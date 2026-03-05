@@ -1,0 +1,14 @@
+2026-03-05T14:16:54.554229,127.0.0.1,sql_injection,username=admin' OR '1'='1  password=password
+2026-03-05T14:16:55.569149,127.0.0.1,sql_injection,username=admin  password=<script>alert('XSS')</script>
+2026-03-05T14:16:56.583315,127.0.0.1,api_reconnaissance,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-03-05T14:16:57.597108,127.0.0.1,api_reconnaissance,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-03-05T14:16:58.612027,127.0.0.1,brute_force_attempt,username=admin  password=wrongpassword
+2026-03-05T14:16:59.636202,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-03-05T15:14:21.632798,127.0.0.1,sql_injection,username=admin' OR '1'='1  password=password
+2026-03-05T15:14:22.642244,127.0.0.1,xss,username=admin  password=<script>alert('XSS')</script>
+2026-03-05T15:14:23.657247,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-03-05T15:14:24.672336,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-03-05T15:14:25.687244,127.0.0.1,brute_force_attempt,username=admin  password=wrongpassword
+2026-03-05T15:14:26.704587,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-03-05T15:18:27.786309,127.0.0.1,brute_force_attempt,username=lodu  password=ldou
+2026-03-05T15:18:32.420967,127.0.0.1,brute_force_attempt,username=Kai  password=antidote-blabber-overdue

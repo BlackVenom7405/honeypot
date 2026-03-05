@@ -1,0 +1,14 @@
+2026-03-05 14:16:54,554 - INFO - Attack Detected: sql_injection from 127.0.0.1 on /login
+2026-03-05 14:16:55,569 - INFO - Attack Detected: sql_injection from 127.0.0.1 on /login
+2026-03-05 14:16:56,583 - INFO - Attack Detected: api_reconnaissance from 127.0.0.1 on /api/v1/user
+2026-03-05 14:16:57,597 - INFO - Attack Detected: api_reconnaissance from 127.0.0.1 on /api/v1/user
+2026-03-05 14:16:58,612 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-05 14:16:59,636 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-03-05 15:14:21,632 - INFO - Attack Detected: sql_injection from 127.0.0.1 on /login
+2026-03-05 15:14:22,642 - INFO - Attack Detected: xss from 127.0.0.1 on /login
+2026-03-05 15:14:23,657 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-05 15:14:24,672 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-05 15:14:25,687 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-05 15:14:26,704 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-03-05 15:18:27,786 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-05 15:18:32,421 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login

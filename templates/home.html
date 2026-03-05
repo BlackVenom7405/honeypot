@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Systems Integrity | Secure Enterprise Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #ffffff;
+            --text: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: -0.025em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn-login {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+        }
+
+        .hero {
+            padding: 8rem 5% 4rem;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #ffffff 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.05em;
+            color: #0f172a;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 4rem 5%;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+
+        .contact-section {
+            padding: 6rem 5%;
+            background: var(--light);
+            text-align: center;
+        }
+
+        .contact-form {
+            max-width: 500px;
+            margin: 3rem auto 0;
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        footer {
+            padding: 4rem 5%;
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">GSI·Integrity</div>
+        <div class="nav-links">
+            <a href="#">Solutions</a>
+            <a href="#">Technology</a>
+            <a href="#">Security</a>
+            <a href="/login" class="btn-login">Client Portal</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Critical Infrastructure. <br>Unrivaled Protection.</h1>
+        <p>Global Systems Integrity provides the backend security framework for the world's most sensitive data
+            networks.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="#contact" class="btn-login" style="text-decoration: none;">Get Started</a>
+            <a href="/upload"
+                style="padding: 0.6rem 1.2rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text);">Upload
+                Specs</a>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="feature-card">
+            <h3>Quantum-Resistant Encryption</h3>
+            <p>Future-proof your data with our proprietary Q-Suite encryption layers.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Automated Threat Mitigation</h3>
+            <p>Real-time AI monitoring that neutralizes breaches before they occur.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Regulatory Compliance</h3>
+            <p>Certified for HIPAA, SOC2, and military-grade data handling standards.</p>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <h2>Consult Our Experts</h2>
+        <p>Leave a message and our security team will contact you within 24 hours.</p>
+        <form class="contact-form" action="/contact" method="POST">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Work Email</label>
+                <input type="email" id="email" name="email" placeholder="john@company.com" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message / Inquiry</label>
+                <textarea id="message" name="message" rows="4" placeholder="How can we help?" required></textarea>
+            </div>
+            <button type="submit">Send Inquiry</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Global Systems Integrity Corp. All rights reserved. <br> 1201 Cyber Plaza, Suite 400. San Jose,
+            CA.</p>
+    </footer>
+</body>
+
+</html>

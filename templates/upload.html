@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Upload - Internal Tool</title>
+    <style>
+        :root {
+            --primary: #5d5dff;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --text: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .upload-card {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px dashed #333;
+        }
+
+        h2 {
+            color: var(--primary);
+        }
+
+        .drop-zone {
+            border: 2px dashed #444;
+            padding: 3rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            background: #111;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upload-card">
+        <h2>Network Config Upload</h2>
+        <p>Upload .yaml or .json configuration files for network validation.</p>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="drop-zone" onclick="document.getElementById('file').click()">
+                <p>Click to select or drag and drop files</p>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <button type="submit" class="btn">Deploy Configuration</button>
+        </form>
+    </div>
+</body>
+
+</html>
