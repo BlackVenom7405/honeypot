@@ -12,3 +12,52 @@
 2026-03-05 15:14:26,704 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
 2026-03-05 15:18:27,786 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
 2026-03-05 15:18:32,421 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-05 20:01:52,823 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-05 20:03:59,648 - INFO - Attack Detected: sql_injection from 127.0.0.1 on /login
+2026-03-05 20:04:02,690 - INFO - Attack Detected: xss from 127.0.0.1 on /login
+2026-03-05 20:04:05,718 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-05 20:04:08,749 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-05 20:04:11,815 - INFO - Attack Detected: xss from 127.0.0.1 on /contact
+2026-03-05 20:04:14,870 - INFO - Attack Detected: sql_injection from 127.0.0.1 on /forgot-password
+2026-03-05 20:04:17,918 - INFO - Attack Detected: brute_force_attempt from 127.0.0.1 on /login
+2026-03-06 12:38:29,402 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /login
+2026-03-06 12:38:32,469 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /login
+2026-03-06 12:38:35,532 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-06 12:38:38,571 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-03-06 12:38:41,645 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /contact
+2026-03-06 12:38:44,710 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /forgot-password
+2026-03-06 12:38:47,802 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-03-06 12:38:50,902 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-04-24 11:49:42,117 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /login
+2026-04-24 11:49:45,185 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /login
+2026-04-24 11:49:48,218 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 11:49:51,270 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 11:49:54,334 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /contact
+2026-04-24 11:49:57,383 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /forgot-password
+2026-04-24 11:50:00,461 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-04-24 11:50:03,512 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-04-24 12:40:25,934 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /login
+2026-04-24 12:40:29,860 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /login
+2026-04-24 12:40:33,095 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 12:40:36,262 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 12:40:39,651 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /contact
+2026-04-24 12:40:42,880 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /forgot-password
+2026-04-24 12:40:46,176 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-04-24 12:40:49,322 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-04-24 12:57:04,212 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-04-24 13:00:54,682 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /login
+2026-04-24 13:00:57,821 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /login
+2026-04-24 13:01:00,988 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 13:01:04,053 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 13:01:07,167 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /contact
+2026-04-24 13:01:10,268 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /forgot-password
+2026-04-24 13:01:13,431 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-04-24 13:01:16,491 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload
+2026-04-24 13:03:29,937 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /login
+2026-04-24 13:03:33,047 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /login
+2026-04-24 13:03:36,143 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 13:03:39,209 - INFO - Attack Detected: path_traversal from 127.0.0.1 on /api/v1/user
+2026-04-24 13:03:42,409 - INFO - Attack Detected: Cross-Site Scripting (XSS) from 127.0.0.1 on /contact
+2026-04-24 13:03:45,560 - INFO - Attack Detected: Command Injection from 127.0.0.1 on /forgot-password
+2026-04-24 13:03:48,671 - INFO - Attack Detected: Brute Force Login from 127.0.0.1 on /login
+2026-04-24 13:03:51,735 - INFO - Attack Detected: web_shell_detection from 127.0.0.1 on /upload

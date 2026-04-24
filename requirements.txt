@@ -9,3 +9,5 @@ aiofiles
 pandas
 matplotlib
 requests
+joblib
+scikit-learn

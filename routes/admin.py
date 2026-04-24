@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="admin.html")
 
 @router.get("/api/stats")
 async def get_stats(db: Session = Depends(get_db)):
@@ -61,3 +61,19 @@ async def get_stats(db: Session = Depends(get_db)):
         "recent_attacks": recent_logs,
         "malware": malware_data
     }
+
+@router.get("/api/logs/download", response_class=PlainTextResponse)
+async def download_logs(db: Session = Depends(get_db)):
+    logs = db.query(AttackLog).order_by(AttackLog.timestamp.desc()).all()
+    
+    content = "GSI SENTINEL - THREAT INTELLIGENCE LOGS\n"
+    content += "="*50 + "\n\n"
+    
+    for log in logs:
+        content += f"[{log.timestamp.isoformat() + 'Z'}] IP: {log.ip_address} | Endpoint: {log.endpoint} | Type: {log.attack_type} | Severity: {log.severity}\n"
+        content += f"Payload: {log.payload}\n"
+        content += "-"*50 + "\n"
+        
+    return PlainTextResponse(content=content, headers={
+        "Content-Disposition": "attachment; filename=gsi_threat_logs.txt"
+    })

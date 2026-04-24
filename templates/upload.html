@@ -5,89 +5,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuration Upload - Internal Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#09090B',
+                        foreground: '#FAFAFA',
+                        muted: '#27272A',
+                        'muted-foreground': '#A1A1AA',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: '#3F3F46',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #5d5dff;
-            --bg: #0a0a0a;
-            --card: #141414;
-            --text: #e0e0e0;
-        }
-
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            background-color: theme('colors.background');
+            color: theme('colors.foreground');
+        }
+        
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
         }
 
-        .upload-card {
-            background: var(--card);
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            border: 1px dashed #333;
-        }
-
-        h2 {
-            color: var(--primary);
-        }
-
-        .drop-zone {
-            border: 2px dashed #444;
-            padding: 3rem;
-            border-radius: 12px;
-            margin: 1.5rem 0;
-            background: #111;
-            cursor: pointer;
-        }
-
-        .drop-zone:hover {
-            border-color: var(--primary);
-        }
-
+        /* Hide actual file input but keep it clickable via label */
         input[type="file"] {
             display: none;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 1rem;
-            cursor: pointer;
-            border: none;
-        }
-
-        p {
-            font-size: 0.9rem;
-            color: #888;
         }
     </style>
 </head>
 
-<body>
-    <div class="upload-card">
-        <h2>Network Config Upload</h2>
-        <p>Upload .yaml or .json configuration files for network validation.</p>
+<body class="font-sans antialiased noise min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-accent-foreground">
+    
+    <nav class="flex justify-between items-center px-4 md:px-8 py-6 border-b-2 border-border bg-background relative z-40">
+        <div class="font-display font-bold text-2xl uppercase tracking-tighter text-accent">GSI·Integrity</div>
+        <a href="/" class="px-6 py-3 border-2 border-border text-foreground font-display font-bold uppercase tracking-tighter text-sm hover:bg-foreground hover:text-accent-foreground transition-all duration-300">Return Home</a>
+    </nav>
 
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <div class="drop-zone" onclick="document.getElementById('file').click()">
-                <p>Click to select or drag and drop files</p>
-                <input type="file" id="file" name="file" required>
-            </div>
-            <button type="submit" class="btn">Deploy Configuration</button>
-        </form>
-    </div>
+    <main class="flex-1 flex flex-col p-4 md:p-8 lg:p-16 max-w-[95vw] mx-auto w-full relative">
+        <div class="absolute right-0 top-20 -z-10 text-[10rem] md:text-[20rem] lg:text-[25rem] font-display font-bold text-muted leading-none tracking-tighter opacity-50 select-none pointer-events-none">
+            UP
+        </div>
+
+        <div class="mb-12">
+            <h1 class="font-display font-bold uppercase text-[clamp(3rem,8vw,8rem)] leading-[0.85] tracking-tighter text-foreground mb-6">
+                Network<br>
+                <span class="text-accent">Config</span><br>
+                Upload
+            </h1>
+            <p class="text-xl md:text-2xl text-muted-foreground max-w-2xl">Upload .yaml or .json configuration files for automated network validation.</p>
+        </div>
+
+        <div class="flex-1 w-full max-w-4xl border-2 border-border bg-background/50 backdrop-blur-sm p-4 md:p-8 flex flex-col">
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="flex-1 flex flex-col h-full space-y-8" id="uploadForm">
+                
+                <label for="file" class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border hover:border-accent hover:bg-accent/5 transition-all duration-300 cursor-pointer p-12 text-center group">
+                    <span class="font-display font-bold text-6xl md:text-8xl text-muted group-hover:text-accent mb-6 transition-colors duration-300">⇪</span>
+                    <span class="font-display font-bold uppercase text-2xl md:text-4xl tracking-tighter mb-4">Select Configuration</span>
+                    <span class="text-sm tracking-widest uppercase text-muted-foreground font-display font-bold">Or Drag & Drop Files Here</span>
+                    
+                    <input type="file" id="file" name="file" required onchange="updateFileName(this)">
+                </label>
+
+                <div id="fileNameDisplay" class="hidden font-display font-bold uppercase tracking-tighter text-2xl text-accent text-center p-4 border-2 border-border bg-muted/20">
+                    <!-- File name appears here -->
+                </div>
+
+                <button type="submit" class="w-full py-8 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-3xl md:text-4xl hover:scale-[1.02] active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent">
+                    Deploy Configuration
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function updateFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files[0]) {
+                display.textContent = 'SELECTED: ' + input.files[0].name;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+        
+        // Simple drag and drop visual feedback
+        const dropZone = document.querySelector('label[for="file"]');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight(e) {
+            dropZone.classList.add('border-accent', 'bg-accent/10');
+            dropZone.classList.remove('border-border');
+        }
+        
+        function unhighlight(e) {
+            dropZone.classList.remove('border-accent', 'bg-accent/10');
+            dropZone.classList.add('border-border');
+        }
+        
+        dropZone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            
+            if (files.length > 0) {
+                document.getElementById('file').files = files;
+                updateFileName(document.getElementById('file'));
+            }
+        }
+        
+        // Form submission behavior logic (Optional logic to handle JSON response properly)
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'DEPLOYING...';
+            btn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('fileNameDisplay').textContent = 'UPLOAD SUCCESS: QUEUED FOR VALIDATION';
+                    document.getElementById('fileNameDisplay').classList.replace('text-accent', 'text-green-400');
+                } else {
+                    document.getElementById('fileNameDisplay').textContent = 'UPLOAD FAILED';
+                    document.getElementById('fileNameDisplay').classList.replace('text-accent', 'text-red-500');
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('fileNameDisplay').textContent = 'NETWORK ERROR';
+                document.getElementById('fileNameDisplay').classList.replace('text-accent', 'text-red-500');
+            } finally {
+                btn.textContent = 'Deploy Configuration';
+                btn.disabled = false;
+                document.getElementById('file').value = '';
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#141c2e",
+                    "error-container": "#3d1414",
+                    "on-secondary-container": "#c0d8e8",
+                    "tertiary-container": "#3d2060",
+                    "secondary": "#88b4cc",
+                    "error": "#ff6b6b",
+                    "primary-fixed": "#c8eaff",
+                    "outline-variant": "#2a3a48",
+                    "on-surface": "#e0e8f0",
+                    "surface": "#0f1524",
+                    "on-surface-variant": "#a0b4c4",
+                    "on-tertiary-fixed-variant": "#4d2a73",
+                    "on-error-container": "#ffb3b3",
+                    "on-secondary": "#001f2e",
+                    "secondary-container": "#1a3a4e",
+                    "surface-variant": "#1a2438",
+                    "on-tertiary": "#1a002e",
+                    "surface-container-high": "#1a2438",
+                    "surface-tint": "#7dd3fc",
+                    "primary": "#7dd3fc",
+                    "on-primary-fixed": "#001f2e",
+                    "on-primary-fixed-variant": "#004d73",
+                    "tertiary": "#c8a0f0",
+                    "on-primary-container": "#c8eaff",
+                    "surface-bright": "#1a2438",
+                    "on-tertiary-fixed": "#1a002e",
+                    "secondary-fixed-dim": "#88b4cc",
+                    "primary-fixed-dim": "#7dd3fc",
+                    "inverse-surface": "#e0e8f0",
+                    "on-secondary-fixed-variant": "#2a4a5e",
+                    "on-secondary-fixed": "#0d1f2b",
+                    "surface-container-lowest": "#0a0e1a",
+                    "outline": "#4a6070",
+                    "tertiary-fixed-dim": "#c8a0f0",
+                    "tertiary-fixed": "#e8d0ff",
+                    "secondary-fixed": "#c0d8e8",
+                    "on-error": "#1a0000",
+                    "inverse-primary": "#0a4c6e",
+                    "background": "#0a0e1a",
+                    "inverse-on-surface": "#0a0e1a",
+                    "on-primary": "#001f2e",
+                    "surface-dim": "#0f1524",
+                    "surface-container-highest": "#202c42",
+                    "on-tertiary-container": "#e8d0ff",
+                    "surface-container-low": "#111828",
+                    "primary-container": "#0e4d6e",
+                    "on-background": "#e0e8f0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "display": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #0a0e1a;
+            color: #e0e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(15, 21, 36, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(125, 211, 252, 0.1);
+        }
+        .glass-panel-elevated {
+            background: rgba(15, 21, 36, 0.75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(125, 211, 252, 0.15);
+        }
+        .glow-soft {
+            box-shadow: 0 0 30px rgba(125, 211, 252, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 h-16 bg-[#0a0e1a]/60 backdrop-blur-[16px] border-b border-[#7dd3fc]/15 shadow-[0_0_30px_rgba(125,211,252,0.05)] font-['Inter'] antialiased text-slate-200">
+<div class="flex items-center gap-4">
+<span class="text-xl font-semibold tracking-tighter text-[#7dd3fc]">Sentinel Node</span>
+<div class="h-4 w-[1px] bg-sky-400/20"></div>
+<span class="text-xs uppercase tracking-widest text-[#7dd3fc]/60 font-bold">System: Online</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-[#7dd3fc] border-b-2 border-[#7dd3fc] pb-1 transition-all duration-300" href="#">Dashboard</a>
+<a class="text-slate-400 font-medium hover:text-[#7dd3fc] hover:bg-white/5 transition-all duration-300 px-2 rounded" href="#">Traffic</a>
+<a class="text-slate-400 font-medium hover:text-[#7dd3fc] hover:bg-white/5 transition-all duration-300 px-2 rounded" href="#">Malware</a>
+<a class="text-slate-400 font-medium hover:text-[#7dd3fc] hover:bg-white/5 transition-all duration-300 px-2 rounded" href="#">Vectors</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined text-slate-400 hover:text-[#7dd3fc] cursor-pointer transition-all duration-300">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border border-[#0a0e1a]"></span>
+</div>
+<span class="material-symbols-outlined text-slate-400 hover:text-[#7dd3fc] cursor-pointer transition-all duration-300">settings</span>
+<span class="material-symbols-outlined text-[#7dd3fc] cursor-pointer transition-transform active:scale-95" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-20 pb-6 z-30 bg-[#0a0e1a]/75 backdrop-blur-[24px] border-r border-[#7dd3fc]/10 shadow-2xl shadow-black/50 w-64 font-['Inter'] text-sm tracking-wide">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 p-3 glass-panel rounded-lg">
+<div class="w-10 h-10 rounded bg-[#7dd3fc]/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#7dd3fc]">shield</span>
+</div>
+<div>
+<div class="text-xs font-bold text-slate-100">Sentinel Node</div>
+<div class="text-[10px] text-slate-400">Threat Intelligence</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<a class="text-[#7dd3fc] bg-[#7dd3fc]/10 font-bold border-r-4 border-[#7dd3fc] px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-slate-400 hover:text-slate-100 hover:bg-white/5 hover:backdrop-blur-md px-4 py-3 flex items-center gap-3 transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">shield</span>
+                Traffic
+            </a>
+<a class="text-slate-400 hover:text-slate-100 hover:bg-white/5 hover:backdrop-blur-md px-4 py-3 flex items-center gap-3 transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">terminal</span>
+                Malware
+            </a>
+<a class="text-slate-400 hover:text-slate-100 hover:bg-white/5 hover:backdrop-blur-md px-4 py-3 flex items-center gap-3 transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">biotech</span>
+                Vectors
+            </a>
+<a class="text-slate-400 hover:text-slate-100 hover:bg-white/5 hover:backdrop-blur-md px-4 py-3 flex items-center gap-3 transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+                Logs
+            </a>
+</nav>
+<div class="mt-auto px-4 space-y-4">
+<button class="w-full py-3 glass-panel border-[#7dd3fc]/30 text-[#7dd3fc] font-bold rounded-lg hover:bg-[#7dd3fc]/10 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">rocket_launch</span>
+                Deploy Node
+            </button>
+<div class="space-y-1 border-t border-white/5 pt-4">
+<a class="text-slate-400 hover:text-slate-100 px-4 py-2 flex items-center gap-3 text-xs transition-all" href="#">
+<span class="material-symbols-outlined text-sm">description</span>
+                    Documentation
+                </a>
+<a class="text-slate-400 hover:text-slate-100 px-4 py-2 flex items-center gap-3 text-xs transition-all" href="#">
+<span class="material-symbols-outlined text-sm">help_outline</span>
+                    Support
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 mt-16 p-8 overflow-y-auto">
+<!-- Stats Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="glass-panel p-6 rounded-xl glow-soft relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-30"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">bolt</span>
+<span class="text-xs text-primary font-bold">+12% vs avg</span>
+</div>
+<h3 class="text-on-surface-variant text-sm font-medium">Total Attacks Today</h3>
+<p class="text-3xl font-bold text-on-surface mt-1">42,891</p>
+</div>
+<div class="glass-panel p-6 rounded-xl glow-soft relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-tertiary to-transparent opacity-30"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary bg-tertiary/10 p-2 rounded-lg">radar</span>
+<span class="text-xs text-tertiary font-bold">All Online</span>
+</div>
+<h3 class="text-on-surface-variant text-sm font-medium">Active Lures</h3>
+<p class="text-3xl font-bold text-on-surface mt-1">128</p>
+</div>
+<div class="glass-panel p-6 rounded-xl glow-soft relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-error to-transparent opacity-30"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-error bg-error/10 p-2 rounded-lg">inventory_2</span>
+<span class="text-xs text-error font-bold">New: 4</span>
+</div>
+<h3 class="text-on-surface-variant text-sm font-medium">Captured Payloads</h3>
+<p class="text-3xl font-bold text-on-surface mt-1">1,024</p>
+</div>
+<div class="glass-panel p-6 rounded-xl glow-soft relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary-fixed to-transparent opacity-30"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed bg-primary-fixed/10 p-2 rounded-lg">public</span>
+<span class="text-xs text-primary-fixed font-bold">Global View</span>
+</div>
+<h3 class="text-on-surface-variant text-sm font-medium">Unique Attacker IPs</h3>
+<p class="text-3xl font-bold text-on-surface mt-1">8,522</p>
+</div>
+</div>
+<!-- Main Dashboard Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Global Threat Activity Map (Bento Main) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-8">
+<div class="glass-panel-elevated rounded-2xl p-1 overflow-hidden min-h-[500px] flex flex-col">
+<div class="p-6 flex justify-between items-center bg-[#0a0e1a]/40">
+<div>
+<h2 class="text-lg font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">language</span>
+                                Global Threat Activity
+                            </h2>
+<p class="text-xs text-on-surface-variant">Real-time pings from detected adversarial origins</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary font-bold">LIVE FEED</span>
+<span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-on-surface-variant font-bold">2,492 pps</span>
+</div>
+</div>
+<div class="flex-1 relative bg-surface-dim overflow-hidden flex items-center justify-center">
+<!-- Map Background -->
+<div class="absolute inset-0 opacity-40 mix-blend-screen" data-alt="stylized digital world map with glowing cyan grid lines and dark navy background, minimalist tech aesthetic" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrxuSmUaHi0abnzrMoyHNQLKz56CALIEzx2vhU5WtzsnXeY1sAAWUAkcnoZVarAascmndARFCvv4lyxMgOVvSrZIcFXG2XqjWJvuiT065qez2ThK_YW2sh7xhKVbIvH1A5oNk18VzKP-rEwSOMPCGP88idc6JJOJaqG7UB8hs-92fg5fGj5KmxusTrCw7fs19BZIuT4-pnvSGQx44fyyvwTnU1ROJHr3S2wB565ynFQ60FMwz852RzQgkJNNqnW8JI_FlVWyqvVw'); background-size: cover; background-position: center;">
+</div>
+<!-- Pulse Effects representing attacks -->
+<div class="absolute top-1/4 left-1/3 w-4 h-4 bg-primary rounded-full animate-ping opacity-75"></div>
+<div class="absolute top-1/2 right-1/4 w-4 h-4 bg-error rounded-full animate-ping opacity-75"></div>
+<div class="absolute bottom-1/3 left-1/2 w-4 h-4 bg-tertiary rounded-full animate-ping opacity-75"></div>
+<div class="absolute top-1/3 right-1/2 w-4 h-4 bg-primary rounded-full animate-ping opacity-75"></div>
+<div class="z-10 text-center">
+<div class="glass-panel p-4 rounded-xl border-primary/30 inline-block">
+<p class="text-xs font-bold tracking-widest text-primary mb-2 uppercase">Tracing Connections</p>
+<div class="flex items-center gap-4">
+<div class="text-left">
+<div class="text-[10px] text-slate-500 uppercase">Latest Origin</div>
+<div class="text-sm font-mono text-on-surface">192.168.42.102</div>
+</div>
+<div class="h-8 w-[1px] bg-white/10"></div>
+<div class="text-left">
+<div class="text-[10px] text-slate-500 uppercase">Target Node</div>
+<div class="text-sm font-mono text-on-surface">SSH-TRAP-04</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Honeypot Health Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="col-span-full">
+<h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Honeypot Infrastructure Status</h2>
+</div>
+<!-- SMTP-Lure -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary border border-primary/20">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">SMTP-Lure</div>
+<div class="text-[10px] text-slate-500">Port 25, 465, 587</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-bold text-green-400 flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                OPTIMAL
+                            </div>
+<div class="text-xs text-slate-400">98.2% Load</div>
+</div>
+</div>
+<!-- SSH-Trap -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary border border-tertiary/20">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">SSH-Trap</div>
+<div class="text-[10px] text-slate-500">Port 22, 2222</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-bold text-green-400 flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                OPTIMAL
+                            </div>
+<div class="text-xs text-slate-400">1.2k Sessions</div>
+</div>
+</div>
+<!-- HTTP-Decoy -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-fixed border border-primary-fixed/20">
+<span class="material-symbols-outlined">web</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">HTTP-Decoy</div>
+<div class="text-[10px] text-slate-500">Port 80, 443</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-bold text-green-400 flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                OPTIMAL
+                            </div>
+<div class="text-xs text-slate-400">12ms Latency</div>
+</div>
+</div>
+<!-- Telnet-Sink -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between group hover:border-primary/40 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-error border border-error/20">
+<span class="material-symbols-outlined">settings_input_component</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">Telnet-Sink</div>
+<div class="text-[10px] text-slate-500">Port 23</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-bold text-yellow-400 flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                STRESS
+                            </div>
+<div class="text-xs text-slate-400">High Traffic</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Incidents Feed (Right Side) -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="glass-panel-elevated rounded-2xl p-6 flex flex-col h-full">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-sm font-bold text-on-surface uppercase tracking-widest">Recent Incidents</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">filter_list</span>
+</div>
+<div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+<!-- Critical Incident -->
+<div class="p-4 rounded-xl bg-error-container/20 border-l-4 border-error">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded">CRITICAL</span>
+<span class="text-[10px] text-slate-500">2 min ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-1">Ransomware Payload Detected</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">Inbound traffic on SMTP-Lure matched signature [MAL-RYUK-G2]. Originating from RU-NET-42.</p>
+<div class="mt-3 flex gap-2">
+<button class="text-[10px] font-bold text-error hover:underline">ISOLATE</button>
+<button class="text-[10px] font-bold text-slate-400 hover:underline">DETAILS</button>
+</div>
+</div>
+<!-- Warning Incident -->
+<div class="p-4 rounded-xl bg-yellow-900/10 border-l-4 border-yellow-500">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">WARNING</span>
+<span class="text-[10px] text-slate-500">14 min ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-1">SSH Brute Force Attempt</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">High-frequency authentication failures on SSH-Trap from IP 45.12.8.21.</p>
+<div class="mt-3 flex gap-2">
+<button class="text-[10px] font-bold text-yellow-500 hover:underline">RE-ROUTE</button>
+<button class="text-[10px] font-bold text-slate-400 hover:underline">DETAILS</button>
+</div>
+</div>
+<!-- Info Incident -->
+<div class="p-4 rounded-xl bg-primary/5 border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">INFO</span>
+<span class="text-[10px] text-slate-500">32 min ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-1">Credential Harvesting Blocked</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">HTTP-Decoy captured 4 sets of dummy credentials from automated bot crawler.</p>
+<div class="mt-3 flex gap-2">
+<button class="text-[10px] font-bold text-primary hover:underline">ANALYZE</button>
+<button class="text-[10px] font-bold text-slate-400 hover:underline">DETAILS</button>
+</div>
+</div>
+<!-- Critical Incident 2 -->
+<div class="p-4 rounded-xl bg-error-container/20 border-l-4 border-error">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded">CRITICAL</span>
+<span class="text-[10px] text-slate-500">45 min ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-1">C2 Callback Detected</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">Outbound traffic detected to known malicious domain on HTTP-Decoy-02.</p>
+<div class="mt-3 flex gap-2">
+<button class="text-[10px] font-bold text-error hover:underline">ISOLATE</button>
+<button class="text-[10px] font-bold text-slate-400 hover:underline">DETAILS</button>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 text-xs font-bold text-slate-400 border border-white/10 rounded hover:bg-white/5 transition-all">VIEW ALL INCIDENTS</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-4 px-8 mt-auto flex justify-between items-center bg-transparent ml-64 border-t border-sky-400/5 font-['Inter'] text-xs text-slate-500">
+<div>© 2024 Sentinel Node Intelligence v2.4.0</div>
+<div class="flex gap-6">
+<a class="text-slate-500 hover:text-slate-300 hover:underline transition-colors" href="#">API Documentation</a>
+<a class="text-slate-500 hover:text-slate-300 hover:underline transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-slate-300 hover:underline transition-colors" href="#">Security Advisories</a>
+</div>
+</footer>
+</body></html>

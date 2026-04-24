@@ -1,240 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Systems Integrity | Secure Enterprise Solutions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Global Systems Integrity | Kinetic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#09090B',
+                        foreground: '#FAFAFA',
+                        muted: '#27272A',
+                        'muted-foreground': '#A1A1AA',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: '#3F3F46',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    animation: {
+                        marquee: 'marquee 25s linear infinite',
+                        marqueeFast: 'marquee 15s linear infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary: #64748b;
-            --bg: #ffffff;
-            --text: #1e293b;
-            --light: #f8fafc;
-            --border: #e2e8f0;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            line-height: 1.6;
-            color: var(--text);
-            background: var(--bg);
+            background-color: theme('colors.background');
+            color: theme('colors.foreground');
+        }
+        
+        /* Noise texture overlay */
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
         }
 
-        nav {
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 5%;
-            background: white;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: -0.025em;
-        }
-
-        .nav-links {
+        .marquee-content {
             display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--secondary);
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .btn-login {
-            background: var(--primary);
-            color: white !important;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-        }
-
-        .hero {
-            padding: 8rem 5% 4rem;
-            text-align: center;
-            background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #ffffff 100%);
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.05em;
-            color: #0f172a;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--secondary);
-            max-width: 600px;
-            margin: 0 auto 2.5rem;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 4rem 5%;
-        }
-
-        .feature-card {
-            padding: 2.5rem;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-card h3 {
-            margin-top: 0;
-            color: #0f172a;
-        }
-
-        .contact-section {
-            padding: 6rem 5%;
-            background: var(--light);
-            text-align: center;
-        }
-
-        .contact-form {
-            max-width: 500px;
-            margin: 3rem auto 0;
-            background: white;
-            padding: 3rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            text-align: left;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        footer {
-            padding: 4rem 5%;
-            background: #0f172a;
-            color: #94a3b8;
-            text-align: center;
-            font-size: 0.875rem;
+            min-width: 200%;
         }
     </style>
 </head>
 
-<body>
-    <nav>
-        <div class="logo">GSI·Integrity</div>
-        <div class="nav-links">
-            <a href="#">Solutions</a>
-            <a href="#">Technology</a>
-            <a href="#">Security</a>
-            <a href="/login" class="btn-login">Client Portal</a>
+<body class="font-sans antialiased noise overflow-x-hidden selection:bg-accent selection:text-accent-foreground">
+    
+    <nav class="flex justify-between items-center px-4 md:px-8 py-6 border-b-2 border-border bg-background sticky top-0 z-40">
+        <div class="font-display font-bold text-2xl uppercase tracking-tighter text-accent">GSI·Integrity</div>
+        <div class="hidden md:flex gap-8 items-center text-sm uppercase tracking-widest font-display font-bold">
+            <a href="#solutions" class="hover:text-accent transition-colors">Solutions</a>
+            <a href="#technology" class="hover:text-accent transition-colors">Technology</a>
+            <a href="#contact" class="hover:text-accent transition-colors">Security</a>
         </div>
+        <a href="/login" class="px-6 py-3 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-sm hover:scale-105 active:scale-95 transition-all duration-300">Client Portal</a>
     </nav>
 
-    <header class="hero">
-        <h1>Critical Infrastructure. <br>Unrivaled Protection.</h1>
-        <p>Global Systems Integrity provides the backend security framework for the world's most sensitive data
-            networks.</p>
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-            <a href="#contact" class="btn-login" style="text-decoration: none;">Get Started</a>
-            <a href="/upload"
-                style="padding: 0.6rem 1.2rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text);">Upload
-                Specs</a>
+    <!-- Hero Section -->
+    <header class="py-32 px-4 md:px-8 max-w-[95vw] mx-auto flex flex-col relative">
+        <div class="absolute top-0 right-0 -z-10 text-[15rem] md:text-[25rem] font-display font-bold text-muted leading-none tracking-tighter opacity-50 select-none">
+            01
+        </div>
+        <h1 class="font-display font-bold uppercase text-[clamp(3rem,12vw,14rem)] leading-[0.85] tracking-tighter text-foreground mb-8">
+            Critical<br>
+            <span class="text-accent">Infrastructure.</span><br>
+            Unrivaled.
+        </h1>
+        <p class="text-lg md:text-2xl text-muted-foreground max-w-2xl leading-tight mb-12">
+            Global Systems Integrity provides the brutal backend security framework for the world's most sensitive data networks.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 max-w-xl">
+            <a href="#contact" class="flex-1 text-center px-8 py-5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-xl hover:scale-105 active:scale-95 transition-all duration-300">Get Started</a>
+            <a href="/upload" class="flex-1 text-center px-8 py-5 border-2 border-border text-foreground font-display font-bold uppercase tracking-tighter text-xl hover:bg-foreground hover:text-accent-foreground transition-all duration-300">Upload Specs</a>
         </div>
     </header>
 
-    <section class="features">
-        <div class="feature-card">
-            <h3>Quantum-Resistant Encryption</h3>
-            <p>Future-proof your data with our proprietary Q-Suite encryption layers.</p>
+    <!-- Marquee Divider -->
+    <div class="w-full border-y-2 border-border bg-background py-4 marquee-container">
+        <div class="marquee-content animate-marqueeFast font-display font-bold uppercase text-2xl md:text-4xl tracking-tighter text-accent flex items-center gap-12">
+            <span>ZERO TRUST ARCHITECTURE</span>
+            <span class="text-foreground">✧</span>
+            <span>QUANTUM RESISTANT</span>
+            <span class="text-foreground">✧</span>
+            <span>REAL-TIME NEUTRALIZATION</span>
+            <span class="text-foreground">✧</span>
+            <span>MILITARY GRADE</span>
+            <span class="text-foreground">✧</span>
+            <span>ZERO TRUST ARCHITECTURE</span>
+            <span class="text-foreground">✧</span>
+            <span>QUANTUM RESISTANT</span>
+            <span class="text-foreground">✧</span>
+            <span>REAL-TIME NEUTRALIZATION</span>
+            <span class="text-foreground">✧</span>
+            <span>MILITARY GRADE</span>
+            <span class="text-foreground">✧</span>
         </div>
-        <div class="feature-card">
-            <h3>Automated Threat Mitigation</h3>
-            <p>Real-time AI monitoring that neutralizes breaches before they occur.</p>
-        </div>
-        <div class="feature-card">
-            <h3>Regulatory Compliance</h3>
-            <p>Certified for HIPAA, SOC2, and military-grade data handling standards.</p>
+    </div>
+
+    <!-- Features Section -->
+    <section id="solutions" class="py-32 px-4 md:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border-2 border-border mb-8">
+            
+            <div class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden">
+                <div class="text-[8rem] font-display font-bold text-muted group-hover:text-black/10 absolute -bottom-10 -right-4 transition-colors duration-300">01</div>
+                <h3 class="font-display font-bold uppercase text-3xl md:text-5xl tracking-tighter mb-4 group-hover:text-accent-foreground transition-colors duration-300 relative z-10">Quantum<br>Encryption</h3>
+                <p class="text-lg text-muted-foreground group-hover:text-black/80 transition-colors duration-300 relative z-10">Future-proof your data with our proprietary Q-Suite encryption layers.</p>
+            </div>
+            
+            <div class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden">
+                <div class="text-[8rem] font-display font-bold text-muted group-hover:text-black/10 absolute -bottom-10 -right-4 transition-colors duration-300">02</div>
+                <h3 class="font-display font-bold uppercase text-3xl md:text-5xl tracking-tighter mb-4 group-hover:text-accent-foreground transition-colors duration-300 relative z-10">Automated<br>Mitigation</h3>
+                <p class="text-lg text-muted-foreground group-hover:text-black/80 transition-colors duration-300 relative z-10">Real-time AI monitoring that neutralizes breaches before they occur.</p>
+            </div>
+            
+            <div class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden">
+                <div class="text-[8rem] font-display font-bold text-muted group-hover:text-black/10 absolute -bottom-10 -right-4 transition-colors duration-300">03</div>
+                <h3 class="font-display font-bold uppercase text-3xl md:text-5xl tracking-tighter mb-4 group-hover:text-accent-foreground transition-colors duration-300 relative z-10">Regulatory<br>Compliance</h3>
+                <p class="text-lg text-muted-foreground group-hover:text-black/80 transition-colors duration-300 relative z-10">Certified for HIPAA, SOC2, and military-grade data handling standards.</p>
+            </div>
+
         </div>
     </section>
 
-    <section class="contact-section" id="contact">
-        <h2>Consult Our Experts</h2>
-        <p>Leave a message and our security team will contact you within 24 hours.</p>
-        <form class="contact-form" action="/contact" method="POST">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Work Email</label>
-                <input type="email" id="email" name="email" placeholder="john@company.com" required>
-            </div>
-            <div class="form-group">
-                <label for="message">Message / Inquiry</label>
-                <textarea id="message" name="message" rows="4" placeholder="How can we help?" required></textarea>
-            </div>
-            <button type="submit">Send Inquiry</button>
-        </form>
+    <!-- Contact Section -->
+    <section id="contact" class="py-32 px-4 md:px-8 border-t-2 border-border flex flex-col lg:flex-row gap-16 relative overflow-hidden">
+        <div class="absolute -bottom-20 -left-10 text-[20rem] font-display font-bold text-muted leading-none opacity-30 select-none pointer-events-none">
+            INQ
+        </div>
+        
+        <div class="flex-1 relative z-10">
+            <h2 class="font-display font-bold uppercase text-5xl md:text-8xl tracking-tighter text-foreground mb-6">Consult<br><span class="text-accent">Our Experts</span></h2>
+            <p class="text-xl md:text-2xl text-muted-foreground max-w-xl">Leave a message and our security team will contact you within 24 hours. We act fast.</p>
+        </div>
+        
+        <div class="flex-1 relative z-10 bg-background border-2 border-border p-8 md:p-12">
+            <form action="/contact" method="POST" class="space-y-8">
+                <div>
+                    <label for="name" class="block font-display font-bold text-sm tracking-widest uppercase text-muted-foreground mb-2">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="JOHN DOE" required class="w-full bg-transparent border-b-2 border-border focus:border-accent text-3xl md:text-4xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted rounded-none">
+                </div>
+                <div>
+                    <label for="email" class="block font-display font-bold text-sm tracking-widest uppercase text-muted-foreground mb-2">Work Email</label>
+                    <input type="email" id="email" name="email" placeholder="JOHN@COMPANY.COM" required class="w-full bg-transparent border-b-2 border-border focus:border-accent text-3xl md:text-4xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted rounded-none">
+                </div>
+                <div>
+                    <label for="message" class="block font-display font-bold text-sm tracking-widest uppercase text-muted-foreground mb-2">Message / Inquiry</label>
+                    <textarea id="message" name="message" rows="2" placeholder="HOW CAN WE HELP?" required class="w-full bg-transparent border-b-2 border-border focus:border-accent text-3xl md:text-4xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted resize-none rounded-none"></textarea>
+                </div>
+                <button type="submit" class="w-full py-6 mt-4 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 transition-all duration-300">Send Inquiry</button>
+            </form>
+        </div>
     </section>
 
-    <footer>
-        <p>&copy; 2024 Global Systems Integrity Corp. All rights reserved. <br> 1201 Cyber Plaza, Suite 400. San Jose,
-            CA.</p>
+    <!-- Footer -->
+    <footer class="bg-accent text-accent-foreground py-16 px-4 md:px-8 border-t-2 border-border">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="font-display font-bold text-4xl uppercase tracking-tighter">GSI·Integrity</div>
+            <div class="text-center md:text-right font-display font-bold text-sm tracking-widest uppercase">
+                &copy; 2024 Global Systems Integrity Corp.<br>
+                1201 Cyber Plaza, Suite 400. San Jose, CA.
+            </div>
+        </div>
     </footer>
 </body>
 

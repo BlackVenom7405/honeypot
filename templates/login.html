@@ -1,130 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Internal Admin Login - Secure Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#09090B',
+                        foreground: '#FAFAFA',
+                        muted: '#27272A',
+                        'muted-foreground': '#A1A1AA',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: '#3F3F46',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #00ff88;
-            --bg: #0a0a0a;
-            --card: #141414;
-            --text: #e0e0e0;
-        }
-
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+            background-color: theme('colors.background');
+            color: theme('colors.foreground');
         }
-
-        .login-card {
-            background: var(--card);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-        }
-
-        h2 {
-            margin-top: 0;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--primary);
-            text-align: center;
-        }
-
-        p {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        button {
-            width: 100%;
-            padding: 0.85rem;
-            background: var(--primary);
-            color: black;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-            margin-top: 1rem;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.75rem;
-            color: #555;
+        
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
         }
     </style>
 </head>
-<body>
-    <div class="login-card">
-        <h2>SECURE PORTAL</h2>
-        <p>INTERNAL ADMINISTRATION ACCESS ONLY</p>
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label for="username">USERNAME</label>
-                <input type="text" id="username" name="username" placeholder="admin" required>
-            </div>
-            <div class="form-group">
-                <label for="password">PASSWORD</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit">AUTHENTICATE</button>
-        </form>
-        <div class="footer">
-            &copy; 2024 Global Systems Integrity Corp.
+
+<body class="font-sans antialiased noise h-screen flex overflow-hidden selection:bg-accent selection:text-accent-foreground">
+    
+    <!-- Left Decorative Side -->
+    <div class="hidden lg:flex w-1/2 border-r-2 border-border bg-background p-12 flex-col justify-between relative overflow-hidden">
+        <div class="font-display font-bold text-3xl uppercase tracking-tighter text-accent relative z-10">GSI·Integrity</div>
+        
+        <div class="relative z-10">
+            <h1 class="font-display font-bold uppercase text-[6rem] leading-[0.8] tracking-tighter mb-6">Secure<br>Portal</h1>
+            <p class="text-2xl text-muted-foreground font-display uppercase tracking-widest">Internal Administration Access Only.</p>
+        </div>
+        
+        <div class="absolute -right-20 -bottom-20 text-[35rem] font-display font-bold text-muted leading-none opacity-20 select-none pointer-events-none">
+            0X
         </div>
     </div>
+
+    <!-- Right Form Side -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 relative bg-background">
+        <div class="w-full max-w-xl">
+            
+            <div class="lg:hidden mb-12">
+                <h1 class="font-display font-bold uppercase text-6xl leading-[0.8] tracking-tighter mb-4">Secure<br>Portal</h1>
+                <p class="text-sm text-accent font-display uppercase tracking-widest font-bold">Internal Administration Access Only.</p>
+            </div>
+
+            {% if error %}
+            <div class="mb-8 p-6 border-2 border-red-500 bg-red-500/10 text-red-500 font-display font-bold uppercase tracking-widest text-sm">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/login" method="POST" class="space-y-12">
+                <div>
+                    <label for="username" class="block font-display font-bold text-sm tracking-widest uppercase text-muted-foreground mb-2">Username</label>
+                    <input type="text" id="username" name="username" placeholder="ADMIN" required class="w-full bg-transparent border-b-2 border-border focus:border-accent text-4xl md:text-5xl font-display font-bold uppercase tracking-tighter outline-none py-4 text-foreground transition-colors placeholder:text-muted rounded-none">
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <label for="password" class="block font-display font-bold text-sm tracking-widest uppercase text-muted-foreground">Password</label>
+                        <a href="/forgot-password" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:text-foreground transition-colors">Reset Auth</a>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required class="w-full bg-transparent border-b-2 border-border focus:border-accent text-4xl md:text-5xl font-display font-bold uppercase tracking-tighter outline-none py-4 text-foreground transition-colors placeholder:text-muted rounded-none">
+                </div>
+                
+                <button type="submit" class="w-full py-8 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-3xl hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent">
+                    Authenticate
+                </button>
+            </form>
+
+            <div class="mt-16 text-center font-display font-bold text-xs tracking-widest uppercase text-muted-foreground">
+                &copy; 2024 Global Systems Integrity Corp.<br>
+                <a href="/" class="text-accent hover:text-foreground transition-colors mt-2 inline-block">Return to Public Interface</a>
+            </div>
+        </div>
+    </div>
+
 </body>
+
 </html>

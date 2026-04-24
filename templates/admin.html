@@ -6,233 +6,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GSI Sentinel | Threat Intelligence Center</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#000000',
+                        foreground: '#E4E4E7',
+                        muted: '#27272A',
+                        'muted-foreground': '#D4D4D8',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: '#3F3F46',
+                        danger: '#ff0055',
+                        warning: '#ffcc00',
+                        success: '#00ffaa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg: #020205;
-            --surface: #0a0a14;
-            --accent: #00f2ff;
-            --danger: #ff0055;
-            --warning: #ffcc00;
-            --success: #00ffaa;
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
+            background-color: #000000;
+            color: #E4E4E7;
         }
 
-        .sidebar {
-            width: 260px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2.5rem;
+        .noise::before {
+            content: "";
             position: fixed;
-            height: 100vh;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 2.5rem;
-            max-width: 1400px;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            color: var(--accent);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover {
-            color: white;
-            background: var(--glass);
-        }
-
-        .nav-item.active {
-            background: var(--glass);
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
-            height: 2px;
-            width: 40px;
-            background: var(--accent);
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .panel-title {
-            font-size: 1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 1.2rem 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge-sql_injection {
-            background: rgba(255, 0, 85, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-
-        .badge-xss {
-            background: rgba(255, 204, 0, 0.1);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
-
-        .badge-path_traversal {
-            background: rgba(0, 242, 255, 0.1);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        .badge-brute_force_attempt {
-            background: rgba(0, 255, 170, 0.1);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .radar-box {
-            background: #000;
-            border-radius: 12px;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid var(--border);
-        }
-
+        /* Radar Animation */
         .system-radar {
-            height: 160px;
-            width: 160px;
-            background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(223, 225, 4, 0.1) 0%, transparent 70%);
             border-radius: 50%;
             position: relative;
-            border: 1px solid var(--border);
-            margin-bottom: 1rem;
         }
 
         .radar-sweep {
@@ -241,9 +70,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: conic-gradient(from 0deg, transparent 80%, rgba(0, 242, 255, 0.3) 100%);
+            background: conic-gradient(from 0deg, transparent 80%, rgba(223, 225, 4, 0.4) 100%);
             border-radius: 50%;
-            animation: sweep 3s linear infinite;
+            animation: sweep 2s linear infinite;
         }
 
         @keyframes sweep {
@@ -256,139 +85,249 @@
             }
         }
 
-        .btn-action {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Custom Scrollbar for tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
         }
 
-        .btn-action:hover {
-            background: var(--accent);
-            color: black;
-            border-color: var(--accent);
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: theme('colors.background');
+            border-top: 2px solid theme('colors.border');
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: theme('colors.muted');
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.accent');
         }
     </style>
 </head>
 
-<body>
-    <div class="sidebar">
-        <div class="logo-area">
-            <span style="font-size: 1.5rem; filter: drop-shadow(0 0 8px var(--accent));">⌬</span> SENTINEL·X
-        </div>
-        <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <a href="#" class="nav-item active">Operational Deck</a>
-            <a href="#" class="nav-item">Traffic Analysis</a>
-            <a href="#" class="nav-item">Malware Vault</a>
-            <a href="#" class="nav-item">Attack Vectors</a>
-            <a href="#" class="nav-item">System Intelligence</a>
-        </nav>
-        <div style="margin-top: auto;">
-            <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                STATUS: <span style="color: var(--success);">NOMINAL</span><br>
-                UPTIME: 99.99%
+<body class="font-sans antialiased noise min-h-screen flex selection:bg-accent selection:text-accent-foreground">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r-2 border-border bg-background flex flex-col fixed h-screen z-40">
+        <div class="p-6 border-b-2 border-border">
+            <div class="font-display font-bold text-2xl uppercase tracking-tighter text-accent flex items-center gap-2">
+                <span class="text-3xl leading-none">⌬</span> SENTINEL·X
             </div>
-            <div style="font-size: 0.65rem; color: #475569;">
+        </div>
+
+        <nav class="flex-1 flex flex-col p-4 gap-2">
+            <a href="#"
+                class="px-4 py-3 bg-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-accent">Operational
+                Deck</a>
+            <a href="#"
+                class="px-4 py-3 text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all">Traffic
+                Analysis</a>
+            <a href="#"
+                class="px-4 py-3 text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all">Malware
+                Vault</a>
+            <a href="#"
+                class="px-4 py-3 text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all">Attack
+                Vectors</a>
+            <a href="#"
+                class="px-4 py-3 text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all">System
+                Intel</a>
+        </nav>
+
+        <div class="p-6 border-t-2 border-border bg-muted/20">
+            <div class="font-mono text-xs uppercase text-muted-foreground mb-2 flex justify-between">
+                <span>Status:</span>
+                <span class="text-accent font-bold animate-pulse">NOMINAL</span>
+            </div>
+            <div class="font-mono text-xs uppercase text-muted-foreground mb-4 flex justify-between">
+                <span>Uptime:</span>
+                <span class="text-foreground">99.99%</span>
+            </div>
+            <div class="font-display font-bold text-[0.65rem] tracking-widest uppercase text-border">
                 &copy; 2024 GSI Security Labs.
             </div>
         </div>
-    </div>
+    </aside>
 
-    <main class="main-content">
-        <header>
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <header class="border-b-2 border-border p-8 flex justify-between items-end bg-background sticky top-0 z-30">
             <div>
-                <h1 style="margin: 0; font-size: 2.25rem; letter-spacing: -1.5px;">Threat Intelligence <span
-                        style="color: var(--accent); font-weight: 400;">Deck</span></h1>
-                <p style="margin: 8px 0 0; color: var(--text-secondary); font-size: 0.9rem;">Adaptive honeynet
-                    monitoring live adversarial interactions.</p>
+                <h1 class="font-display font-bold uppercase text-5xl md:text-6xl tracking-tighter leading-none mb-2">
+                    Threat<br><span class="text-accent">Intel Deck</span></h1>
+                <p class="font-mono text-sm text-muted-foreground uppercase tracking-wider">Adaptive honeynet monitoring
+                    live adversarial interactions.</p>
             </div>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-action">Download Logs</button>
-                <button class="btn-action" style="background: var(--accent); color: black;">Live View</button>
+            <div class="flex gap-4">
+                <a href="/admin/api/logs/download"
+                    class="px-6 py-3 border-2 border-border text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 inline-block text-center">Download
+                    Logs</a>
+                <button
+                    class="px-6 py-3 bg-accent border-2 border-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-xs hover:bg-background hover:text-accent transition-all duration-300 relative flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    Live View
+                </button>
             </div>
         </header>
 
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-label">Captured Intrusions</div>
-                <div class="stat-value" id="total-attacks">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Unique Adversary Nodes</div>
-                <div class="stat-value" id="unique-ips">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Quarantined Samples</div>
-                <div class="stat-value" id="total-malware">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Adversary Level</div>
-                <div class="stat-value" style="color: var(--danger);">HIGH</div>
-            </div>
-        </div>
+        <div class="p-8 space-y-8">
 
-        <div class="content-grid">
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-title"><span>☲</span> Recent Adversarial Events</div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Last 100ms sync</div>
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border border-2 border-border">
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Captured Intrusions</div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="total-attacks">0</div>
                 </div>
-                <table id="attack-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Source node</th>
-                            <th>Endpoint</th>
-                            <th>Classification</th>
-                            <th>Risk</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Unique Adversaries</div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="unique-ips">0</div>
+                </div>
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Quarantined Samples</div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="total-malware">0</div>
+                </div>
+                <div class="bg-background p-6 hover:bg-red-500 group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-black/60 mb-2">
+                        Global Threat Level</div>
+                    <div
+                        class="font-mono font-extrabold text-5xl md:text-6xl text-red-500 group-hover:text-black transition-colors">
+                        HIGH</div>
+                </div>
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-title"><span>☉</span> Vector Distribution</div>
-                </div>
-                <div style="height: 220px; margin-bottom: 2rem;">
-                    <canvas id="attackChart"></canvas>
-                </div>
-                <div class="radar-box">
-                    <div class="system-radar">
-                        <div class="radar-sweep"></div>
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+                <!-- Left Column: Attack Table -->
+                <div class="xl:col-span-2 border-2 border-border bg-background flex flex-col">
+                    <div class="p-6 border-b-2 border-border flex justify-between items-center bg-muted/10">
+                        <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                            <span class="text-accent">☲</span> Recent Adversarial Events
+                        </h2>
+                        <div class="font-mono text-xs text-accent animate-pulse">Syncing...</div>
                     </div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: center;">
-                        GLOBAL SCANNER: <span style="color: var(--success); font-weight: 700;">ACTIVE</span>
+                    <div class="p-0 overflow-x-auto custom-scrollbar flex-1">
+                        <table id="attack-table" class="w-full text-left whitespace-nowrap">
+                            <thead class="bg-muted/30">
+                                <tr>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Time</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Source Node</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Endpoint</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Classification</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-mono text-sm">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title"><span>☢</span> Malware Laboratory</div>
+                <!-- Right Column: Chart & Radar -->
+                <div class="xl:col-span-1 flex flex-col gap-8">
+
+                    <!-- Chart Panel -->
+                    <div class="border-2 border-border bg-background">
+                        <div class="p-6 border-b-2 border-border bg-muted/10">
+                            <h2
+                                class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                                <span class="text-accent">☉</span> Vector Distribution
+                            </h2>
+                        </div>
+                        <div class="p-6 h-[250px] flex items-center justify-center">
+                            <canvas id="attackChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Radar Panel -->
+                    <div
+                        class="border-2 border-border bg-background p-8 flex flex-col items-center justify-center flex-1">
+                        <div
+                            class="system-radar w-40 h-40 border-2 border-accent/30 rounded-full flex items-center justify-center mb-6">
+                            <div class="radar-sweep"></div>
+                            <div class="w-2 h-2 rounded-full bg-accent absolute shadow-[0_0_10px_#DFE104]"></div>
+                        </div>
+                        <div
+                            class="font-display font-bold text-sm tracking-widest uppercase text-muted-foreground text-center">
+                            GLOBAL SCANNER:<br>
+                            <span class="text-accent text-xl mt-1 block">ACTIVE</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <table id="malware-table">
-                <thead>
-                    <tr>
-                        <th>Filename</th>
-                        <th>Identifier (SHA256)</th>
-                        <th>Size</th>
-                        <th>MIME Description</th>
-                        <th>Source Node</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+
+            <!-- Malware Lab Table -->
+            <div class="border-2 border-border bg-background">
+                <div class="p-6 border-b-2 border-border bg-muted/10">
+                    <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                        <span class="text-red-500">☢</span> Malware Laboratory
+                    </h2>
+                </div>
+                <div class="p-0 overflow-x-auto custom-scrollbar">
+                    <table id="malware-table" class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-muted/30">
+                            <tr>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Filename</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Identifier (SHA256)</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Size</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    MIME Type</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Source Node</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-mono text-sm">
+                            <!-- Data populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <script>
+        // Custom Tailwind colors for JS logic
+        const colors = {
+            accent: '#DFE104',
+            danger: '#ff0055',
+            warning: '#ffcc00',
+            success: '#00ffaa',
+            muted: '#27272A',
+            foreground: '#FAFAFA'
+        };
+
         async function fetchData() {
             try {
                 const response = await fetch('/admin/api/stats');
@@ -401,14 +340,23 @@
                 const attackBody = document.querySelector('#attack-table tbody');
                 attackBody.innerHTML = '';
                 data.recent_attacks.forEach(log => {
-                    const riskColor = log.severity === 'High' ? 'var(--danger)' : log.severity === 'Medium' ? 'var(--warning)' : 'var(--success)';
+                    const riskColor = log.severity === 'High' ? colors.danger : log.severity === 'Medium' ? colors.warning : colors.success;
+
+                    // Format badge classes
+                    let badgeClass = "border border-border px-2 py-1 bg-muted/30 font-display uppercase tracking-widest text-[0.65rem] font-bold";
+                    if (log.attack_type.includes('sql') || log.attack_type.includes('shell')) {
+                        badgeClass = `border border-[${colors.danger}] px-2 py-1 bg-[${colors.danger}]/10 text-[${colors.danger}] font-display uppercase tracking-widest text-[0.65rem] font-bold`;
+                    } else if (log.attack_type.includes('xss') || log.attack_type.includes('traversal')) {
+                        badgeClass = `border border-[${colors.accent}] px-2 py-1 bg-[${colors.accent}]/10 text-[${colors.accent}] font-display uppercase tracking-widest text-[0.65rem] font-bold`;
+                    }
+
                     attackBody.insertAdjacentHTML('beforeend', `
-                        <tr>
-                            <td style="color: var(--text-secondary)">${new Date(log.timestamp).toLocaleTimeString()}</td>
-                            <td><code>${log.ip_address}</code></td>
-                            <td><code>${log.endpoint}</code></td>
-                            <td><span class="badge badge-${log.attack_type}">${log.attack_type.replace(/_/g, ' ')}</span></td>
-                            <td style="color: ${riskColor}; font-weight: 700;">${log.severity}</td>
+                        <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                            <td class="p-4 text-muted-foreground">${new Date(log.timestamp + 'Z').toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })} IST</td>
+                            <td class="p-4 text-foreground">${log.ip_address}</td>
+                            <td class="p-4 text-muted-foreground">${log.endpoint}</td>
+                            <td class="p-4"><span class="${badgeClass}" style="${badgeClass.includes('[') ? '' : `color: ${colors.accent}; border-color: ${colors.accent}`}">${log.attack_type.replace(/_/g, ' ')}</span></td>
+                            <td class="p-4 font-bold" style="color: ${riskColor};">${log.severity}</td>
                         </tr>
                     `);
                 });
@@ -417,12 +365,12 @@
                 malwareBody.innerHTML = '';
                 data.malware.forEach(m => {
                     malwareBody.insertAdjacentHTML('beforeend', `
-                        <tr>
-                            <td>${m.filename}</td>
-                            <td><code title="${m.file_hash}">${m.file_hash.substring(0, 20)}...</code></td>
-                            <td>${(m.file_size / 1024).toFixed(2)} KB</td>
-                            <td>${m.mime_type}</td>
-                            <td><code>${m.source_ip}</code></td>
+                        <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                            <td class="p-4 text-foreground font-bold">${m.filename}</td>
+                            <td class="p-4 text-muted-foreground text-xs" title="${m.file_hash}">${m.file_hash.substring(0, 32)}...</td>
+                            <td class="p-4">${(m.file_size / 1024).toFixed(2)} KB</td>
+                            <td class="p-4 text-muted-foreground">${m.mime_type}</td>
+                            <td class="p-4 text-accent">${m.source_ip}</td>
                         </tr>
                     `);
                 });
@@ -441,25 +389,55 @@
 
             if (attackChart) attackChart.destroy();
 
+            // Setup chart with Kinetic theme
+            Chart.defaults.color = '#A1A1AA';
+            Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+            Chart.defaults.font.weight = 'bold';
+
             attackChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: '#00f2ff',
-                        borderRadius: 4,
-                        barThickness: 12
+                        backgroundColor: '#DFE104',
+                        borderColor: '#09090B',
+                        borderWidth: 2,
+                        hoverBackgroundColor: '#DFE104'
                     }]
                 },
                 options: {
                     indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false, grid: { display: false } },
-                        y: { ticks: { color: '#94a3b8', font: { size: 9, family: 'JetBrains Mono' } }, grid: { display: false } }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#DFE104',
+                            titleColor: '#09090B',
+                            bodyColor: '#09090B',
+                            titleFont: { family: '"Space Grotesk"', size: 14, weight: 'bold' },
+                            bodyFont: { family: '"JetBrains Mono"', size: 14, weight: 'bold' },
+                            cornerRadius: 0,
+                            displayColors: false
+                        }
                     },
-                    maintainAspectRatio: false
+                    scales: {
+                        x: {
+                            display: false,
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#A1A1AA',
+                                font: { size: 10, family: '"Space Grotesk"', weight: 'bold' }
+                            },
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    },
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // Snappy updates, no slow animation
+                    }
                 }
             });
         }

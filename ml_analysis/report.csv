@@ -1,0 +1,14 @@
+ip,endpoint,payload,confidence,predicted_attack_type
+192.168.1.5,/login,username=admin&password=123,0.43,Brute Force Login
+192.168.1.10,/home,,0.63,Normal Traffic
+10.0.0.1,/search,q=admin' UNION SELECT * FROM users--,0.81,SQL Injection
+10.0.0.1,/login,username=admin' OR 1=1--,0.85,SQL Injection
+172.16.0.4,/comment,text=<script>alert('xss')</script>,0.73,Cross-Site Scripting (XSS)
+172.16.0.5,/profile,name=javascript:alert(1),0.58,Cross-Site Scripting (XSS)
+10.0.0.2,/ping,host=127.0.0.1; cat /etc/passwd,0.82,Command Injection
+10.0.0.3,/status,target=localhost && ls -la,0.8,Command Injection
+192.168.1.100,/download,file=../../../../etc/passwd,0.55,Directory Traversal
+192.168.1.101,/static,file=..\..\windows\win.ini,0.38,Command Injection
+203.0.113.1,/login,username=admin&password=admin,0.94,Brute Force Login
+203.0.113.1,/login,username=admin&password=root,0.91,Brute Force Login
+203.0.113.1,/login,username=admin&password=123456,0.93,Brute Force Login
