@@ -1,0 +1,53 @@
+# =========================
+# Python cache
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+
+# =========================
+# Virtual environment
+# =========================
+venv/
+.venv/
+
+# =========================
+# VS Code local settings
+# =========================
+.vscode/
+
+# =========================
+# Database files
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Logs / runtime data
+# =========================
+logs/
+*.log
+
+# =========================
+# Uploaded / quarantined files
+# =========================
+uploads/quarantine/
+
+# =========================
+# Generated reports
+# =========================
+ml_analysis/report.csv
+ml_analysis/report.json
+ml_analysis/report.txt
+
+# =========================
+# Generated ML datasets
+# =========================
+ml_dataset/
+
+# =========================
+# Python temporary files
+# =========================
+*.tmp
+*.temp

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background Badge -->
+  <rect width="64" height="64" rx="14" fill="#09090B"/>
+  <rect width="64" height="64" rx="14" stroke="#DFE104" stroke-width="2.5" stroke-opacity="0.6"/>
+  
+  <!-- Outer Cyber Hexagon / Aperture -->
+  <polygon points="32,7 55,20 55,44 32,57 9,44 9,20" fill="none" stroke="#DFE104" stroke-width="3" stroke-linejoin="round"/>
+  
+  <!-- Inner Ring / Core Grid -->
+  <circle cx="32" cy="32" r="14" fill="#18181B" stroke="#DFE104" stroke-width="2" stroke-dasharray="3 2"/>
+  
+  <!-- Central Sentinel "X" Radar Mark -->
+  <path d="M24 24 L40 40 M40 24 L24 40" stroke="#DFE104" stroke-width="3.5" stroke-linecap="round"/>
+  
+  <!-- Glowing Center Blip -->
+  <circle cx="32" cy="32" r="3.5" fill="#ff0055"/>
+  <circle cx="32" cy="32" r="6" fill="none" stroke="#ff0055" stroke-width="1.5" stroke-opacity="0.8"/>
+</svg>

@@ -9,9 +9,9 @@ import os
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="CyberGuard Honeypot",
-    description="A lightweight web honeypot for threat detection and logging.",
-    version="1.0.0"
+    title="Sentinel.X Honeypot",
+    description="Autonomous Deception Grid & Threat Intelligence Center.",
+    version="2.0.0"
 )
 
 # CORS configuration
@@ -38,4 +38,5 @@ app.include_router(admin.router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+

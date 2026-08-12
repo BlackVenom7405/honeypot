@@ -11,3 +11,4 @@ matplotlib
 requests
 joblib
 scikit-learn
+reportlab
