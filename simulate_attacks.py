@@ -2,8 +2,17 @@ import requests
 import time
 import os
 import random
+import urllib3
 
-BASE_URL = "http://localhost:8000"
+# Suppress self-signed certificate warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Auto-detect whether decoy runs on standard 443 or fallback 8443
+BASE_URL = "https://localhost:443"
+try:
+    requests.get(BASE_URL, verify=False, timeout=2)
+except Exception:
+    BASE_URL = "https://localhost:8443"
 
 USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0",
@@ -42,11 +51,24 @@ attacks = [
         "data": {"username": "admin' OR '1'='1", "password": "password"}
     },
     {
+        "category": "SQL Injection",
+        "name": "SQL Injection on Search Query",
+        "url": f"{BASE_URL}/search?q=' UNION SELECT NULL, NULL --",
+        "method": "GET"
+    },
+    {
         "category": "XSS",
         "name": "Cross-Site Scripting (XSS) on Contact Portal",
         "url": f"{BASE_URL}/contact",
         "method": "POST",
         "data": {"name": "Auditor", "email": "test@domain.com", "message": "<script>alert('XSS_POC')</script>"}
+    },
+    {
+        "category": "XSS",
+        "name": "Cross-Site Scripting (XSS) on Playlist Name",
+        "url": f"{BASE_URL}/create-playlist",
+        "method": "POST",
+        "data": {"name": "<script>alert('XSS_PLAYLIST')</script>"}
     },
     {
         "category": "Path Traversal",
@@ -65,7 +87,7 @@ attacks = [
 
 def run_simulations():
     print("==========================================================")
-    print("      CYBERGUARD HONEYPOT - ATTACK SIMULATOR (5 VECTORS)  ")
+    print("      SENTINEL.X HONEYPOT - ATTACK SIMULATOR (5 VECTORS)  ")
     print("==========================================================")
     
     # 1. Run Web Attacks (SQL Injection, XSS, Path Traversal, Brute Force)
@@ -84,18 +106,22 @@ def run_simulations():
         print(f"    User-Agent:     {random_ua}")
         
         try:
-            if attack["method"] == "POST":
-                response = requests.post(attack["url"], data=attack.get("data"), headers=headers, timeout=5)
+            # Set cookie for playlist creation simulation to avoid login redirect issues
+            if "create-playlist" in attack["url"]:
+                cookies = {"decoy_session": "admin:admin"}
+                response = requests.post(attack["url"], data=attack.get("data"), headers=headers, cookies=cookies, verify=False, timeout=5, allow_redirects=False)
+            elif attack["method"] == "POST":
+                response = requests.post(attack["url"], data=attack.get("data"), headers=headers, verify=False, timeout=5)
             else:
-                response = requests.get(attack["url"], headers=headers, timeout=5)
+                response = requests.get(attack["url"], headers=headers, verify=False, timeout=5)
             print(f"    Response Code:  {response.status_code}")
         except Exception as e:
             print(f"    Connection Err: {e}")
         time.sleep(0.5)
 
-    # 2. Run Web Shell Detection Attack (Malicious File Upload)
+    # 2. Run Web Shell Detection Attack (Malicious Profile Avatar Upload)
     print("\n[+] Simulating Vector: Web Shell Detection")
-    print("    Scenario:       Malicious PHP Web Shell Upload")
+    print("    Scenario:       Malicious PHP Web Shell Profile Pic Upload")
     shell_ip = generate_random_ip()
     shell_ua = random.choice(USER_AGENTS)
     headers = {
@@ -111,20 +137,47 @@ def run_simulations():
         f.write(file_content)
     
     try:
+        # Simulate authenticated user avatar upload
+        cookies = {"decoy_session": "admin:admin"}
         with open('tmp_shell.php', 'rb') as f:
             files = {'file': ('shell.php', f, 'application/x-php')}
-            response = requests.post(f"{BASE_URL}/upload", files=files, headers=headers, timeout=5)
+            response = requests.post(f"{BASE_URL}/upload-avatar", files=files, headers=headers, cookies=cookies, verify=False, timeout=5, allow_redirects=False)
         print(f"    Response Code:  {response.status_code}")
-        print(f"    Quarantine Msg: {response.json().get('message')}")
     except Exception as e:
         print(f"    Connection Err: {e}")
     finally:
         if os.path.exists("tmp_shell.php"):
             os.remove("tmp_shell.php")
 
+    # 3. Run Web Shell Detection Attack (Legacy Decoy upload compat)
+    print("\n[+] Simulating Vector: Web Shell Detection (Legacy)")
+    print("    Scenario:       Legacy Upload Endpoint Attack")
+    legacy_ip = generate_random_ip()
+    legacy_ua = random.choice(USER_AGENTS)
+    headers = {
+        "X-Forwarded-For": legacy_ip,
+        "X-Real-IP": legacy_ip,
+        "User-Agent": legacy_ua
+    }
+    file_content = b"<?php @eval($_POST['cmd']); ?>"
+    with open("tmp_legacy.php", "wb") as f:
+        f.write(file_content)
+    
+    try:
+        with open('tmp_legacy.php', 'rb') as f:
+            files = {'file': ('webshell.php', f, 'application/x-php')}
+            response = requests.post(f"{BASE_URL}/upload", files=files, headers=headers, verify=False, timeout=5)
+        print(f"    Response Code:  {response.status_code}")
+        print(f"    Quarantine Msg: {response.json().get('message')}")
+    except Exception as e:
+        print(f"    Connection Err: {e}")
+    finally:
+        if os.path.exists("tmp_legacy.php"):
+            os.remove("tmp_legacy.php")
+
     print("\n==========================================================")
-    print("[+] Simulation complete! View the live multi-node logs at:")
-    print("    http://localhost:8000/admin")
+    print("[+] Simulation complete! View the live dashboard stats at:")
+    print("    http://localhost:8080/admin")
     print("==========================================================")
 
 if __name__ == "__main__":

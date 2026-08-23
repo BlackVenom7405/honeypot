@@ -114,9 +114,13 @@
     <div class="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-12 lg:p-16 relative bg-background">
         <!-- Top bar with Theme Switcher & Back Link -->
         <div class="flex items-center justify-between mb-8">
+            {% if not is_dashboard %}
             <a href="/" class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors flex items-center gap-2">
                 <span>&larr;</span> Return to Public Interface
             </a>
+            {% else %}
+            <div></div>
+            {% endif %}
 
             <!-- Theme Toggle -->
             <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Light and Dark Mode" 
@@ -160,6 +164,7 @@
             {% endif %}
 
             <!-- Direct Client Portal Hint for Guests -->
+            {% if not is_dashboard %}
             <div class="mb-8 border-2 border-border p-4 bg-muted/15 flex items-center justify-between gap-4">
                 <div>
                     <div class="font-display font-bold text-xs uppercase tracking-wider text-foreground">
@@ -173,6 +178,7 @@
                     Open Client Portal →
                 </a>
             </div>
+            {% endif %}
 
             <!-- Administrator Login Form -->
             <form action="/login" method="POST" class="space-y-6" id="loginForm">

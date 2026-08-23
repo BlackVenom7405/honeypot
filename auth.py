@@ -22,14 +22,7 @@ def authenticate_user(username: str, password: str) -> Optional[Dict]:
             "display_name": "Root Administrator"
         }
     
-    # Guest user credentials
-    if u in ["guest", "viewer", "demo", "analyst"] and p in ["guest", "guest123", "demo", "123456", "viewer"]:
-        return {
-            "username": "guest",
-            "role": "guest",
-            "display_name": "Guest Analyst"
-        }
-        
+    # Guest credentials removed to ensure strict admin-only access
     return None
 
 def create_session_token(username: str, role: str) -> str:
@@ -48,10 +41,12 @@ def verify_session_token(token: str) -> Optional[Dict]:
     username, role, sig = parts
     expected_sig = hmac.new(SECRET_KEY.encode(), f"{username}:{role}".encode(), hashlib.sha256).hexdigest()
     if hmac.compare_digest(sig, expected_sig):
+        if role != "admin":
+            return None
         return {
             "username": username,
-            "role": role,
-            "display_name": "Root Administrator" if role == "admin" else "Guest Analyst"
+            "role": "admin",
+            "display_name": "Root Administrator"
         }
     return None
 

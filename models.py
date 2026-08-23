@@ -27,3 +27,20 @@ class MalwareMetadata(Base):
     mime_type = Column(String)
     source_ip = Column(String)
     quarantine_path = Column(String)
+
+class User(Base):
+    __tablename__ = "decoy_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class DecoyPlaylist(Base):
+    __tablename__ = "decoy_playlists"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    user_id = Column(Integer, index=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

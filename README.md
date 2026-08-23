@@ -85,29 +85,33 @@ Real-time payload inspection categorizes inbound threats into five major vectors
 
 ```plaintext
 honeypot/
-├── app.py                      # FastAPI application entry point & router mounting
-├── auth.py                     # Role-based auth (Admin vs Guest), session tokens & hashing
-├── database.py                 # SQLAlchemy database session & SQLite engine configuration
+├── app_decoy.py                # FastAPI server hosting public Spotify clone on port 8000
+├── app_dashboard.py            # FastAPI server hosting Sentinel.X admin deck on port 8080
+├── auth.py                     # Session validation & security gateway hashing functions
+├── database.py                 # SQLAlchemy SQLite configuration & database connection
 ├── detection.py                # Regex & heuristic signature detection engine
 ├── logger.py                   # Threat logging controller for SQLite & JSON stores
-├── models.py                   # ORM data models (AttackLog, MalwareMetadata)
+├── models.py                   # ORM data models (AttackLog, MalwareMetadata, User, Playlist)
 ├── report_generator.py         # Multi-format report exporter (PDF, CSV, JSON, TXT)
-├── simulate_attacks.py         # Multi-vector attack generator for testing & demos
+├── simulate_attacks.py         # Multi-vector attack generator targeting decoy endpoints
 ├── requirements.txt            # Python dependencies
 ├── .gitignore                  # Git tracking exclusion rules
 ├── static/
-│   └── favicon.svg             # Sentinel.X cyber aperture SVG logo
+│   ├── favicon.svg             # Sentinel.X logo icon
+│   └── decoy/                  # Spotify clone stylesheet assets and images
 ├── routes/
-│   ├── public.py               # Public decoy endpoints & authentication routes
-│   └── admin.py                # Admin dashboard routes, stats API & log exports
+│   ├── public.py               # Public endpoints for legacy/compat honeypot lures
+│   └── admin.py                # Admin dashboard routes, statistics & exports
 ├── templates/
-│   ├── home.html               # Main landing page with moving radar & telemetry
-│   ├── admin.html              # Sentinel.X Threat Intelligence Center (Dashboard)
-│   ├── login.html              # Administrator authentication gate
-│   ├── upload.html             # Malware sandbox upload decoy
-│   └── forgot_password.html    # Credential reset decoy trap
+│   ├── decoy_home.html         # Interactive Spotify clone homepage template
+│   ├── decoy_login.html         # Spotify-themed decoy login interface
+│   ├── decoy_signup.html        # Spotify-themed decoy registration form
+│   ├── admin.html              # Sentinel.X Threat Intelligence Center Dashboard
+│   ├── login.html              # Secure Sentinel.X administrator login
+│   ├── upload.html             # Legacy malware upload decoy template
+│   └── forgot_password.html    # Decoy credential reset recovery page
 ├── uploads/
-│   └── quarantine/             # Sandboxed directory for trapped malware samples
+│   └── quarantine/             # Sandboxed containment for web shells and uploads
 └── logs/                       # Persistent JSON & raw log archives
 ```
 
@@ -139,24 +143,40 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Launch the Server
+### 3. Launch the Web Applications
+
+#### Option A: Deploy via Docker Compose (Recommended)
+This runs both applications in isolated containers sharing database, logs, and uploads directories, with the dashboard restricted to localhost:
 ```bash
-python app.py
+docker-compose up --build -d
 ```
-The server will start at `http://localhost:8000` with hot-reloading enabled.
+To stop the services:
+```bash
+docker-compose down
+```
+
+#### Option B: Launch Manually (Local Python)
+Make sure you generated your SSL certificates first using `python generate_ssl.py`.
+
+* **Decoy Spotify Website (HTTPS Port 443)**:
+  ```bash
+  python app_decoy.py
+  ```
+* **Sentinel.X Monitoring Dashboard (Port 8080)**:
+  ```bash
+  python app_dashboard.py
+  ```
 
 ---
 
 ## 🔑 Default Credentials & Access Endpoints
 
-| Portal | URL | Credentials / Access |
+| Portal / Service | URL | Access Protocol |
 | :--- | :--- | :--- |
-| **Home Page** | `http://localhost:8000/` | Public |
-| **Client Portal (Guest View)** | `http://localhost:8000/client-portal` | **1-Click Direct Access** (No login required) |
-| **Admin Login** | `http://localhost:8000/login` | `admin` / `admin123` |
-| **Threat Intelligence Deck** | `http://localhost:8000/admin` | Requires Admin or Guest Session |
-| **Decoy Upload Trap** | `http://localhost:8000/upload` | Public Decoy |
-| **Auth Recovery Decoy** | `http://localhost:8000/forgot-password` | Public Decoy |
+| **Public Decoy Spotify** | `https://localhost/` | Public clone featuring real signup/logins, searches, audio previews, and avatar uploads |
+| **Decoy Login Gate** | `https://localhost/login` | Attacker decoy (detects credential attacks & brute force logs) |
+| **Sentinel.X Dashboard** | `http://127.0.0.1:8080/admin` | Strict root admin login (Credentials: `admin` / `admin123`) |
+| **Secure Admin Login** | `http://127.0.0.1:8080/login` | Restricted solely to localhost and administrators (No guest access, no decoy links) |
 
 ---
 
