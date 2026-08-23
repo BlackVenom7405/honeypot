@@ -85,6 +85,7 @@ Real-time payload inspection categorizes inbound threats into five major vectors
 
 ```plaintext
 honeypot/
+<<<<<<< HEAD
 ├── app_decoy.py                # FastAPI server hosting public Spotify clone on port 8000
 ├── app_dashboard.py            # FastAPI server hosting Sentinel.X admin deck on port 8080
 ├── auth.py                     # Session validation & security gateway hashing functions
@@ -112,6 +113,31 @@ honeypot/
 │   └── forgot_password.html    # Decoy credential reset recovery page
 ├── uploads/
 │   └── quarantine/             # Sandboxed containment for web shells and uploads
+=======
+├── app.py                      # FastAPI application entry point & router mounting
+├── auth.py                     # Role-based auth (Admin vs Guest), session tokens & hashing
+├── database.py                 # SQLAlchemy database session & SQLite engine configuration
+├── detection.py                # Regex & heuristic signature detection engine
+├── logger.py                   # Threat logging controller for SQLite & JSON stores
+├── models.py                   # ORM data models (AttackLog, MalwareMetadata)
+├── report_generator.py         # Multi-format report exporter (PDF, CSV, JSON, TXT)
+├── simulate_attacks.py         # Multi-vector attack generator for testing & demos
+├── requirements.txt            # Python dependencies
+├── .gitignore                  # Git tracking exclusion rules
+├── static/
+│   └── favicon.svg             # Sentinel.X cyber aperture SVG logo
+├── routes/
+│   ├── public.py               # Public decoy endpoints & authentication routes
+│   └── admin.py                # Admin dashboard routes, stats API & log exports
+├── templates/
+│   ├── home.html               # Main landing page with moving radar & telemetry
+│   ├── admin.html              # Sentinel.X Threat Intelligence Center (Dashboard)
+│   ├── login.html              # Administrator authentication gate
+│   ├── upload.html             # Malware sandbox upload decoy
+│   └── forgot_password.html    # Credential reset decoy trap
+├── uploads/
+│   └── quarantine/             # Sandboxed directory for trapped malware samples
+>>>>>>> 44175add73702c1e6664040fd37ed83f4762b836
 └── logs/                       # Persistent JSON & raw log archives
 ```
 
@@ -143,6 +169,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+<<<<<<< HEAD
 ### 3. Launch the Web Applications
 
 #### Option A: Deploy via Docker Compose (Recommended)
@@ -166,17 +193,35 @@ Make sure you generated your SSL certificates first using `python generate_ssl.p
   ```bash
   python app_dashboard.py
   ```
+=======
+### 3. Launch the Server
+```bash
+python app.py
+```
+The server will start at `http://localhost:8000` with hot-reloading enabled.
+>>>>>>> 44175add73702c1e6664040fd37ed83f4762b836
 
 ---
 
 ## 🔑 Default Credentials & Access Endpoints
 
+<<<<<<< HEAD
 | Portal / Service | URL | Access Protocol |
 | :--- | :--- | :--- |
 | **Public Decoy Spotify** | `https://localhost/` | Public clone featuring real signup/logins, searches, audio previews, and avatar uploads |
 | **Decoy Login Gate** | `https://localhost/login` | Attacker decoy (detects credential attacks & brute force logs) |
 | **Sentinel.X Dashboard** | `http://127.0.0.1:8080/admin` | Strict root admin login (Credentials: `admin` / `admin123`) |
 | **Secure Admin Login** | `http://127.0.0.1:8080/login` | Restricted solely to localhost and administrators (No guest access, no decoy links) |
+=======
+| Portal | URL | Credentials / Access |
+| :--- | :--- | :--- |
+| **Home Page** | `http://localhost:8000/` | Public |
+| **Client Portal (Guest View)** | `http://localhost:8000/client-portal` | **1-Click Direct Access** (No login required) |
+| **Admin Login** | `http://localhost:8000/login` | `admin` / `admin123` |
+| **Threat Intelligence Deck** | `http://localhost:8000/admin` | Requires Admin or Guest Session |
+| **Decoy Upload Trap** | `http://localhost:8000/upload` | Public Decoy |
+| **Auth Recovery Decoy** | `http://localhost:8000/forgot-password` | Public Decoy |
+>>>>>>> 44175add73702c1e6664040fd37ed83f4762b836
 
 ---
 
