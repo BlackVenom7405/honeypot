@@ -214,6 +214,137 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* ========================================== */
+        /* Light Theme Variables and Overrides       */
+        /* ========================================== */
+        body.light-theme {
+            background-color: #f4f5f7;
+            color: #121212;
+        }
+        body.light-theme .sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+        }
+        body.light-theme .sidebar .logo img {
+            filter: invert(1) hue-rotate(180deg);
+        }
+        body.light-theme .sidebar .navigation a {
+            color: #555555;
+        }
+        body.light-theme .sidebar .navigation a:hover,
+        body.light-theme .sidebar .navigation li.active a {
+            color: #1db954;
+        }
+        body.light-theme .playlist-sidebar-list li {
+            color: #666666;
+        }
+        body.light-theme .playlist-sidebar-list li:hover {
+            background-color: #eaeaea;
+            color: #121212;
+        }
+        body.light-theme .main-container {
+            background-color: #f8f9fa;
+        }
+        body.light-theme .topbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        body.light-theme .search-bar-wrapper input {
+            background: #edf2f7;
+            color: #2d3748;
+        }
+        body.light-theme .search-bar-wrapper input:focus {
+            border-color: #1db954;
+            background: #ffffff;
+        }
+        body.light-theme .search-icon {
+            color: #718096;
+        }
+        body.light-theme .user-name-badge {
+            background: #ffffff;
+            color: #1a202c;
+            border-color: #cbd5e0;
+        }
+        body.light-theme .btn-upload {
+            background: #1a202c;
+            color: #ffffff;
+        }
+        body.light-theme .btn-upload:hover {
+            background-color: #2d3748;
+        }
+        body.light-theme .logout-link {
+            color: #718096;
+        }
+        body.light-theme .logout-link:hover {
+            color: #1a202c;
+        }
+        body.light-theme .spotify-playlists h2 {
+            color: #1a202c;
+        }
+        body.light-theme .spotify-playlists .list .item {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        body.light-theme .spotify-playlists .list .item:hover {
+            background-color: #f7fafc;
+        }
+        body.light-theme .spotify-playlists .list .item h4 {
+            color: #1a202c;
+        }
+        body.light-theme .spotify-playlists .list .item p {
+            color: #718096;
+        }
+        body.light-theme .preview {
+            background-color: #ffffff !important;
+            border-top: 1px solid #e2e8f0 !important;
+        }
+        body.light-theme .preview .text h6 {
+            color: #2d3748;
+        }
+        body.light-theme .preview .text p {
+            color: #718096;
+        }
+        body.light-theme .player-track-info h6 {
+            color: #1a202c !important;
+        }
+        body.light-theme .player-track-info p {
+            color: #718096 !important;
+        }
+        body.light-theme .player-controls button {
+            color: #4a5568 !important;
+        }
+        body.light-theme #player-play-btn {
+            background: #1db954 !important;
+            color: white !important;
+        }
+        body.light-theme #player-play-btn:hover {
+            background: #1ed760 !important;
+        }
+        body.light-theme .modal-content {
+            background-color: #ffffff;
+            color: #1a202c;
+            border-color: #cbd5e0;
+        }
+        body.light-theme .modal-content h3 {
+            color: #1a202c;
+        }
+        body.light-theme .modal-content input[type="text"] {
+            background: #f7fafc;
+            color: #1a202c;
+            border-color: #cbd5e0;
+        }
+        body.light-theme .topbar .prev-next-buttons button {
+            background-color: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+            cursor: pointer;
+        }
+        body.light-theme .topbar .prev-next-buttons button:hover {
+            background-color: #e2e8f0;
+            color: #1a202c;
+        }
     </style>
 </head>
 
@@ -325,6 +456,12 @@
 
             {% if user %}
             <div class="navbar-user">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleDecoyTheme()" type="button" aria-label="Toggle Theme" 
+                        style="background:transparent; border:1px solid #535353; color:#b3b3b3; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; transition:all 0.2s; flex-shrink:0; outline:none; margin-right:15px; padding:0; box-sizing:border-box;">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
                 <span class="user-name-badge">Hi, {{ user.username }}</span>
                 
                 <!-- Profile Avatar Uploader -->
@@ -336,7 +473,13 @@
                 <a href="/logout" class="logout-link">Log out</a>
             </div>
             {% else %}
-            <div class="navbar">
+            <div class="navbar" style="display:flex; align-items:center; gap:15px;">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleDecoyTheme()" type="button" aria-label="Toggle Theme" 
+                        style="background:transparent; border:1px solid #535353; color:#b3b3b3; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; transition:all 0.2s; flex-shrink:0; outline:none; padding:0; box-sizing:border-box;">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
                 <ul>
                     <li>
                         <a href="/signup">Sign Up</a>
@@ -567,7 +710,7 @@
         <div class="player-controls" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40%;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <button onclick="prevTrack()" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-backward-step"></i></button>
-                <button id="player-play-btn" onclick="togglePlayer()" style="background:white; border:none; color:black; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; font-weight:bold;"><i class="fa-solid fa-play"></i></button>
+                <button id="player-play-btn" onclick="togglePlayer()" style="background:white; border:none; color:black; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; font-weight:bold; padding:0; flex-shrink:0; box-sizing:border-box;"><i class="fa-solid fa-play"></i></button>
                 <button onclick="nextTrack()" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-forward-step"></i></button>
             </div>
             <div style="display:flex; align-items:center; gap:10px; width:100%;">
@@ -785,6 +928,41 @@
             const seconds = Math.floor(secs % 60);
             return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
+
+        /* ========================================== */
+        /* Light Theme Toggle Control Logic           */
+        /* ========================================== */
+        function toggleDecoyTheme() {
+            const body = document.body;
+            body.classList.toggle("light-theme");
+            const isLight = body.classList.contains("light-theme");
+            localStorage.setItem("decoyTheme", isLight ? "light" : "dark");
+            updateThemeUI(isLight);
+        }
+
+        function updateThemeUI(isLight) {
+            const btns = document.querySelectorAll("#themeToggleBtn");
+            btns.forEach(btn => {
+                if (isLight) {
+                    btn.innerHTML = '<i class="fa-solid fa-sun" style="color: #ecc94b;"></i>';
+                    btn.style.borderColor = "#cbd5e0";
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                    btn.style.borderColor = "#535353";
+                }
+            });
+        }
+
+        // Initialize Theme on startup
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("decoyTheme");
+            if (savedTheme === "light") {
+                document.body.classList.add("light-theme");
+                updateThemeUI(true);
+            } else {
+                updateThemeUI(false);
+            }
+        });
     </script>
 </body>
 

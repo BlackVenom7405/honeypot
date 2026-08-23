@@ -137,7 +137,12 @@
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Password" required autocomplete="off">
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="password" name="password" placeholder="Password" required autocomplete="off" style="width: 100%; box-sizing: border-box; padding-right: 45px;">
+                    <span onclick="togglePasswordVisibility('password', this)" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a7a7a7; display: flex; align-items: center; justify-content: center; height: 100%;">
+                        <i class="fa-solid fa-eye"></i>
+                    </span>
+                </div>
             </div>
             <button type="submit" class="btn-login">Log In</button>
         </form>
@@ -146,5 +151,21 @@
             Don't have an account? <a href="/signup">Sign up for myTunes</a>
         </div>
     </div>
+
+    <script>
+        function togglePasswordVisibility(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector("i");
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                field.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
 </body>
 </html>

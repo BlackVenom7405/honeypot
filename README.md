@@ -169,7 +169,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-<<<<<<< HEAD
 ### 3. Launch the Web Applications
 
 #### Option A: Deploy via Docker Compose (Recommended)
@@ -185,43 +184,22 @@ docker-compose down
 #### Option B: Launch Manually (Local Python)
 Make sure you generated your SSL certificates first using `python generate_ssl.py`.
 
-* **Decoy Spotify Website (HTTPS Port 443)**:
-  ```bash
-  python app_decoy.py
-  ```
-* **Sentinel.X Monitoring Dashboard (Port 8080)**:
-  ```bash
-  python app_dashboard.py
-  ```
-=======
-### 3. Launch the Server
+To run both services concurrently in a single command, run:
 ```bash
-python app.py
+python start.py
 ```
-The server will start at `http://localhost:8000` with hot-reloading enabled.
->>>>>>> 44175add73702c1e6664040fd37ed83f4762b836
+*(Simply press `CTRL+C` in your terminal to gracefully stop both servers).*
 
 ---
 
 ## 🔑 Default Credentials & Access Endpoints
 
-<<<<<<< HEAD
 | Portal / Service | URL | Access Protocol |
 | :--- | :--- | :--- |
-| **Public Decoy Spotify** | `https://localhost/` | Public clone featuring real signup/logins, searches, audio previews, and avatar uploads |
+| **Public Decoy myTunes** | `https://localhost/` | Public clone featuring real signup/logins, searches, audio previews, and avatar uploads |
 | **Decoy Login Gate** | `https://localhost/login` | Attacker decoy (detects credential attacks & brute force logs) |
 | **Sentinel.X Dashboard** | `http://127.0.0.1:8080/admin` | Strict root admin login (Credentials: `admin` / `admin123`) |
 | **Secure Admin Login** | `http://127.0.0.1:8080/login` | Restricted solely to localhost and administrators (No guest access, no decoy links) |
-=======
-| Portal | URL | Credentials / Access |
-| :--- | :--- | :--- |
-| **Home Page** | `http://localhost:8000/` | Public |
-| **Client Portal (Guest View)** | `http://localhost:8000/client-portal` | **1-Click Direct Access** (No login required) |
-| **Admin Login** | `http://localhost:8000/login` | `admin` / `admin123` |
-| **Threat Intelligence Deck** | `http://localhost:8000/admin` | Requires Admin or Guest Session |
-| **Decoy Upload Trap** | `http://localhost:8000/upload` | Public Decoy |
-| **Auth Recovery Decoy** | `http://localhost:8000/forgot-password` | Public Decoy |
->>>>>>> 44175add73702c1e6664040fd37ed83f4762b836
 
 ---
 
