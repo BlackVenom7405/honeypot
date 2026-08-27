@@ -256,3 +256,36 @@ async def download_logs(request: Request, format: str = "txt", db: Session = Dep
 @router.get("/api/logs/download/pdf")
 async def download_pdf_logs(request: Request, db: Session = Depends(get_db)):
     return await download_logs(request=request, format="pdf", db=db)
+
+@router.post("/api/clear-logs")
+@router.delete("/api/clear-logs")
+async def clear_logs(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "Authentication required"})
+    if user.get("role") != "admin":
+        return JSONResponse(status_code=403, content={"error": "Only administrators can clear attack logs."})
+
+    try:
+        # Delete records from database
+        db.query(AttackLog).delete()
+        db.query(MalwareMetadata).delete()
+        db.commit()
+
+        # Overwrite JSON log file and CSV log file if present
+        try:
+            with open("logs/attacks.json", "w") as f:
+                f.write("")
+        except Exception:
+            pass
+
+        try:
+            with open("ml_dataset/raw_logs.csv", "w") as f:
+                f.write("timestamp,ip_address,attack_type,payload\n")
+        except Exception:
+            pass
+
+        return {"status": "success", "message": "All captured attack history cleared successfully."}
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"error": f"Failed to clear attack history: {str(e)}"})

@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel.X | Threat Intelligence Center</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Init theme immediately to prevent FOUC
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-bg)',
+                        foreground: 'var(--color-fg)',
+                        card: 'var(--color-card-bg)',
+                        muted: 'var(--color-muted)',
+                        'muted-foreground': 'var(--color-muted-fg)',
+                        border: 'var(--color-border)',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        danger: '#ff0055',
+                        warning: '#ffcc00',
+                        success: '#00ffaa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg: #F4F4F5;
+            --color-card-bg: #FFFFFF;
+            --color-fg: #09090B;
+            --color-muted: #E4E4E7;
+            --color-muted-fg: #52525B;
+            --color-border: #18181B;
+            --color-input-bg: #FFFFFF;
+        }
+
+        html.dark {
+            --color-bg: #000000;
+            --color-card-bg: #09090B;
+            --color-fg: #E4E4E7;
+            --color-muted: #27272A;
+            --color-muted-fg: #A1A1AA;
+            --color-border: #3F3F46;
+            --color-input-bg: #09090B;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
+        }
+
+        /* Radar Animation & Dynamic Blip Grid */
+        .system-radar {
+            background: radial-gradient(circle, rgba(223, 225, 4, 0.08) 0%, rgba(0, 0, 0, 0.95) 75%);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: conic-gradient(from 0deg, transparent 75%, rgba(223, 225, 4, 0.15) 90%, rgba(223, 225, 4, 0.5) 100%);
+            border-radius: 50%;
+            animation: sweep 2.5s linear infinite;
+            pointer-events: none;
+        }
+
+        .system-radar.under-attack .radar-sweep {
+            background: conic-gradient(from 0deg, transparent 75%, rgba(255, 0, 85, 0.2) 90%, rgba(255, 0, 85, 0.65) 100%);
+            animation: sweep 1.2s linear infinite;
+        }
+
+        @keyframes sweep {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Radar concentric grid & crosshairs */
+        .radar-grid {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .radar-ring-1 {
+            position: absolute;
+            inset: 20%;
+            border: 1px dashed rgba(223, 225, 4, 0.2);
+            border-radius: 50%;
+        }
+
+        .radar-ring-2 {
+            position: absolute;
+            inset: 48%;
+            border: 1px solid rgba(223, 225, 4, 0.25);
+            border-radius: 50%;
+        }
+
+        .radar-ring-3 {
+            position: absolute;
+            inset: 74%;
+            border: 1px dashed rgba(223, 225, 4, 0.2);
+            border-radius: 50%;
+        }
+
+        .radar-crosshair-h {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(223, 225, 4, 0.15);
+        }
+
+        .radar-crosshair-v {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(223, 225, 4, 0.15);
+        }
+
+        /* Interactive Radar Threat Blip Dot */
+        .radar-blip {
+            position: absolute;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .radar-blip::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            opacity: 0.9;
+            animation: blip-pulse 1.4s ease-out infinite;
+        }
+
+        @keyframes blip-pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* Custom Scrollbar for tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: theme('colors.background');
+            border-top: 2px solid theme('colors.border');
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: theme('colors.muted');
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.accent');
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased noise min-h-screen flex selection:bg-accent selection:text-accent-foreground">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 border-r-2 border-border bg-background flex flex-col fixed h-screen z-40">
+        <div class="p-6 border-b-2 border-border">
+            <div class="font-display font-bold text-2xl uppercase tracking-tighter text-accent flex items-center gap-2">
+                <span class="text-3xl leading-none">⌬</span> SENTINEL·X
+            </div>
+        </div>
+
+        <nav class="flex-1 flex flex-col p-4 gap-2" id="sidebar-nav">
+            <button onclick="switchTab('operational')" id="nav-operational"
+                class="px-4 py-3 text-left bg-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-accent transition-all cursor-pointer">
+                Operational Deck
+            </button>
+            <button onclick="switchTab('traffic')" id="nav-traffic"
+                class="px-4 py-3 text-left text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all cursor-pointer">
+                Traffic Analysis
+            </button>
+            <button onclick="switchTab('malware')" id="nav-malware"
+                class="px-4 py-3 text-left text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all cursor-pointer">
+                Malware Vault
+            </button>
+            <button onclick="switchTab('vectors')" id="nav-vectors"
+                class="px-4 py-3 text-left text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all cursor-pointer">
+                Attack Vectors
+            </button>
+        </nav>
+
+        <div class="p-6 border-t-2 border-border bg-muted/20">
+            <!-- User Profile Box -->
+            <div class="mb-4 pb-4 border-b border-border/60">
+                <div class="font-mono text-[10px] uppercase text-muted-foreground mb-1">AUTHENTICATED OPERATOR:</div>
+                <div class="font-display font-bold text-sm text-foreground uppercase tracking-tight flex items-center justify-between">
+                    <span>{{ username | default('Operator') }}</span>
+                    {% if user_role == 'guest' %}
+                    <span class="px-2 py-0.5 bg-warning text-black font-display font-bold text-[9px] uppercase tracking-wider">GUEST</span>
+                    {% else %}
+                    <span class="px-2 py-0.5 bg-accent text-black font-display font-bold text-[9px] uppercase tracking-wider">ADMIN</span>
+                    {% endif %}
+                </div>
+                <a href="/logout" class="mt-3 block w-full py-1.5 px-2 border-2 border-border hover:border-danger hover:text-danger text-center font-display font-bold uppercase text-[10px] tracking-widest text-muted-foreground transition-colors">
+                    Sign Out ⇥
+                </a>
+            </div>
+
+            <div class="font-mono text-xs uppercase text-muted-foreground mb-2 flex justify-between items-center">
+                <span>Status:</span>
+                <span id="system-status" class="text-success font-bold font-mono text-xs tracking-wider">NOMINAL</span>
+            </div>
+            <div class="font-mono text-xs uppercase text-muted-foreground mb-4 flex justify-between items-center">
+                <span>Uptime:</span>
+                <div class="flex items-center gap-1.5 font-mono">
+                    <span id="system-uptime-pct" class="text-foreground font-bold">99.99%</span>
+                    <span id="system-uptime-time" class="text-[0.65rem] text-muted-foreground">(0s)</span>
+                </div>
+            </div>
+            <div class="font-display font-bold text-[0.65rem] tracking-widest uppercase text-border">
+                &copy; 2026 Sentinel.X Security Labs.
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="ml-64 flex-1 flex flex-col min-w-0">
+
+        <!-- Top Dynamic Header -->
+        <header class="border-b-2 border-border p-8 flex justify-between items-end bg-background sticky top-0 z-30">
+            <div>
+                <h1 id="header-title"
+                    class="font-display font-bold uppercase text-5xl md:text-6xl tracking-tighter leading-none mb-2">
+                    Threat<br><span class="text-accent">Intel Deck</span>
+                </h1>
+                <p id="header-subtitle" class="font-mono text-sm text-muted-foreground uppercase tracking-wider">
+                    Adaptive honeynet monitoring live adversarial interactions.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Light and Dark Mode"
+                    class="px-3.5 py-3 border-2 border-border bg-background text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:text-accent transition-all duration-200 flex items-center gap-2 cursor-pointer">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <span id="themeLabel" class="hidden sm:inline">Theme</span>
+                </button>
+
+                {% if user_role == 'guest' %}
+                <div class="px-3 py-2.5 border-2 border-warning bg-warning/10 text-warning font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5" title="Guest Access Mode">
+                    <span>👁️</span> <span>GUEST ANALYST</span>
+                </div>
+                {% else %}
+                <div class="px-3 py-2.5 border-2 border-accent bg-accent/10 text-accent font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5" title="Root Administrator Clearance">
+                    <span>🛡️</span> <span>ROOT ADMIN</span>
+                </div>
+                {% endif %}
+
+                <button onclick="toggleDownloadModal()" id="download-btn"
+                    class="px-5 py-3 border-2 border-border text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Logs
+                    <span class="text-[0.6rem] ml-1 opacity-70">▼</span>
+                </button>
+                <button
+                    class="px-5 py-3 bg-accent border-2 border-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-xs hover:bg-background hover:text-accent transition-all duration-300 relative flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    Live View
+                </button>
+                <a href="/logout"
+                    class="px-4 py-3 border-2 border-border text-muted-foreground hover:border-danger hover:text-danger font-display font-bold uppercase tracking-widest text-xs transition-colors flex items-center gap-1.5" title="Sign Out">
+                    <span>⇥ Logout</span>
+                </a>
+            </div>
+        </header>
+
+        {% if user_role == 'guest' %}
+        <!-- Guest Clearance Notice Banner -->
+        <div class="mx-8 mt-6 p-4 border-2 border-warning bg-warning/10 text-warning font-display font-bold uppercase tracking-wider text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">⚠</span>
+                <div>
+                    <div>RESTRICTED GUEST CLEARANCE ACTIVE</div>
+                    <div class="text-[11px] font-mono font-normal text-warning/90 mt-0.5">Sensitive IP nodes, attack payload contents, user agents, and malware vault paths are redacted. Log downloads are locked.</div>
+                </div>
+            </div>
+            <a href="/logout" class="px-3 py-1.5 bg-warning text-black hover:bg-white font-display font-bold uppercase text-[11px] tracking-wider transition-colors shrink-0">
+                Switch to Admin →
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- TAB 1: OPERATIONAL DECK -->
+        <div id="tab-view-operational" class="p-8 space-y-8 tab-view">
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border border-2 border-border">
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Captured Intrusions
+                    </div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="total-attacks">0</div>
+                </div>
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Unique Adversaries
+                    </div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="unique-ips">0</div>
+                </div>
+                <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                    <div
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/60 mb-2">
+                        Quarantined Samples
+                    </div>
+                    <div class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors"
+                        id="total-malware">0</div>
+                </div>
+                <div id="threat-level-container"
+                    class="bg-background p-6 hover:bg-red-500 group transition-colors duration-300">
+                    <div id="threat-level-label"
+                        class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-black/60 mb-2">
+                        Threat Level
+                    </div>
+                    <div id="threat-level"
+                        class="font-mono font-extrabold text-5xl md:text-6xl text-red-500 group-hover:text-black transition-colors">
+                        HIGH
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <!-- Left Column: Attack Table -->
+                <div class="xl:col-span-2 border-2 border-border bg-background flex flex-col">
+                    <div class="p-6 border-b-2 border-border flex justify-between items-center bg-muted/10">
+                        <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                            <span class="text-accent">☲</span> Recent Adversarial Events
+                        </h2>
+                        <button onclick="switchTab('traffic')"
+                            class="font-mono text-xs text-accent hover:underline uppercase tracking-wider cursor-pointer">
+                            View All Telemetry →
+                        </button>
+                    </div>
+                    <div class="p-0 overflow-x-auto custom-scrollbar flex-1">
+                        <table id="attack-table" class="w-full text-left whitespace-nowrap">
+                            <thead class="bg-muted/30">
+                                <tr>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Time</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Source Node</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Endpoint</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Classification</th>
+                                    <th
+                                        class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                        Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-mono text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Column: Chart & Radar -->
+                <div class="xl:col-span-1 flex flex-col gap-8">
+                    <!-- Chart Panel -->
+                    <div class="border-2 border-border bg-background">
+                        <div class="p-6 border-b-2 border-border bg-muted/10">
+                            <h2
+                                class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                                <span class="text-accent">☉</span> Vector Distribution
+                            </h2>
+                        </div>
+                        <div class="p-6 h-[250px] flex items-center justify-center">
+                            <canvas id="attackChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Radar Panel -->
+                    <div
+                        class="border-2 border-border bg-background p-6 flex flex-col items-center justify-center flex-1 relative">
+                        <div id="radar-container"
+                            class="system-radar w-48 h-48 border-2 border-accent/40 rounded-full flex items-center justify-center mb-4 relative shadow-[0_0_20px_rgba(223,225,4,0.08)]">
+                            <div class="radar-grid">
+                                <div class="radar-ring-1"></div>
+                                <div class="radar-ring-2"></div>
+                                <div class="radar-ring-3"></div>
+                                <div class="radar-crosshair-h"></div>
+                                <div class="radar-crosshair-v"></div>
+                            </div>
+                            <div class="radar-sweep"></div>
+                            <div id="radar-blips" class="absolute inset-0"></div>
+                            <div id="radar-center-beacon"
+                                class="w-2.5 h-2.5 rounded-full bg-accent absolute shadow-[0_0_12px_#DFE104] z-10 transition-all duration-300">
+                            </div>
+                        </div>
+                        <div
+                            class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground text-center">
+                            SCANNER:<br>
+                            <span id="scanner-status"
+                                class="text-accent text-lg mt-0.5 block font-mono font-bold">ACTIVE SCAN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Malware Lab Table -->
+            <div class="border-2 border-border bg-background">
+                <div class="p-6 border-b-2 border-border flex justify-between items-center bg-muted/10">
+                    <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                        <span class="text-red-500">☢</span> Malware Laboratory
+                    </h2>
+                    <button onclick="switchTab('malware')"
+                        class="font-mono text-xs text-accent hover:underline uppercase tracking-wider cursor-pointer">
+                        Explore Vault →
+                    </button>
+                </div>
+                <div class="p-0 overflow-x-auto custom-scrollbar">
+                    <table id="malware-table" class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-muted/30">
+                            <tr>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Filename</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Identifier (SHA256)</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Size</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    MIME Type</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Source Node</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-mono text-sm">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TRAFFIC ANALYSIS -->
+        <div id="tab-view-traffic" class="p-8 space-y-6 tab-view hidden">
+            <!-- Filter / Search Console -->
+            <div class="border-2 border-border bg-background p-6 space-y-4">
+                <div class="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <span
+                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground font-mono">
+                            🔍
+                        </span>
+                        <input type="text" id="traffic-search" oninput="filterTrafficLogs()"
+                            placeholder="Filter by IP address, endpoint, payload or user-agent..."
+                            class="w-full pl-10 pr-4 py-3 bg-muted/20 border-2 border-border text-foreground font-mono text-xs focus:border-accent focus:outline-none uppercase tracking-wider">
+                    </div>
+
+                    <!-- Counter -->
+                    <div
+                        class="flex items-center gap-3 font-mono text-xs text-muted-foreground bg-muted/30 px-4 py-3 border border-border">
+                        <span>FILTERED LOGS:</span>
+                        <span id="filtered-count" class="text-accent font-bold">0</span>
+                    </div>
+                </div>
+
+                <!-- Attack Vector Filter Pills -->
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-border/50 items-center">
+                    <span
+                        class="font-display font-bold text-[0.7rem] uppercase text-muted-foreground mr-2">VECTOR:</span>
+                    <button onclick="setVectorFilter('ALL')" id="filter-vec-all"
+                        class="px-3 py-1 bg-accent text-black font-display font-bold text-xs uppercase tracking-wider border border-accent cursor-pointer">ALL</button>
+                    <button onclick="setVectorFilter('SQL Injection')" id="filter-vec-sql"
+                        class="px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer">SQL
+                        INJECTION</button>
+                    <button onclick="setVectorFilter('XSS')" id="filter-vec-xss"
+                        class="px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer">XSS</button>
+                    <button onclick="setVectorFilter('Path Traversal')" id="filter-vec-pt"
+                        class="px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer">PATH
+                        TRAVERSAL</button>
+                    <button onclick="setVectorFilter('Brute Force')" id="filter-vec-bf"
+                        class="px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer">BRUTE
+                        FORCE</button>
+                    <button onclick="setVectorFilter('Web Shell Detection')" id="filter-vec-ws"
+                        class="px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer">WEB
+                        SHELL</button>
+                </div>
+            </div>
+
+            <!-- Full Traffic Log Table -->
+            <div class="border-2 border-border bg-background">
+                <div class="p-6 border-b-2 border-border flex justify-between items-center bg-muted/10">
+                    <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                        <span class="text-accent">⚡</span> Adversarial Stream & Payload Inspector
+                    </h2>
+                    <span class="font-mono text-xs text-accent">REAL-TIME INGESTION ACTIVE</span>
+                </div>
+                <div class="p-0 overflow-x-auto custom-scrollbar">
+                    <table id="full-traffic-table" class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-muted/30">
+                            <tr>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Timestamp</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Source Node IP</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Method & Target</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Attack Vector</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Risk</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Intercepted Payload</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    User-Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="traffic-table-body" class="font-mono text-sm">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MALWARE VAULT -->
+        <div id="tab-view-malware" class="p-8 space-y-8 tab-view hidden">
+            <!-- Vault Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border-2 border-border">
+                <div class="bg-background p-6">
+                    <div class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">
+                        Isolated Binaries</div>
+                    <div class="font-mono font-extrabold text-4xl text-foreground" id="vault-total-count">0</div>
+                </div>
+                <div class="bg-background p-6">
+                    <div class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">Web
+                        Shell Scripts</div>
+                    <div class="font-mono font-extrabold text-4xl text-red-500" id="vault-shell-count">0</div>
+                </div>
+                <div class="bg-background p-6">
+                    <div class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">
+                        Vault Storage Location</div>
+                    <div class="font-mono font-bold text-xs text-accent mt-2">/uploads/quarantine/ (LOCKED)</div>
+                </div>
+            </div>
+
+            <!-- Full Malware Vault Table -->
+            <div class="border-2 border-border bg-background">
+                <div class="p-6 border-b-2 border-border flex justify-between items-center bg-muted/10">
+                    <h2 class="font-display font-bold uppercase text-2xl tracking-tighter flex items-center gap-2">
+                        <span class="text-red-500">☢</span> Quarantined Weaponized Samples & Cryptographic Signatures
+                    </h2>
+                    <span
+                        class="font-mono text-xs text-red-500 border border-red-500/40 px-2 py-1 bg-red-500/10">ISOLATION
+                        SECURE</span>
+                </div>
+                <div class="p-0 overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-muted/30">
+                            <tr>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Ingestion Date</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Filename</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    SHA-256 Checksum</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Size</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    MIME Type</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Origin Node</th>
+                                <th
+                                    class="p-4 font-display font-bold text-xs uppercase tracking-widest text-muted-foreground border-b-2 border-border">
+                                    Storage Isolation Path</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vault-table-body" class="font-mono text-sm">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: ATTACK VECTORS -->
+        <div id="tab-view-vectors" class="p-8 space-y-8 tab-view hidden">
+            <!-- 5 Attack Vector Intelligence Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- SQL Injection Card -->
+                <div
+                    class="border-2 border-border bg-background p-6 flex flex-col justify-between hover:border-[#ff0055] transition-colors">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span
+                                class="px-2 py-1 font-display font-bold text-xs uppercase tracking-widest text-[#ff0055] border border-[#ff0055] bg-[#ff0055]/10">SQL
+                                INJECTION</span>
+                            <span class="font-mono text-xs text-red-500 font-bold">HIGH RISK</span>
+                        </div>
+                        <h3 class="font-display font-bold text-xl uppercase tracking-tight text-foreground mb-2">
+                            Relational Query Injection</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                            Adversaries inject malicious SQL fragments into login and auth recovery forms to bypass
+                            authentication and access underlying database tables.
+                        </p>
+                        <div class="p-3 bg-muted/30 border border-border font-mono text-[0.75rem] text-red-400 mb-4">
+                            <code>admin' OR '1'='1</code>
+                        </div>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-border text-[0.7rem] font-mono text-muted-foreground flex justify-between">
+                        <span>TARGET: /login, /forgot-password</span>
+                        <span id="card-count-sql" class="text-foreground font-bold">0 INCIDENTS</span>
+                    </div>
+                </div>
+
+                <!-- Web Shell Card -->
+                <div
+                    class="border-2 border-border bg-background p-6 flex flex-col justify-between hover:border-[#d946ef] transition-colors">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span
+                                class="px-2 py-1 font-display font-bold text-xs uppercase tracking-widest text-[#e879f9] border border-[#d946ef] bg-[#d946ef]/10">WEB
+                                SHELL</span>
+                            <span class="font-mono text-xs text-red-500 font-bold">HIGH RISK</span>
+                        </div>
+                        <h3 class="font-display font-bold text-xl uppercase tracking-tight text-foreground mb-2">
+                            Arbitrary Code Execution</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                            Uploading malicious scripts (.php, .phtml) to spawn remote command consoles and achieve
+                            persistent remote access on host machines.
+                        </p>
+                        <div class="p-3 bg-muted/30 border border-border font-mono text-[0.75rem] text-[#e879f9] mb-4">
+                            <code>&lt;?php system($_GET['cmd']); ?&gt;</code>
+                        </div>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-border text-[0.7rem] font-mono text-muted-foreground flex justify-between">
+                        <span>TARGET: /upload</span>
+                        <span id="card-count-shell" class="text-foreground font-bold">0 INCIDENTS</span>
+                    </div>
+                </div>
+
+                <!-- XSS Card -->
+                <div
+                    class="border-2 border-border bg-background p-6 flex flex-col justify-between hover:border-[#DFE104] transition-colors">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span
+                                class="px-2 py-1 font-display font-bold text-xs uppercase tracking-widest text-[#DFE104] border border-[#DFE104] bg-[#DFE104]/10">XSS</span>
+                            <span class="font-mono text-xs text-yellow-400 font-bold">MEDIUM RISK</span>
+                        </div>
+                        <h3 class="font-display font-bold text-xl uppercase tracking-tight text-foreground mb-2">
+                            Cross-Site Scripting</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                            Injecting client-side JavaScript payloads through form inputs (e.g. contact inquiry) to
+                            hijack session cookies and execute unauthorized client actions.
+                        </p>
+                        <div class="p-3 bg-muted/30 border border-border font-mono text-[0.75rem] text-[#DFE104] mb-4">
+                            <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
+                        </div>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-border text-[0.7rem] font-mono text-muted-foreground flex justify-between">
+                        <span>TARGET: /contact, /login</span>
+                        <span id="card-count-xss" class="text-foreground font-bold">0 INCIDENTS</span>
+                    </div>
+                </div>
+
+                <!-- Path Traversal Card -->
+                <div
+                    class="border-2 border-border bg-background p-6 flex flex-col justify-between hover:border-[#38bdf8] transition-colors">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span
+                                class="px-2 py-1 font-display font-bold text-xs uppercase tracking-widest text-[#38bdf8] border border-[#38bdf8] bg-[#38bdf8]/10">PATH
+                                TRAVERSAL</span>
+                            <span class="font-mono text-xs text-yellow-400 font-bold">MEDIUM RISK</span>
+                        </div>
+                        <h3 class="font-display font-bold text-xl uppercase tracking-tight text-foreground mb-2">
+                            Dot-Dot-Slash File Probe</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                            Manipulating file path parameters (e.g. `../../../../etc/passwd`) to escape the web root
+                            directory and read restricted system files.
+                        </p>
+                        <div class="p-3 bg-muted/30 border border-border font-mono text-[0.75rem] text-[#38bdf8] mb-4">
+                            <code>file=../../../../etc/passwd</code>
+                        </div>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-border text-[0.7rem] font-mono text-muted-foreground flex justify-between">
+                        <span>TARGET: /api/v1/user?file=...</span>
+                        <span id="card-count-pt" class="text-foreground font-bold">0 INCIDENTS</span>
+                    </div>
+                </div>
+
+                <!-- Brute Force Card -->
+                <div
+                    class="border-2 border-border bg-background p-6 flex flex-col justify-between hover:border-[#fb923c] transition-colors">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span
+                                class="px-2 py-1 font-display font-bold text-xs uppercase tracking-widest text-[#fb923c] border border-[#fb923c] bg-[#fb923c]/10">BRUTE
+                                FORCE</span>
+                            <span class="font-mono text-xs text-orange-400 font-bold">MEDIUM RISK</span>
+                        </div>
+                        <h3 class="font-display font-bold text-xl uppercase tracking-tight text-foreground mb-2">
+                            Credential Guessing</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                            Automated dictionary-based credential guessing attempts against authentication gateways to
+                            uncover valid user credentials.
+                        </p>
+                        <div class="p-3 bg-muted/30 border border-border font-mono text-[0.75rem] text-[#fb923c] mb-4">
+                            <code>username=admin&password=...</code>
+                        </div>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-border text-[0.7rem] font-mono text-muted-foreground flex justify-between">
+                        <span>TARGET: /login</span>
+                        <span id="card-count-bf" class="text-foreground font-bold">0 INCIDENTS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Global state
+        let globalData = null;
+        let activeTab = 'operational';
+        let selectedVectorFilter = 'ALL';
+
+        const colors = {
+            accent: '#DFE104',
+            danger: '#ff0055',
+            warning: '#ffcc00',
+            success: '#00ffaa',
+            muted: '#27272A',
+            foreground: '#FAFAFA'
+        };
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            activeTab = tabId;
+
+            // 1. Update Sidebar Nav Active Styles
+            const navTabs = ['operational', 'traffic', 'malware', 'vectors'];
+            navTabs.forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                const view = document.getElementById(`tab-view-${t}`);
+
+                if (t === tabId) {
+                    btn.className = "px-4 py-3 text-left bg-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-accent transition-all cursor-pointer";
+                    if (view) view.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-3 text-left text-muted-foreground hover:text-foreground font-display font-bold uppercase tracking-widest text-sm border-2 border-transparent hover:border-border transition-all cursor-pointer";
+                    if (view) view.classList.add('hidden');
+                }
+            });
+
+            // 2. Update Header Title & Subtitle
+            const titleElem = document.getElementById('header-title');
+            const subtitleElem = document.getElementById('header-subtitle');
+
+            if (tabId === 'operational') {
+                titleElem.innerHTML = `Threat<br><span class="text-accent">Intel Deck</span>`;
+                subtitleElem.innerText = "Adaptive honeynet monitoring live adversarial interactions.";
+            } else if (tabId === 'traffic') {
+                titleElem.innerHTML = `Traffic<br><span class="text-accent">Analysis</span>`;
+                subtitleElem.innerText = "Adversary network traffic stream & payload inspector.";
+                filterTrafficLogs();
+            } else if (tabId === 'malware') {
+                titleElem.innerHTML = `Malware<br><span class="text-red-500">Vault</span>`;
+                subtitleElem.innerText = "Quarantined malicious binaries, web shells, and cryptographic SHA-256 signatures.";
+            } else if (tabId === 'vectors') {
+                titleElem.innerHTML = `Attack<br><span class="text-accent">Vectors</span>`;
+                subtitleElem.innerText = "Classification taxonomy & forensic mitigation matrix for active threat vectors.";
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/admin/api/stats');
+                const data = await response.json();
+                globalData = data;
+
+                document.getElementById('total-attacks').innerText = data.total_attacks;
+                document.getElementById('unique-ips').innerText = data.unique_ips;
+                document.getElementById('total-malware').innerText = data.total_malware;
+
+                // Update Dynamic Sidebar Status & Real Uptime
+                const statusElem = document.getElementById('system-status');
+                const uptimePctElem = document.getElementById('system-uptime-pct');
+                const uptimeTimeElem = document.getElementById('system-uptime-time');
+
+                if (statusElem && data.system_status) {
+                    statusElem.innerText = data.system_status;
+                    if (data.status_color === 'danger') {
+                        statusElem.className = 'text-red-500 font-bold font-mono text-xs tracking-wider animate-pulse';
+                    } else if (data.status_color === 'warning') {
+                        statusElem.className = 'text-yellow-400 font-bold font-mono text-xs tracking-wider animate-pulse';
+                    } else if (data.status_color === 'accent') {
+                        statusElem.className = 'text-accent font-bold font-mono text-xs tracking-wider animate-pulse';
+                    } else {
+                        statusElem.className = 'text-success font-bold font-mono text-xs tracking-wider';
+                    }
+                }
+
+                if (uptimePctElem && data.uptime_percentage) {
+                    uptimePctElem.innerText = data.uptime_percentage;
+                    if (data.status_color === 'danger') {
+                        uptimePctElem.className = 'text-red-500 font-bold';
+                    } else if (data.status_color === 'warning') {
+                        uptimePctElem.className = 'text-yellow-400 font-bold';
+                    } else {
+                        uptimePctElem.className = 'text-foreground font-bold';
+                    }
+                }
+
+                if (uptimeTimeElem && data.uptime_formatted) {
+                    uptimeTimeElem.innerText = `(${data.uptime_formatted})`;
+                }
+
+                // Threat Level container
+                let isHighThreat = (data.system_status === 'UNDER ATTACK' || data.system_status === 'INTERCEPTING');
+                const threatContainer = document.getElementById('threat-level-container');
+                const threatLevel = document.getElementById('threat-level');
+
+                if (isHighThreat) {
+                    threatLevel.innerText = 'HIGH';
+                    threatLevel.className = 'font-mono font-extrabold text-5xl md:text-6xl text-red-500 group-hover:text-black transition-colors';
+                    threatContainer.className = 'bg-background p-6 hover:bg-red-500 group transition-colors duration-300';
+                } else {
+                    threatLevel.innerText = 'LOW';
+                    threatLevel.className = 'font-mono font-extrabold text-5xl md:text-6xl text-success group-hover:text-black transition-colors';
+                    threatContainer.className = 'bg-background p-6 hover:bg-success group transition-colors duration-300';
+                }
+
+                // Render Operational Deck Tables
+                renderOperationalTables(data);
+
+                // Render Traffic Analysis
+                filterTrafficLogs();
+
+                // Render Malware Vault
+                renderMalwareVault(data);
+
+                // Render Vector Matrix Cards
+                renderVectorCards(data);
+
+                // Update Chart and Radar
+                updateChart(data.distribution);
+                updateRadar(data);
+
+            } catch (err) {
+                console.error("Critical: Data Sync Failure", err);
+            }
+        }
+
+        function getBadgeStyle(attackType) {
+            const typeLower = (attackType || '').toLowerCase();
+            if (typeLower.includes('sql')) {
+                return "border: 1px solid #ff0055; background: rgba(255,0,85,0.12); color: #ff0055;";
+            } else if (typeLower.includes('shell') || typeLower.includes('upload')) {
+                return "border: 1px solid #d946ef; background: rgba(217,70,239,0.12); color: #e879f9;";
+            } else if (typeLower.includes('xss')) {
+                return "border: 1px solid #DFE104; background: rgba(223,225,4,0.12); color: #DFE104;";
+            } else if (typeLower.includes('traversal')) {
+                return "border: 1px solid #38bdf8; background: rgba(56,189,248,0.12); color: #38bdf8;";
+            } else if (typeLower.includes('brute')) {
+                return "border: 1px solid #fb923c; background: rgba(251,146,60,0.12); color: #fb923c;";
+            }
+            return "border: 1px solid #3F3F46; background: rgba(39,39,42,0.3); color: #E4E4E7;";
+        }
+
+        function renderOperationalTables(data) {
+            const attackBody = document.querySelector('#attack-table tbody');
+            if (!attackBody) return;
+            attackBody.innerHTML = '';
+            (data.recent_attacks || []).slice(0, 10).forEach(log => {
+                const riskColor = log.severity === 'High' ? colors.danger : log.severity === 'Medium' ? colors.warning : colors.success;
+                attackBody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                        <td class="p-4 text-muted-foreground">${new Date(log.timestamp + 'Z').toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })} IST</td>
+                        <td class="p-4 text-foreground font-semibold">${escapeHtml(log.ip_address)}</td>
+                        <td class="p-4 text-muted-foreground">${escapeHtml(log.endpoint)}</td>
+                        <td class="p-4"><span class="px-2 py-1 font-display uppercase tracking-widest text-[0.65rem] font-bold" style="${getBadgeStyle(log.attack_type)}">${escapeHtml(log.attack_type)}</span></td>
+                        <td class="p-4 font-bold" style="color: ${riskColor};">${escapeHtml(log.severity)}</td>
+                    </tr>
+                `);
+            });
+
+            const malwareBody = document.querySelector('#malware-table tbody');
+            if (!malwareBody) return;
+            malwareBody.innerHTML = '';
+            (data.malware || []).slice(0, 5).forEach(m => {
+                malwareBody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                        <td class="p-4 text-foreground font-bold">${escapeHtml(m.filename)}</td>
+                        <td class="p-4 text-muted-foreground text-xs font-mono" title="${escapeHtml(m.file_hash)}">${escapeHtml((m.file_hash || '').substring(0, 32))}...</td>
+                        <td class="p-4">${((m.file_size || 0) / 1024).toFixed(2)} KB</td>
+                        <td class="p-4 text-muted-foreground">${escapeHtml(m.mime_type)}</td>
+                        <td class="p-4 text-accent">${escapeHtml(m.source_ip)}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function setVectorFilter(vec) {
+            selectedVectorFilter = vec;
+            const filterMap = {
+                'ALL': 'filter-vec-all',
+                'SQL Injection': 'filter-vec-sql',
+                'XSS': 'filter-vec-xss',
+                'Path Traversal': 'filter-vec-pt',
+                'Brute Force': 'filter-vec-bf',
+                'Web Shell Detection': 'filter-vec-ws'
+            };
+            for (const [k, id] of Object.entries(filterMap)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (k === vec) {
+                        el.className = "px-3 py-1 bg-accent text-black font-display font-bold text-xs uppercase tracking-wider border border-accent cursor-pointer";
+                    } else {
+                        el.className = "px-3 py-1 bg-muted/30 text-muted-foreground hover:text-foreground font-display font-bold text-xs uppercase tracking-wider border border-border cursor-pointer";
+                    }
+                }
+            }
+            filterTrafficLogs();
+        }
+
+        function filterTrafficLogs() {
+            if (!globalData || !globalData.recent_attacks) return;
+            const query = (document.getElementById('traffic-search')?.value || '').toLowerCase().trim();
+            const tbody = document.getElementById('traffic-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            let matchCount = 0;
+
+            globalData.recent_attacks.forEach(log => {
+                const matchesVector = selectedVectorFilter === 'ALL' || log.attack_type === selectedVectorFilter;
+                const fullText = `${log.ip_address} ${log.endpoint} ${log.payload} ${log.user_agent} ${log.attack_type} ${log.severity}`.toLowerCase();
+                const matchesQuery = !query || fullText.includes(query);
+
+                if (matchesVector && matchesQuery) {
+                    matchCount++;
+                    const riskColor = log.severity === 'High' ? colors.danger : log.severity === 'Medium' ? colors.warning : colors.success;
+
+                    let rawPayload = (log.payload || '');
+                    let isTruncated = rawPayload.length > 85;
+                    let displayPayload = isTruncated ? rawPayload.substring(0, 85) + '...' : rawPayload;
+                    let safePayloadHtml = displayPayload.trim() ? escapeHtml(displayPayload) : '<span class="opacity-40">[Header Scan]</span>';
+
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                            <td class="p-4 text-muted-foreground text-xs">${new Date(log.timestamp + 'Z').toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })} IST</td>
+                            <td class="p-4 text-foreground font-semibold">${escapeHtml(log.ip_address)}</td>
+                            <td class="p-4 text-muted-foreground text-xs"><span class="text-accent font-bold">${escapeHtml(log.method || 'POST')}</span> ${escapeHtml(log.endpoint)}</td>
+                            <td class="p-4"><span class="px-2 py-1 font-display uppercase tracking-widest text-[0.65rem] font-bold" style="${getBadgeStyle(log.attack_type)}">${escapeHtml(log.attack_type)}</span></td>
+                            <td class="p-4 font-bold text-xs" style="color: ${riskColor};">${escapeHtml(log.severity)}</td>
+                            <td class="p-4 font-mono text-xs text-red-300 max-w-xs truncate" title="${escapeHtml(rawPayload)}">${safePayloadHtml}</td>
+                            <td class="p-4 text-muted-foreground text-xs max-w-[200px] truncate" title="${escapeHtml(log.user_agent || '')}">${escapeHtml(log.user_agent || 'unknown')}</td>
+                        </tr>
+                    `);
+                }
+            });
+
+            const countEl = document.getElementById('filtered-count');
+            if (countEl) countEl.innerText = matchCount;
+        }
+
+        function renderMalwareVault(data) {
+            const vaultBody = document.getElementById('vault-table-body');
+            const totalCountEl = document.getElementById('vault-total-count');
+            const shellCountEl = document.getElementById('vault-shell-count');
+
+            if (!vaultBody) return;
+            vaultBody.innerHTML = '';
+
+            const malwareList = data.malware || [];
+            if (totalCountEl) totalCountEl.innerText = malwareList.length;
+
+            let shellCount = 0;
+            malwareList.forEach(m => {
+                const fname = (m.filename || '').toLowerCase();
+                if (fname.includes('.php') || fname.includes('.sh') || fname.includes('.jsp')) shellCount++;
+
+                vaultBody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-muted/20 border-b border-border/50 transition-colors">
+                        <td class="p-4 text-muted-foreground text-xs">${new Date((m.timestamp || '') + 'Z').toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })} IST</td>
+                        <td class="p-4 text-foreground font-bold flex items-center gap-2">
+                            <span class="text-red-500">⚠</span> ${escapeHtml(m.filename)}
+                        </td>
+                        <td class="p-4 text-xs font-mono text-muted-foreground flex items-center gap-2">
+                            <span class="cursor-pointer text-accent hover:underline" title="Click to copy hash" onclick="navigator.clipboard.writeText('${escapeHtml(m.file_hash)}'); alert('SHA-256 Copied!');">${escapeHtml((m.file_hash || '').substring(0, 36))}...</span>
+                        </td>
+                        <td class="p-4 text-xs">${((m.file_size || 0) / 1024).toFixed(2)} KB</td>
+                        <td class="p-4 text-xs text-muted-foreground">${escapeHtml(m.mime_type)}</td>
+                        <td class="p-4 text-xs text-accent font-semibold">${escapeHtml(m.source_ip)}</td>
+                        <td class="p-4 text-xs font-mono text-muted-foreground max-w-xs truncate" title="${escapeHtml(m.quarantine_path)}">${escapeHtml(m.quarantine_path)}</td>
+                    </tr>
+                `);
+            });
+
+            if (shellCountEl) shellCountEl.innerText = shellCount;
+        }
+
+        function renderVectorCards(data) {
+            const dist = data.distribution || {};
+            const countSql = document.getElementById('card-count-sql');
+            const countShell = document.getElementById('card-count-shell');
+            const countXss = document.getElementById('card-count-xss');
+            const countPt = document.getElementById('card-count-pt');
+            const countBf = document.getElementById('card-count-bf');
+
+            if (countSql) countSql.innerText = `${dist['SQL Injection'] || 0} INCIDENTS`;
+            if (countShell) countShell.innerText = `${dist['Web Shell Detection'] || 0} INCIDENTS`;
+            if (countXss) countXss.innerText = `${dist['XSS'] || 0} INCIDENTS`;
+            if (countPt) countPt.innerText = `${dist['Path Traversal'] || 0} INCIDENTS`;
+            if (countBf) countBf.innerText = `${dist['Brute Force'] || 0} INCIDENTS`;
+        }
+
+        function updateRadar(data) {
+            const blipsContainer = document.getElementById('radar-blips');
+            const scannerStatus = document.getElementById('scanner-status');
+            const radarContainer = document.getElementById('radar-container');
+            const centerBeacon = document.getElementById('radar-center-beacon');
+
+            if (!blipsContainer) return;
+            blipsContainer.innerHTML = '';
+
+            const now = new Date();
+            const recentAttacks = data.recent_attacks || [];
+            const activeThreats = recentAttacks.filter(log => {
+                if (!log.timestamp) return false;
+                const logTime = new Date(log.timestamp + 'Z');
+                const diffSec = (now - logTime) / 1000;
+                return diffSec >= -60 && diffSec <= 35;
+            });
+
+            if (activeThreats.length > 0) {
+                if (radarContainer) {
+                    radarContainer.classList.add('under-attack');
+                    radarContainer.style.borderColor = '#ff0055';
+                    radarContainer.style.boxShadow = '0 0 25px rgba(255, 0, 85, 0.35)';
+                }
+                if (centerBeacon) {
+                    centerBeacon.style.backgroundColor = '#ff0055';
+                    centerBeacon.style.boxShadow = '0 0 16px #ff0055';
+                }
+                if (scannerStatus) {
+                    scannerStatus.innerHTML = `<span class="text-red-500 font-bold animate-pulse font-mono tracking-wider">THREAT DETECTED (${activeThreats.length})</span>`;
+                }
+
+                activeThreats.forEach((threat, idx) => {
+                    const typeLower = (threat.attack_type || '').toLowerCase();
+
+                    let blipColor = '#DFE104';
+                    if (typeLower.includes('sql')) blipColor = '#ff0055';
+                    else if (typeLower.includes('shell')) blipColor = '#d946ef';
+                    else if (typeLower.includes('xss')) blipColor = '#DFE104';
+                    else if (typeLower.includes('traversal')) blipColor = '#38bdf8';
+                    else if (typeLower.includes('brute')) blipColor = '#fb923c';
+
+                    let hash = 0;
+                    const str = (threat.ip_address || '127.0.0.1') + idx;
+                    for (let i = 0; i < str.length; i++) {
+                        hash = (hash << 5) - hash + str.charCodeAt(i);
+                        hash |= 0;
+                    }
+
+                    const angle = ((Math.abs(hash) % 360) * Math.PI) / 180;
+                    const radius = 28 + (Math.abs((hash >> 2)) % 52);
+
+                    const cx = 96;
+                    const cy = 96;
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+
+                    const blip = document.createElement('div');
+                    blip.className = 'radar-blip';
+                    blip.style.left = `${x}px`;
+                    blip.style.top = `${y}px`;
+                    blip.style.backgroundColor = blipColor;
+                    blip.style.color = blipColor;
+                    blip.style.boxShadow = `0 0 10px ${blipColor}, 0 0 20px ${blipColor}`;
+                    blip.title = `[${threat.ip_address}] ${threat.attack_type} (${threat.severity})`;
+
+                    blipsContainer.appendChild(blip);
+                });
+            } else {
+                if (radarContainer) {
+                    radarContainer.classList.remove('under-attack');
+                    radarContainer.style.borderColor = 'rgba(223, 225, 4, 0.4)';
+                    radarContainer.style.boxShadow = '0 0 20px rgba(223, 225, 4, 0.08)';
+                }
+                if (centerBeacon) {
+                    centerBeacon.style.backgroundColor = '#DFE104';
+                    centerBeacon.style.boxShadow = '0 0 12px #DFE104';
+                }
+                if (scannerStatus) {
+                    scannerStatus.innerHTML = `<span class="text-accent font-mono tracking-wider font-bold">ACTIVE SCAN</span>`;
+                }
+            }
+        }
+
+        let attackChart;
+        function updateChart(distribution) {
+            const ctx = document.getElementById('attackChart')?.getContext('2d');
+            if (!ctx) return;
+
+            const labelMap = {
+                'sql_injection': 'SQL INJECTION',
+                'SQL Injection': 'SQL INJECTION',
+                'xss': 'XSS',
+                'XSS': 'XSS',
+                'path_traversal': 'PATH TRAVERSAL',
+                'Path Traversal': 'PATH TRAVERSAL',
+                'brute_force_attempt': 'BRUTE FORCE',
+                'brute_force': 'BRUTE FORCE',
+                'Brute Force': 'BRUTE FORCE',
+                'web_shell_detection': 'WEB SHELL DETECTION',
+                'Web Shell Detection': 'WEB SHELL DETECTION'
+            };
+
+            const labels = [];
+            const values = [];
+            const barColors = [];
+
+            for (const [key, val] of Object.entries(distribution || {})) {
+                const label = labelMap[key] || key.replace(/_/g, ' ').toUpperCase();
+                labels.push(label);
+                values.push(val);
+
+                if (label.includes('SQL')) barColors.push('#ff0055');
+                else if (label.includes('SHELL')) barColors.push('#d946ef');
+                else if (label.includes('XSS')) barColors.push('#DFE104');
+                else if (label.includes('TRAVERSAL')) barColors.push('#38bdf8');
+                else if (label.includes('BRUTE')) barColors.push('#fb923c');
+                else barColors.push('#DFE104');
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#A1A1AA' : '#52525B';
+            
+            if (attackChart) attackChart.destroy();
+
+            Chart.defaults.color = textColor;
+            Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+            Chart.defaults.font.weight = 'bold';
+
+            attackChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: barColors,
+                        borderColor: isDark ? '#09090B' : '#FFFFFF',
+                        borderWidth: 1,
+                        hoverBackgroundColor: barColors
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#DFE104',
+                            titleColor: '#09090B',
+                            bodyColor: '#09090B',
+                            titleFont: { family: '"Space Grotesk"', size: 14, weight: 'bold' },
+                            bodyFont: { family: '"JetBrains Mono"', size: 14, weight: 'bold' },
+                            cornerRadius: 0,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false,
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10, family: '"Space Grotesk"', weight: 'bold' }
+                            },
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    },
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+        }
+
+        // Theme Switcher JavaScript Handlers
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeButton();
+            if (globalData && globalData.distribution) {
+                updateChart(globalData.distribution);
+            }
+        }
+
+        function updateThemeButton() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            const themeLabel = document.getElementById('themeLabel');
+            if (isDark) {
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (themeLabel) themeLabel.textContent = 'Light';
+            } else {
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (themeLabel) themeLabel.textContent = 'Dark';
+            }
+        }
+
+        // Initialize theme button on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeButton();
+        });
+
+        fetchData();
+        setInterval(fetchData, 4000);
+
+        // Download Modal Controls
+        function toggleDownloadModal() {
+            const modal = document.getElementById('export-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                closeDownloadModal();
+            }
+        }
+
+        function closeDownloadModal() {
+            const modal = document.getElementById('export-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                closeDownloadModal();
+            }
+        });
+
+        // Close when clicking modal backdrop
+        document.getElementById('export-modal')?.addEventListener('click', function (event) {
+            if (event.target === this) {
+                closeDownloadModal();
+            }
+        });
+    </script>
+
+    <!-- Export / Download Modal Dialog -->
+    <div id="export-modal"
+        class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div
+            class="bg-background border-2 border-accent max-w-lg w-full p-6 sm:p-8 shadow-[0_0_50px_rgba(223,225,4,0.15)] relative">
+            <button onclick="closeDownloadModal()"
+                class="absolute top-4 right-4 text-muted-foreground hover:text-accent font-mono text-xl p-2 leading-none cursor-pointer">
+                ✕
+            </button>
+
+            <div class="flex items-center gap-3 mb-2">
+                <span class="text-accent text-3xl">⌬</span>
+                <div>
+                    <h3 class="font-display font-bold text-2xl uppercase tracking-tighter text-foreground leading-none">
+                        Export Intelligence Logs
+                    </h3>
+                    <p class="font-mono text-xs text-muted-foreground uppercase tracking-wider mt-1">
+                        Select Telemetry & Audit Report Format
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4 my-6">
+                {% if user_role == 'guest' %}
+                <div class="p-6 border-2 border-warning bg-warning/10 text-warning">
+                    <div class="flex items-center gap-3 font-display font-bold uppercase text-sm mb-2">
+                        <span class="text-xl">🔒</span>
+                        <span>Access Clearance Restricted</span>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed mb-4">
+                        Guest analysts do not have clearance to export forensic dumps or download raw threat telemetry reports. Full reporting is reserved for Root Administrators.
+                    </p>
+                    <a href="/logout" class="inline-block px-4 py-2 bg-warning text-black font-display font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors">
+                        Sign Out &amp; Login as Admin →
+                    </a>
+                </div>
+                {% else %}
+                <!-- PDF Option Card -->
+                <a href="/admin/api/logs/download/pdf" onclick="closeDownloadModal()"
+                    class="group block p-4 border-2 border-border hover:border-accent bg-muted/10 hover:bg-accent/10 transition-all duration-200 cursor-pointer">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="p-3 bg-red-500/10 border border-red-500/30 text-red-500 font-mono font-bold text-lg group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-colors flex-shrink-0">
+                                PDF
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4
+                                        class="font-display font-bold uppercase text-sm text-foreground group-hover:text-accent tracking-wide">
+                                        Executive PDF Threat Report
+                                    </h4>
+                                    <span
+                                        class="bg-accent/20 text-accent text-[0.6rem] px-1.5 py-0.5 border border-accent/40 font-mono font-bold">PROFESSIONAL</span>
+                                </div>
+                                <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                    Comprehensive executive intelligence report with vector distribution, quarantined
+                                    malware SHA-256 hashes, incident log tables, and security hardening recommendations.
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            class="text-muted-foreground group-hover:text-accent font-mono text-xl ml-2 flex-shrink-0">↓</span>
+                    </div>
+                </a>
+
+                <!-- TXT Option Card -->
+                <a href="/admin/api/logs/download/txt" onclick="closeDownloadModal()"
+                    class="group block p-4 border-2 border-border hover:border-accent bg-muted/10 hover:bg-accent/10 transition-all duration-200 cursor-pointer">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="p-3 bg-muted border border-border text-foreground font-mono font-bold text-lg group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-colors flex-shrink-0">
+                                TXT
+                            </div>
+                            <div>
+                                <h4
+                                    class="font-display font-bold uppercase text-sm text-foreground group-hover:text-accent tracking-wide">
+                                    Raw Plaintext Log Dump (.txt)
+                                </h4>
+                                <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                    Full plain text telemetry containing source IP addresses, attacked endpoints,
+                                    captured payloads, user-agents, and quarantined files.
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            class="text-muted-foreground group-hover:text-accent font-mono text-xl ml-2 flex-shrink-0">↓</span>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-end">
+                <button onclick="closeDownloadModal()"
+                    class="px-5 py-2 border border-border font-display text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-foreground transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - myTunes</title>
+    <link rel="shortcut icon" href="/static/decoy/images/Spotify_favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            padding: 25px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid #292929;
+            background-color: #000000;
+        }
+        .logo-img {
+            height: 44px;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        .form-group input {
+            padding: 14px;
+            border-radius: 4px;
+            border: 1px solid #727272;
+            background-color: #121212;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+        }
+        .btn-login {
+            background-color: #1db954;
+            color: #000000;
+            padding: 14px;
+            border-radius: 500px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-login:hover {
+            background-color: #1ed760;
+            transform: scale(1.02);
+        }
+        .btn-login:active {
+            transform: scale(0.99);
+        }
+        .error-alert {
+            background-color: #e91429;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .signup-prompt {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #a7a7a7;
+            border-top: 1px solid #292929;
+            padding-top: 30px;
+        }
+        .signup-prompt a {
+            color: #ffffff;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .signup-prompt a:hover {
+            color: #1db954;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img class="logo-img" src="/static/decoy/images/mytunes_logo.png" alt="myTunes Logo">
+    </header>
+    <div class="container">
+        <h1>Log in to myTunes</h1>
+        
+        {% if error %}
+        <div class="error-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Email or username</label>
+                <input type="text" id="username" name="username" placeholder="Email or username" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="password" name="password" placeholder="Password" required autocomplete="off" style="width: 100%; box-sizing: border-box; padding-right: 45px;">
+                    <span onclick="togglePasswordVisibility('password', this)" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a7a7a7; display: flex; align-items: center; justify-content: center; height: 100%;">
+                        <i class="fa-solid fa-eye"></i>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">Log In</button>
+        </form>
+
+        <div class="signup-prompt">
+            Don't have an account? <a href="/signup">Sign up for myTunes</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector("i");
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                field.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+</body>
+</html>

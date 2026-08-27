@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel.X | Administrator Login</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-bg)',
+                        foreground: 'var(--color-fg)',
+                        muted: 'var(--color-muted)',
+                        'muted-foreground': 'var(--color-muted-fg)',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: 'var(--color-border)',
+                        danger: '#ff0055',
+                        warning: '#ffcc00',
+                        success: '#00ffaa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg: #F4F4F5;
+            --color-fg: #09090B;
+            --color-muted: #E4E4E7;
+            --color-muted-fg: #52525B;
+            --color-border: #18181B;
+        }
+
+        html.dark {
+            --color-bg: #000000;
+            --color-fg: #E4E4E7;
+            --color-muted: #27272A;
+            --color-muted-fg: #A1A1AA;
+            --color-border: #3F3F46;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased noise min-h-screen flex flex-col lg:flex-row overflow-x-hidden selection:bg-accent selection:text-accent-foreground">
+    
+    <!-- Left Decorative Side -->
+    <div class="hidden lg:flex w-1/2 border-r-2 border-border bg-background p-12 flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between relative z-10">
+            <a href="/" class="font-display font-bold text-3xl uppercase tracking-tighter text-accent flex items-center gap-2">
+                <span>⌬</span> Sentinel.X
+            </a>
+            <div class="font-mono text-xs uppercase px-3 py-1 border-2 border-border bg-muted/20 text-accent font-bold">
+                SECURITY GATEWAY // #0X-AUTH
+            </div>
+        </div>
+        
+        <div class="relative z-10">
+            <h1 class="font-display font-bold uppercase text-[5.5rem] leading-[0.85] tracking-tighter mb-6 text-foreground">
+                Sentinel<br><span class="text-accent">Auth Gate</span>
+            </h1>
+            <p class="text-lg text-muted-foreground font-display uppercase tracking-widest leading-relaxed max-w-md">
+                Role-Based Threat Intelligence Clearance. Root Administrators &amp; Guest Analysts.
+            </p>
+        </div>
+        
+        <div class="relative z-10 flex justify-between items-center font-mono text-xs text-muted-foreground border-t-2 border-border pt-6">
+            <span>CHALLENGE: SHA-256 HMAC</span>
+            <span>SENTINEL.X MATRIX</span>
+        </div>
+
+        <div class="absolute -right-20 -bottom-20 text-[32rem] font-display font-bold text-muted leading-none opacity-20 select-none pointer-events-none">
+            0X
+        </div>
+    </div>
+
+    <!-- Right Form Side -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-12 lg:p-16 relative bg-background">
+        <!-- Top bar with Theme Switcher & Back Link -->
+        <div class="flex items-center justify-between mb-8">
+            <div></div>
+
+            <!-- Theme Toggle -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Light and Dark Mode" 
+                    class="px-3 py-2 border-2 border-border bg-background text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:text-accent transition-all cursor-pointer flex items-center gap-2">
+                <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span id="themeLabel">Theme</span>
+            </button>
+        </div>
+
+        <div class="w-full max-w-xl mx-auto my-auto">
+            
+            <div class="mb-8">
+                <div class="lg:hidden font-display font-bold text-2xl uppercase tracking-tighter text-accent flex items-center gap-2 mb-3">
+                    <span>⌬</span> Sentinel.X
+                </div>
+                <h2 class="font-display font-bold uppercase text-4xl sm:text-5xl leading-[0.88] tracking-tighter text-foreground mb-2">
+                    Threat Center<br><span class="text-accent">Admin Login</span>
+                </h2>
+                <p class="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                    Root administrator credentials required for unredacted threat intelligence.
+                </p>
+            </div>
+
+            {% if notice %}
+            <div class="mb-6 p-4 border-2 border-warning bg-warning/10 text-warning font-display font-bold uppercase tracking-widest text-xs flex items-center gap-3">
+                <span class="text-base font-bold">🔒</span>
+                <div>{{ notice }}</div>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="mb-6 p-4 border-2 border-danger bg-danger/10 text-danger font-display font-bold uppercase tracking-widest text-xs flex items-center gap-3">
+                <span class="text-base font-bold">⚠</span>
+                <div>{{ error }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Direct Client Portal Hint for Guests -->
+            {% if not is_dashboard %}
+            <div class="mb-8 border-2 border-border p-4 bg-muted/15 flex items-center justify-between gap-4">
+                <div>
+                    <div class="font-display font-bold text-xs uppercase tracking-wider text-foreground">
+                        Looking for Guest / Client Access?
+                    </div>
+                    <div class="text-[11px] text-muted-foreground font-mono mt-0.5">
+                        No login required for client telemetry view.
+                    </div>
+                </div>
+                <a href="/client-portal" class="px-4 py-2 bg-accent text-accent-foreground font-display font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors shrink-0">
+                    Open Client Portal →
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Administrator Login Form -->
+            <form action="/login" method="POST" class="space-y-6" id="loginForm">
+                <input type="hidden" name="next" value="{{ next or '/admin' }}">
+                
+                <div>
+                    <label for="username" class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
+                        Administrator Username
+                    </label>
+                    <input type="text" id="username" name="username" placeholder="admin" required 
+                           class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/30 rounded-none">
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <label for="password" class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground">
+                            Password
+                        </label>
+                        <a href="/forgot-password" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:underline">
+                            Reset Auth
+                        </a>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required 
+                           class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/30 rounded-none">
+                </div>
+                
+                <button type="submit" class="w-full py-5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent cursor-pointer">
+                    Authenticate Administrator
+                </button>
+            </form>
+
+            <div class="mt-8 text-center font-display font-bold text-xs tracking-widest uppercase text-muted-foreground">
+                &copy; 2026 Global Systems Integrity Corp.<br>
+            </div>
+        </div>
+
+        <div class="text-center font-mono text-[10px] text-muted-foreground uppercase pt-6">
+            AUDIT TRAIL
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function fillCredentials(user, pass) {
+            document.getElementById('username').value = user;
+            document.getElementById('password').value = pass;
+            // Highlight input fields
+            document.getElementById('username').classList.add('border-accent');
+            document.getElementById('password').classList.add('border-accent');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeButton();
+        }
+
+        function updateThemeButton() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            const themeLabel = document.getElementById('themeLabel');
+            if (isDark) {
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (themeLabel) themeLabel.textContent = 'Light';
+            } else {
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (themeLabel) themeLabel.textContent = 'Dark';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateThemeButton);
+    </script>
+</body>
+
+</html>

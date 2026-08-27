@@ -71,6 +71,9 @@ async def login_page(request: Request, next: Optional[str] = "/admin", auth_requ
         context={"next": next, "notice": notice}
     )
 
+# Global tracker for failed admin login attempts by IP
+admin_login_failures = {}
+
 @router.post("/login")
 async def handle_login(
     request: Request,
@@ -85,6 +88,8 @@ async def handle_login(
     # 1. Check for valid Admin authentication
     auth_result = authenticate_user(username, password)
     if auth_result:
+        # Reset counter on success
+        admin_login_failures[ip] = 0
         token = create_session_token(auth_result["username"], auth_result["role"])
         target_url = next if next and next.startswith("/") else "/admin"
         response = RedirectResponse(url=target_url, status_code=303)
@@ -101,6 +106,7 @@ async def handle_login(
     detected_user = detect_attack(username)
     detected_pass = detect_attack(password)
     
+    should_log = True
     if detected_user != "none":
         attack_type = detected_user
         severity = "High" if attack_type == "SQL Injection" else "Medium"
@@ -110,17 +116,25 @@ async def handle_login(
     else:
         attack_type = "Brute Force"
         severity = "Medium"
+        # Increment failed attempt count
+        admin_login_failures[ip] = admin_login_failures.get(ip, 0) + 1
+        # Only log to dashboard if attempts >= 4
+        if admin_login_failures[ip] >= 4:
+            admin_login_failures[ip] = 0  # Reset counter
+        else:
+            should_log = False
 
-    log_attack(
-        ip_address=ip,
-        user_agent=user_agent,
-        endpoint="/login",
-        method="POST",
-        headers=dict(request.headers),
-        payload=payload,
-        attack_type=attack_type,
-        severity=severity
-    )
+    if should_log:
+        log_attack(
+            ip_address=ip,
+            user_agent=user_agent,
+            endpoint="/login",
+            method="POST",
+            headers=dict(request.headers),
+            payload=payload,
+            attack_type=attack_type,
+            severity=severity
+        )
 
     # Return deceptive honeypot error response
     return templates.TemplateResponse(request=request, name="login.html", context={

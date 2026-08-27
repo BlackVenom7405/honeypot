@@ -1,0 +1,22 @@
+================================================================================
+                    SENTINEL.X FIREWALL PORT CONFIGURATION
+================================================================================
+Run these commands in an Administrator PowerShell window to manage access
+to the public honeypot decoy website from other devices on your local network.
+
+1. ALLOW ACCESS (Open ports 443 and 8443)
+----------------------------------------
+New-NetFirewallRule -DisplayName "Honeypot Decoy Ports" -Direction Inbound -LocalPort 443,8443 -Protocol TCP -Action Allow
+
+2. DISABLE ACCESS (Temporarily close ports)
+-------------------------------------------
+Disable-NetFirewallRule -DisplayName "Honeypot Decoy Ports"
+
+3. RE-ENABLE ACCESS (Turn it back on)
+-------------------------------------
+Enable-NetFirewallRule -DisplayName "Honeypot Decoy Ports"
+
+4. REMOVE RULE COMPLETELY (Clean system)
+----------------------------------------
+Remove-NetFirewallRule -DisplayName "Honeypot Decoy Ports"
+================================================================================

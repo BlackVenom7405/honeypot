@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel.X | Autonomous Threat Trap &amp; Cyber Deception</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Init theme immediately to prevent FOUC (Flash of Unstyled Content)
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            // Default to dark mode to match Admin Dashboard
+            document.documentElement.classList.add('dark');
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-bg)',
+                        'card-bg': 'var(--color-card-bg)',
+                        foreground: 'var(--color-fg)',
+                        muted: 'var(--color-muted)',
+                        'muted-foreground': 'var(--color-muted-fg)',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: 'var(--color-border)',
+                        danger: '#ff0055',
+                        warning: '#ffcc00',
+                        success: '#00ffaa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    animation: {
+                        marquee: 'marquee 25s linear infinite',
+                        marqueeFast: 'marquee 15s linear infinite',
+                        sweep: 'sweep 2.5s linear infinite',
+                        'blip-pulse': 'blipPulse 1.5s ease-out infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        sweep: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' },
+                        },
+                        blipPulse: {
+                            '0%': { transform: 'scale(0.6)', opacity: '1' },
+                            '100%': { transform: 'scale(2.6)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg: #F4F4F5;
+            --color-card-bg: #FFFFFF;
+            --color-fg: #09090B;
+            --color-muted: #E4E4E7;
+            --color-muted-fg: #52525B;
+            --color-border: #18181B;
+            --color-input-bg: #FFFFFF;
+            --color-watermark: #E4E4E7;
+        }
+
+        html.dark {
+            --color-bg: #000000;
+            --color-card-bg: #09090B;
+            --color-fg: #E4E4E7;
+            --color-muted: #27272A;
+            --color-muted-fg: #A1A1AA;
+            --color-border: #3F3F46;
+            --color-input-bg: #09090B;
+            --color-watermark: #1c1c20;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Brutalist Noise Texture matching Admin Dashboard */
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            display: flex;
+        }
+
+        .marquee-content {
+            display: flex;
+            min-width: 200%;
+        }
+
+        /* Radar Animation & Dynamic Blip Grid matching Admin Dashboard */
+        .system-radar {
+            background: radial-gradient(circle, rgba(223, 225, 4, 0.08) 0%, rgba(0, 0, 0, 0.95) 75%);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: conic-gradient(from 0deg, transparent 75%, rgba(223, 225, 4, 0.15) 90%, rgba(223, 225, 4, 0.55) 100%);
+            border-radius: 50%;
+            animation: sweep 2.5s linear infinite;
+            pointer-events: none;
+        }
+
+        .system-radar.under-attack .radar-sweep {
+            background: conic-gradient(from 0deg, transparent 75%, rgba(255, 0, 85, 0.2) 90%, rgba(255, 0, 85, 0.65) 100%);
+            animation: sweep 1.2s linear infinite;
+        }
+
+        @keyframes sweep {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Radar concentric grid & crosshairs */
+        .radar-grid {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .radar-ring-1 {
+            position: absolute;
+            inset: 20%;
+            border: 1px dashed rgba(223, 225, 4, 0.2);
+            border-radius: 50%;
+        }
+
+        .radar-ring-2 {
+            position: absolute;
+            inset: 48%;
+            border: 1px solid rgba(223, 225, 4, 0.25);
+            border-radius: 50%;
+        }
+
+        .radar-ring-3 {
+            position: absolute;
+            inset: 74%;
+            border: 1px dashed rgba(223, 225, 4, 0.2);
+            border-radius: 50%;
+        }
+
+        .radar-crosshair-h {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(223, 225, 4, 0.15);
+        }
+
+        .radar-crosshair-v {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(223, 225, 4, 0.15);
+        }
+
+        /* Interactive Radar Threat Blip Dot */
+        .radar-blip {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            transition: all 0.6s ease;
+            cursor: pointer;
+        }
+
+        .radar-blip::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            opacity: 0.9;
+            animation: blip-pulse 1.4s ease-out infinite;
+        }
+
+        @keyframes blip-pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+            border-left: 2px solid var(--color-border);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-muted);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #DFE104;
+        }
+    </style>
+</head>
+
+<body
+    class="font-sans antialiased noise overflow-x-hidden selection:bg-accent selection:text-accent-foreground min-h-screen flex flex-col">
+
+    <!-- Top Telemetry Status Header Bar -->
+    <aside aria-label="Live Telemetry"
+        class="border-b-2 border-border bg-background px-4 py-2 text-xs font-mono flex justify-between items-center transition-colors">
+        <div class="flex items-center gap-3">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-success animate-ping"></span>
+            <span class="font-bold text-success tracking-wider">DEFENSE GRID ACTIVE</span>
+            <span class="text-muted-foreground hidden sm:inline">|</span>
+            <span class="text-muted-foreground hidden sm:inline">NODE: GSI-SENTINEL-X</span>
+        </div>
+        <div class="flex items-center gap-4 text-muted-foreground">
+            <span class="hidden md:inline">SYSTEM INTEGRITY: <span
+                    class="text-foreground font-bold font-mono">100.0%</span></span>
+            <span class="text-accent font-bold">STATUS: NOMINAL</span>
+        </div>
+    </aside>
+
+    <!-- Main Navigation Bar -->
+    <nav
+        class="flex justify-between items-center px-4 md:px-8 py-5 border-b-2 border-border bg-background sticky top-0 z-40 transition-colors">
+
+        <!-- Brand Logo -->
+        <a href="/" class="flex items-center gap-2 group">
+            <span
+                class="text-2xl md:text-3xl text-accent font-bold leading-none transition-transform group-hover:rotate-45">⌬</span>
+            <div class="font-display font-bold text-2xl md:text-3xl uppercase tracking-tighter text-accent">
+                Sentinel.X
+            </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <div class="hidden lg:flex gap-8 items-center text-xs uppercase tracking-widest font-display font-bold">
+            <a href="#capabilities" class="hover:text-accent transition-colors">Capabilities</a>
+            <a href="#architecture" class="hover:text-accent transition-colors">Architecture</a>
+            <a href="#metrics" class="hover:text-accent transition-colors">Threat Intel</a>
+            <a href="#contact" class="hover:text-accent transition-colors">Security Inquiry</a>
+        </div>
+
+        <!-- Right Action Controls -->
+        <div class="flex items-center gap-3">
+
+            <!-- Light / Dark Theme Switcher Button -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Light and Dark Theme"
+                class="px-3.5 py-2.5 border-2 border-border bg-background text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:text-accent transition-all duration-200 flex items-center gap-2 cursor-pointer">
+                <!-- Sun icon (shown in dark mode) -->
+                <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-accent" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <!-- Moon icon (shown in light mode) -->
+                <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-foreground" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span id="themeLabel" class="hidden sm:inline">Theme</span>
+            </button>
+
+            <!-- Admin Sentinel Live Deck -->
+            <a href="/admin"
+                class="hidden sm:flex px-4 py-2.5 border-2 border-border text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-200 items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-danger animate-pulse"></span>
+                <span>Threat Center</span>
+            </a>
+
+            <!-- Client Portal Button (Direct 1-Click Guest Access) -->
+            <a href="/client-portal"
+                class="px-5 py-2.5 bg-accent border-2 border-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-xs md:text-sm hover:scale-105 active:scale-95 transition-all duration-200">
+                Client Portal
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header
+        class="py-20 md:py-28 px-4 md:px-8 max-w-[96vw] mx-auto w-full flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden">
+
+        <!-- Left Hero Text -->
+        <div class="flex-1 z-10">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 border-2 border-border bg-muted/30 font-mono text-xs text-accent font-bold uppercase tracking-wider mb-6">
+                <span class="w-2 h-2 rounded-full bg-accent"></span>
+                AUTONOMOUS THREAT TRAP &amp; TELEMETRY
+            </div>
+
+            <h1
+                class="font-display font-bold uppercase text-[clamp(2.8rem,7vw,7.5rem)] leading-[0.88] tracking-tighter text-foreground mb-6">
+                Critical<br>
+                <span class="text-accent">Infrastructure.</span><br>
+                Unrivaled.
+            </h1>
+
+            <p class="text-base sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-8">
+                Global Systems Integrity provides the brutal backend security framework for the world's most sensitive
+                data networks, trapping adversarial bots with adaptive decoys and real-time payload quarantine.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 max-w-lg">
+                <a href="#contact"
+                    class="flex-1 text-center px-8 py-5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-lg hover:scale-105 active:scale-95 border-2 border-accent hover:bg-background hover:text-accent transition-all duration-300">
+                    Get Started
+                </a>
+                <a href="#capabilities"
+                    class="flex-1 text-center px-8 py-5 border-2 border-border text-foreground font-display font-bold uppercase tracking-tighter text-lg hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300">
+                    Learn More
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Radar Scanner Interactive Graphic -->
+        <div class="w-full lg:w-[460px] flex flex-col items-center justify-center relative">
+            <div id="home-radar-container"
+                class="system-radar w-72 h-72 sm:w-96 sm:h-96 border-2 border-accent/40 rounded-full flex items-center justify-center relative shadow-[0_0_35px_rgba(223,225,4,0.14)] transition-all duration-500">
+                <!-- Concentric Rings & Crosshairs -->
+                <div class="radar-grid">
+                    <div class="radar-ring-1"></div>
+                    <div class="radar-ring-2"></div>
+                    <div class="radar-ring-3"></div>
+                    <div class="radar-crosshair-h"></div>
+                    <div class="radar-crosshair-v"></div>
+                </div>
+
+                <!-- Animated Conic Rotating Radar Sweep -->
+                <div class="radar-sweep"></div>
+
+                <!-- Dynamic Moving Threat Blips Container -->
+                <div id="home-radar-blips" class="absolute inset-0 pointer-events-auto"></div>
+
+                <!-- Pulsing Central Beacon -->
+                <div id="home-radar-center-beacon"
+                    class="w-3 h-3 rounded-full bg-accent absolute shadow-[0_0_15px_#DFE104] z-10 transition-all duration-300">
+                </div>
+
+
+            </div>
+
+            <div
+                class="mt-4 flex items-center justify-between w-full max-w-sm font-mono text-xs text-muted-foreground border-2 border-border p-3 bg-muted/20">
+
+                <span id="home-scanner-status" class="text-danger font-bold">THREATS DETECTED: 4</span>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- Marquee Divider matching Admin Dashboard -->
+    <div class="w-full border-y-2 border-border bg-background py-4 marquee-container">
+        <div
+            class="marquee-content animate-marqueeFast font-display font-bold uppercase text-xl md:text-3xl tracking-tighter text-accent flex items-center gap-12">
+            <span>ZERO TRUST ARCHITECTURE</span>
+            <span class="text-foreground">✧</span>
+            <span>AUTONOMOUS HONEYNET</span>
+            <span class="text-foreground">✧</span>
+            <span>REAL-TIME NEUTRALIZATION</span>
+            <span class="text-foreground">✧</span>
+            <span>MILITARY GRADE DECEPTION</span>
+            <span class="text-foreground">✧</span>
+            <span>AUTOMATED MALWARE QUARANTINE</span>
+            <span class="text-foreground">✧</span>
+            <span>ZERO TRUST ARCHITECTURE</span>
+            <span class="text-foreground">✧</span>
+            <span>AUTONOMOUS HONEYNET</span>
+            <span class="text-foreground">✧</span>
+            <span>REAL-TIME NEUTRALIZATION</span>
+            <span class="text-foreground">✧</span>
+            <span>MILITARY GRADE DECEPTION</span>
+            <span class="text-foreground">✧</span>
+        </div>
+    </div>
+
+    <!-- Live Telemetry Metrics Row matching Admin Stats Bar -->
+    <section id="metrics" class="py-16 px-4 md:px-8 max-w-[96vw] mx-auto w-full">
+        <div
+            class="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+            <span class="text-accent text-lg">■</span> LIVE TELEMETRY DECK METRICS
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border border-2 border-border">
+
+            <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                <div
+                    class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
+                    Captured Intrusions
+                </div>
+                <div
+                    class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
+                    1,428+
+                </div>
+            </div>
+
+            <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                <div
+                    class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
+                    Unique Adversaries
+                </div>
+                <div
+                    class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
+                    384
+                </div>
+            </div>
+
+            <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
+                <div
+                    class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
+                    Quarantined Samples
+                </div>
+                <div
+                    class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
+                    89
+                </div>
+            </div>
+
+            <div class="bg-background p-6 hover:bg-danger group transition-colors duration-300">
+                <div
+                    class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-black/70 mb-2">
+                    System Threat Level
+                </div>
+                <div
+                    class="font-mono font-extrabold text-5xl md:text-6xl text-danger group-hover:text-black transition-colors">
+                    HIGH
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Features / Capabilities Section matching Brutalist Card Grid -->
+    <section id="capabilities" class="py-16 px-4 md:px-8 max-w-[96vw] mx-auto w-full scroll-mt-24">
+        <div class="mb-10">
+            <h2 class="font-display font-bold uppercase text-4xl md:text-7xl tracking-tighter text-foreground mb-2">
+                Core<br><span class="text-accent">Capabilities</span>
+            </h2>
+            <p class="font-mono text-sm text-muted-foreground uppercase tracking-wider">
+                Multi-vector cyber deception and autonomous payload containment.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border-2 border-border mb-8">
+
+            <!-- Card 01 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    01
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        TRAFFIC INTELLIGENCE</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        Real-Time<br>Traffic Analysis
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        Continuous deep packet inspection and HTTP stream forensics monitor inbound network telemetry,
+                        dissecting malicious request headers, anomalous bot scanners, and unauthorized probe sweeps in microseconds.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    INSPECTION: 100% PACKET FLOW ✧ &lt; 1.2MS
+                </div>
+            </div>
+
+            <!-- Card 02 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    02
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        DEFENSE MITIGATION</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        Automated<br>Mitigation
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        Real-time heuristic AI classifier that neutralizes SQL injections, XSS payloads, and directory
+                        path traversals before execution occurs.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    RESPONSE: &lt; 2.4MS SUB-SECOND
+                </div>
+            </div>
+
+            <!-- Card 03 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    03
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        SANDBOX VAULT</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        Malware<br>Quarantine
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        Uploaded web shells and suspicious scripts are hashed (SHA-256), isolated from system kernels,
+                        and preserved for intelligence analysis.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    INTEGRITY: 100% ISOLATION
+                </div>
+            </div>
+
+            <!-- Card 04 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    04
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        AI CLASSIFIER</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        Behavioral<br>Forensics
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        Continuous machine learning cluster correlates attack frequencies, payload patterns, and IP
+                        origin clusters to classify threat severity.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    ACCURACY: 99.8% PRECISION
+                </div>
+            </div>
+
+            <!-- Card 05 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    05
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        AUDIT &amp; EXPORT</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        Automated<br>Reporting
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        One-click PDF intelligence reports, JSON structured telemetry streams, and CSV export compliant
+                        with HIPAA, SOC2, and ISO standards.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    FORMAT: PDF / JSON / CSV
+                </div>
+            </div>
+
+            <!-- Card 06 -->
+            <div
+                class="group bg-background p-8 md:p-12 hover:bg-accent transition-colors duration-300 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                <div
+                    class="text-[7rem] md:text-[8rem] font-display font-bold text-muted group-hover:text-black/15 absolute -bottom-10 -right-4 transition-colors duration-300 pointer-events-none select-none">
+                    06
+                </div>
+                <div class="relative z-10">
+                    <div
+                        class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
+                        HONEYNET DECOY</div>
+                    <h3
+                        class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
+                        High-Interaction<br>Traps
+                    </h3>
+                    <p
+                        class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
+                        Convincing fake APIs, credentials forms, and file upload endpoints that waste attacker compute
+                        and record their exploits for analysis.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
+                    NODES: MULTI-ENDPOINT DECEPT
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Architecture & Live Terminal Feed Section -->
+    <section id="architecture" class="py-16 px-4 md:px-8 max-w-[96vw] mx-auto w-full border-t-2 border-border">
+        <div class="flex flex-col lg:flex-row items-stretch gap-8">
+
+            <div class="flex-1 flex flex-col justify-between">
+                <div>
+                    <h2
+                        class="font-display font-bold uppercase text-4xl md:text-6xl tracking-tighter text-foreground mb-4">
+                        Honeynet<br><span class="text-accent">Architecture</span>
+                    </h2>
+                    <p class="text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl">
+                        When an intrusion payload strikes GSI endpoints, Sentinel deceives the adversary while
+                        extracting cryptographic hashes, IP telemetry, and request headers into our SQLite forensic
+                        store.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="p-4 border-2 border-border bg-background flex items-center gap-4">
+                        <div class="font-mono font-bold text-accent text-xl">01</div>
+                        <div>
+                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Decoy
+                                Traps &amp; Endpoints</div>
+                            <div class="text-xs text-muted-foreground">Simulates /login, /forgot-password, /upload,
+                                /api/v1/user</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-2 border-border bg-background flex items-center gap-4">
+                        <div class="font-mono font-bold text-accent text-xl">02</div>
+                        <div>
+                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">
+                                Real-time Signature Classification</div>
+                            <div class="text-xs text-muted-foreground">Regex &amp; heuristic detection for SQLi, XSS,
+                                Path Traversal</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-2 border-border bg-background flex items-center gap-4">
+                        <div class="font-mono font-bold text-accent text-xl">03</div>
+                        <div>
+                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Sandbox
+                                Quarantine Vault</div>
+                            <div class="text-xs text-muted-foreground">Isolates uploaded shells with unique timestamped
+                                SHA-256 names</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Window matching Admin Aesthetic -->
+            <div
+                class="flex-1 border-2 border-border bg-black p-6 font-mono text-xs flex flex-col justify-between min-h-[420px]">
+                <div class="flex justify-between items-center pb-4 border-b-2 border-border mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-danger"></span>
+                        <span class="w-3 h-3 rounded-full bg-warning"></span>
+                        <span class="w-3 h-3 rounded-full bg-success"></span>
+                        <span
+                            class="ml-2 font-display font-bold uppercase tracking-wider text-muted-foreground text-xs">GSI-SENTINEL-TELEMETRY.STREAM</span>
+                    </div>
+                    <span class="text-success font-bold text-[10px] animate-pulse">● LIVE STREAM</span>
+                </div>
+
+                <div class="space-y-2.5 text-zinc-300 leading-relaxed overflow-hidden">
+                    <p class="text-zinc-500">[00:00:01] <span class="text-accent">SENTINEL:</span> Honeypot core
+                        initialized on port 8000 (PID 4920)</p>
+                    <p class="text-zinc-500">[00:01:24] <span class="text-warning">INTERCEPT:</span> POST /login [admin'
+                        OR '1'='1] from 192.168.1.104</p>
+                    <p class="text-danger font-bold">&gt; SIGNATURE: SQL Injection (Severity: High) | Payload Decoyed
+                    </p>
+                    <p class="text-zinc-500">[00:02:11] <span class="text-warning">INTERCEPT:</span> GET
+                        /api/v1/user?file=../../etc/passwd from 10.0.0.87</p>
+                    <p class="text-warning font-bold">&gt; SIGNATURE: Path Traversal (Severity: High) | Deceptive dummy
+                        returned</p>
+                    <p class="text-zinc-500">[00:03:45] <span class="text-warning">INTERCEPT:</span> POST /upload
+                        [r57_shell.php] (SHA256: 9e107d9...)</p>
+                    <p class="text-accent font-bold">&gt; QUARANTINE: Moved to uploads/quarantine/20260812_r57_shell.php
+                    </p>
+                    <p class="text-success font-bold">&gt; DATABASE: Incident successfully logged to
+                        sqlite:///honeypot.db</p>
+                    <p class="text-zinc-500 animate-pulse">&gt; _ Awaiting next threat vector...</p>
+                </div>
+
+                <div
+                    class="pt-4 border-t-2 border-border mt-4 flex justify-between items-center text-zinc-500 text-[10px]">
+                    <span>BUFFER: 4096 KB</span>
+                    <a href="/admin" class="text-accent hover:underline font-bold">VIEW FULL SENTINEL CONSOLE &rarr;</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Contact & Consultation Section matching Admin Aesthetic -->
+    <section id="contact"
+        class="py-20 md:py-28 px-4 md:px-8 border-t-2 border-border flex flex-col lg:flex-row gap-16 relative overflow-hidden bg-background">
+
+        <div class="flex-1 relative z-10">
+            <h2 class="font-display font-bold uppercase text-5xl md:text-8xl tracking-tighter text-foreground mb-6">
+                Consult<br><span class="text-accent">Our Experts</span>
+            </h2>
+            <p class="text-lg md:text-2xl text-muted-foreground max-w-xl leading-relaxed mb-8">
+                Request an enterprise honeynet deployment or report an adversarial incident. Our incident response unit
+                acts immediately.
+            </p>
+
+            <div
+                class="font-mono text-xs space-y-3 text-muted-foreground border-2 border-border p-6 bg-muted/20 max-w-md">
+                <div class="text-accent font-bold uppercase tracking-wider mb-2">SECURE TRANSMISSION PROTOCOL:</div>
+                <div>• Zero logs retained outside encrypted SQLite quarantine</div>
+                <div>• Direct alert webhook integration with SIEM / SOAR</div>
+                <div>• SLA: Under 24-hour response for enterprise networks</div>
+            </div>
+        </div>
+
+        <!-- High Contrast Form -->
+        <div class="flex-1 relative z-10 bg-background border-2 border-border p-8 md:p-12">
+            <form action="/contact" method="POST" class="space-y-8" id="contactForm">
+                <div>
+                    <label for="name"
+                        class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
+                        Full Name / Handle
+                    </label>
+                    <input type="text" id="name" name="name" placeholder="JOHN DOE" required
+                        class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 rounded-none">
+                </div>
+                <div>
+                    <label for="email"
+                        class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
+                        Corporate Work Email
+                    </label>
+                    <input type="email" id="email" name="email" placeholder="JOHN@ENTERPRISE.COM" required
+                        class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 rounded-none">
+                </div>
+                <div>
+                    <label for="message"
+                        class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
+                        Deployment Scope / Threat Details
+                    </label>
+                    <textarea id="message" name="message" rows="3" placeholder="DESCRIBE YOUR HONEYNET REQUIREMENTS..."
+                        required
+                        class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 resize-none rounded-none"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full py-6 mt-4 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 border-2 border-accent hover:bg-background hover:text-accent transition-all duration-300 cursor-pointer">
+                    Send Security Inquiry
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer matching Admin Dashboard -->
+    <footer class="bg-background text-foreground py-16 px-4 md:px-8 border-t-2 border-border">
+        <div class="max-w-[96vw] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+            <div>
+                <div
+                    class="font-display font-bold text-3xl md:text-4xl uppercase tracking-tighter text-accent flex items-center gap-2">
+                    <span>⌬</span> Sentinel.X
+                </div>
+                <p class="font-mono text-xs text-muted-foreground uppercase tracking-widest mt-1">
+                    Threat Intelligence Center &amp; Cyber Deception Core
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-6 font-display font-bold text-xs uppercase tracking-widest">
+                <a href="/" class="hover:text-accent transition-colors">Home</a>
+                <a href="/client-portal" class="hover:text-accent transition-colors">Client Portal</a>
+                <a href="/forgot-password" class="hover:text-accent transition-colors">Reset Auth</a>
+                <a href="/admin" class="text-accent hover:underline">Sentinel Console</a>
+            </div>
+
+            <div class="text-left md:text-right font-mono text-xs text-muted-foreground uppercase tracking-wider">
+                &copy; 2026 Global Systems Integrity Corp.<br>
+                All connection attempts logged to threat matrix.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Theme Switcher & Moving Radar JavaScript Logic -->
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeButton();
+        }
+
+        function updateThemeButton() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            const themeLabel = document.getElementById('themeLabel');
+
+            if (isDark) {
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (themeLabel) themeLabel.textContent = 'Light';
+            } else {
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (themeLabel) themeLabel.textContent = 'Dark';
+            }
+        }
+
+        // Dynamic Moving Radar Simulation matching Admin Dashboard
+        function initHomeRadar() {
+            const blipsContainer = document.getElementById('home-radar-blips');
+            const scannerStatus = document.getElementById('home-scanner-status');
+            const radarContainer = document.getElementById('home-radar-container');
+            const centerBeacon = document.getElementById('home-radar-center-beacon');
+
+            if (!blipsContainer || !radarContainer) return;
+
+            const threatNodes = [
+                { type: 'SQL Injection', ip: '192.168.1.104', color: '#ff0055', severity: 'HIGH', speed: 0.75, radiusRatio: 0.35, angle: 45 },
+                { type: 'Path Traversal', ip: '10.0.0.87', color: '#38bdf8', severity: 'HIGH', speed: -0.55, radiusRatio: 0.65, angle: 160 },
+                { type: 'Web Shell Detection', ip: '172.16.4.12', color: '#d946ef', severity: 'CRITICAL', speed: 0.9, radiusRatio: 0.48, angle: 260 },
+                { type: 'Brute Force', ip: '192.168.1.50', color: '#fb923c', severity: 'MEDIUM', speed: -0.4, radiusRatio: 0.22, angle: 320 }
+            ];
+
+            // Render and update moving blips
+            function updateBlips() {
+                blipsContainer.innerHTML = '';
+                const width = radarContainer.offsetWidth || 384;
+                const height = radarContainer.offsetHeight || 384;
+                const cx = width / 2;
+                const cy = height / 2;
+
+                threatNodes.forEach((node) => {
+                    // Update orbital angle
+                    node.angle = (node.angle + node.speed + 360) % 360;
+                    const rad = (node.angle * Math.PI) / 180;
+                    const r = (width / 2) * node.radiusRatio;
+
+                    const x = cx + r * Math.cos(rad);
+                    const y = cy + r * Math.sin(rad);
+
+                    const blip = document.createElement('div');
+                    blip.className = 'radar-blip';
+                    blip.style.left = `${x}px`;
+                    blip.style.top = `${y}px`;
+                    blip.style.backgroundColor = node.color;
+                    blip.style.color = node.color;
+                    blip.title = `[ACTIVE THREAT] ${node.type} (${node.ip}) - Severity: ${node.severity}`;
+
+                    blipsContainer.appendChild(blip);
+                });
+            }
+
+            updateBlips();
+            setInterval(updateBlips, 80);
+        }
+
+        // Initialize button state and moving radar on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeButton();
+            initHomeRadar();
+        });
+    </script>
+</body>
+
+</html>

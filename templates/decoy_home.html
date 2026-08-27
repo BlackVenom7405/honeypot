@@ -279,6 +279,12 @@
         body.light-theme .logout-link:hover {
             color: #1a202c;
         }
+        .sidebar .policies {
+            transition: bottom 0.3s ease;
+        }
+        body.light-theme .sidebar .policies ul li a {
+            color: #718096;
+        }
         body.light-theme .spotify-playlists h2 {
             color: #1a202c;
         }
@@ -296,31 +302,93 @@
         body.light-theme .spotify-playlists .list .item p {
             color: #718096;
         }
-        body.light-theme .preview {
+        /* Playbar Base Styles (Dark Mode Default) */
+        .playbar {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            background-color: #181818 !important;
+            border-top: 1px solid #282828 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 15px 30px !important;
+            z-index: 1000 !important;
+            height: 90px !important;
+            box-sizing: border-box !important;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .playbar .player-track-info h6 {
+            color: #ffffff !important;
+        }
+        .playbar .player-track-info p {
+            color: #b3b3b3 !important;
+        }
+        .playbar .player-controls button {
+            color: #b3b3b3 !important;
+        }
+        .playbar #player-time-current,
+        .playbar #player-time-duration {
+            color: #b3b3b3 !important;
+        }
+        .playbar .player-volume i {
+            color: #b3b3b3 !important;
+        }
+        .playbar #player-play-btn {
             background-color: #ffffff !important;
-            border-top: 1px solid #e2e8f0 !important;
+            color: #000000 !important;
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 14px !important;
+            font-weight: bold !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: transform 0.2s, background-color 0.2s;
         }
-        body.light-theme .preview .text h6 {
-            color: #2d3748;
+        .playbar #player-play-btn:hover {
+            background-color: #f2f2f2 !important;
+            transform: scale(1.05);
         }
-        body.light-theme .preview .text p {
-            color: #718096;
+
+        /* Light Theme Player Bar Overrides */
+        body.light-theme .playbar {
+            background-color: #ffffff !important;
+            border-top: 1px solid #cbd5e0 !important;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05) !important;
         }
-        body.light-theme .player-track-info h6 {
+        body.light-theme .playbar .player-track-info h6 {
             color: #1a202c !important;
         }
-        body.light-theme .player-track-info p {
+        body.light-theme .playbar .player-track-info p {
             color: #718096 !important;
         }
-        body.light-theme .player-controls button {
+        body.light-theme .playbar .player-controls button {
             color: #4a5568 !important;
         }
-        body.light-theme #player-play-btn {
-            background: #1db954 !important;
-            color: white !important;
+        body.light-theme .playbar .player-controls button:hover {
+            color: #1a202c !important;
         }
-        body.light-theme #player-play-btn:hover {
-            background: #1ed760 !important;
+        body.light-theme .playbar #player-time-current,
+        body.light-theme .playbar #player-time-duration {
+            color: #718096 !important;
+        }
+        body.light-theme .playbar .player-volume i {
+            color: #4a5568 !important;
+        }
+        body.light-theme .playbar #player-play-btn {
+            background-color: #1db954 !important;
+            color: #ffffff !important;
+        }
+        body.light-theme .playbar #player-play-btn:hover {
+            background-color: #1ed760 !important;
+            transform: scale(1.05);
         }
         body.light-theme .modal-content {
             background-color: #ffffff;
@@ -344,6 +412,460 @@
         body.light-theme .topbar .prev-next-buttons button:hover {
             background-color: #e2e8f0;
             color: #1a202c;
+        }
+
+        /* Full-Screen Now Playing View Overlay */
+        .fullscreen-player {
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: linear-gradient(180deg, #1e1e1e 0%, #121212 100%);
+            z-index: 9999 !important;
+            flex-direction: column !important;
+            padding: 30px 40px !important;
+            box-sizing: border-box !important;
+            overflow-y: auto !important;
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s ease;
+        }
+
+        .fullscreen-player.active {
+            transform: translateY(0%) !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        body.light-theme .fullscreen-player {
+            background: linear-gradient(180deg, #edf2f7 0%, #ffffff 100%);
+            color: #1a202c;
+        }
+
+        .fullscreen-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .fullscreen-player-header button {
+            background: transparent;
+            border: none;
+            color: #b3b3b3;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: color 0.2s;
+        }
+
+        .fullscreen-player-header button:hover {
+            color: #ffffff;
+        }
+
+        body.light-theme .fullscreen-player-header button {
+            color: #4a5568;
+        }
+
+        body.light-theme .fullscreen-player-header button:hover {
+            color: #1a202c;
+        }
+
+        .fullscreen-player-header span {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #b3b3b3;
+        }
+
+        body.light-theme .fullscreen-player-header span {
+            color: #718096;
+        }
+
+        .fullscreen-player-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .fullscreen-player-body img {
+            width: 280px;
+            height: 280px;
+            border-radius: 12px;
+            box-shadow: 0 16px 35px rgba(0,0,0,0.6);
+            object-fit: cover;
+            margin-bottom: 30px;
+        }
+
+        .fullscreen-track-details {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .fullscreen-track-details h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        body.light-theme .fullscreen-track-details h2 {
+            color: #1a202c;
+        }
+
+        .fullscreen-track-details p {
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        body.light-theme .fullscreen-track-details p {
+            color: #718096;
+        }
+
+        .fullscreen-timeline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .fullscreen-timeline span {
+            font-size: 12px;
+            color: #b3b3b3;
+            min-width: 35px;
+        }
+
+        body.light-theme .fullscreen-timeline span {
+            color: #718096;
+        }
+
+        .fullscreen-progress-bg {
+            flex: 1;
+            background: #404040;
+            height: 6px;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        body.light-theme .fullscreen-progress-bg {
+            background: #cbd5e0;
+        }
+
+        .fullscreen-progress-bar {
+            background: #1db954;
+            width: 0%;
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .fullscreen-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 35px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .fullscreen-controls button {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.1s, color 0.2s;
+        }
+
+        .fullscreen-controls button:hover {
+            transform: scale(1.1);
+        }
+
+        body.light-theme .fullscreen-controls button {
+            color: #2d3748;
+        }
+
+        .fullscreen-controls #fullscreen-play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #1db954 !important;
+            color: #ffffff !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+            border: none !important;
+        }
+
+        .fullscreen-controls #fullscreen-play-btn:hover {
+            transform: scale(1.08) !important;
+            background-color: #1ed760 !important;
+        }
+
+        /* ========================================================================== */
+        /* Mobile / Responsive Styles (max-width: 768px)                              */
+        /* ========================================================================== */
+        @media (max-width: 768px) {
+            /* 1. Sidebar to bottom navigation */
+            .sidebar {
+                width: 100% !important;
+                height: auto !important;
+                bottom: 0 !important;
+                top: auto !important;
+                left: 0 !important;
+                right: 0 !important;
+                padding: 10px 15px !important;
+                background-color: #000000 !important;
+                display: flex !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                border-top: 1px solid #282828 !important;
+                border-right: none !important;
+                position: fixed !important;
+                z-index: 1001 !important;
+            }
+            
+            .sidebar .logo, 
+            .sidebar .policies, 
+            .sidebar .playlist-sidebar-header, 
+            #user-playlists,
+            .playlist-sidebar-list {
+                display: none !important; /* Hide playlist list and decorations to save space */
+            }
+
+            .sidebar .navigation {
+                width: 100% !important;
+                margin-top: 0 !important;
+            }
+
+            .sidebar .navigation ul {
+                margin-top: 0 !important;
+                display: flex !important;
+                justify-content: space-around !important;
+                width: 100% !important;
+            }
+
+            .sidebar .navigation ul li {
+                padding: 5px 0px !important;
+            }
+
+            .sidebar .navigation ul li a {
+                font-size: 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 4px !important;
+                color: #b3b3b3 !important;
+            }
+
+            .sidebar .navigation ul li .fa {
+                margin-right: 0 !important;
+                font-size: 16px !important;
+            }
+
+            /* 2. Main container adjustment */
+            .main-container {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding-bottom: 220px !important; /* Space for bottom playbar and mobile sidebar */
+            }
+
+            /* 3. Topbar responsive alignment */
+            .topbar {
+                padding: 10px 15px !important;
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: flex-end !important; /* Push everything to the right */
+                align-items: center !important;
+                height: 60px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+
+            .topbar .prev-next-buttons {
+                display: none !important;
+            }
+
+            .topbar .navbar,
+            .topbar .navbar-user {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: flex-end !important; /* Force items to the right */
+                gap: 15px !important;
+                width: 100% !important;
+                margin-top: 0 !important;
+            }
+
+            .topbar .navbar button,
+            .topbar .navbar-user .btn-upload,
+            .topbar .navbar-user .logout-link {
+                padding: 8px 16px !important;
+                font-size: 12px !important;
+                margin: 0 !important;
+            }
+            
+            body.light-theme .topbar .navbar button {
+                background-color: #1a202c !important;
+                color: #ffffff !important;
+                border: none !important;
+            }
+            
+            .topbar .navbar-user {
+                margin-left: 0 !important;
+            }
+
+            /* 4. Playlists list wrapping */
+            .spotify-playlists {
+                padding: 15px !important;
+            }
+
+            .spotify-playlists .list {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important; /* 2 columns grid */
+                gap: 12px !important;
+                overflow: visible !important;
+            }
+
+            .spotify-playlists .list .item {
+                width: auto !important;
+                min-width: 0 !important;
+                padding: 10px !important;
+            }
+            
+            .spotify-playlists .list .item h4 {
+                font-size: 12px !important;
+                margin-bottom: 5px !important;
+            }
+
+            .spotify-playlists .list .item p {
+                font-size: 10px !important;
+                line-height: 14px !important;
+            }
+
+            /* 5. Bottom Playbar controls responsive layout */
+            .playbar {
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 12px 15px !important;
+                gap: 8px !important;
+                align-items: center !important;
+                background-color: #181818 !important;
+                border-top: 1px solid #282828 !important;
+                position: fixed !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 60px !important; /* Stand above bottom mobile navbar */
+                z-index: 1000 !important;
+                box-sizing: border-box !important;
+                height: auto !important;
+            }
+
+            .playbar .player-track-info {
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                gap: 10px !important;
+            }
+            
+            .playbar .player-track-info img {
+                width: 40px !important;
+                height: 40px !important;
+                border-radius: 4px !important;
+            }
+
+            .playbar .player-track-info h6 {
+                font-size: 12px !important;
+                margin: 0 !important;
+            }
+
+            .playbar .player-track-info p {
+                font-size: 10px !important;
+                margin: 2px 0 0 0 !important;
+            }
+
+            .playbar .player-controls {
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+
+            .playbar .player-controls div {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                gap: 20px !important;
+            }
+
+            .playbar #player-play-btn {
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+                min-height: 32px !important;
+                border-radius: 50% !important;
+                flex-shrink: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            body.light-theme .playbar #player-play-btn {
+                background-color: #1db954 !important;
+                color: #ffffff !important;
+            }
+
+            .playbar .player-volume {
+                display: none !important; /* Hide volume controls on mobile */
+            }
+
+            /* 6. Preview / Signup bar responsive stacking */
+            .preview {
+                padding: 15px !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: center !important;
+                text-align: center !important;
+                position: fixed !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 60px !important; /* Stand above bottom mobile navbar */
+                z-index: 1000 !important;
+                box-sizing: border-box !important;
+            }
+
+            .preview .text p {
+                font-size: 11px !important;
+            }
+
+            .preview button {
+                padding: 10px 20px !important;
+                font-size: 13px !important;
+                width: 100% !important;
+            }
         }
     </style>
 </head>
@@ -463,12 +985,6 @@
                 </button>
 
                 <span class="user-name-badge">Hi, {{ user.username }}</span>
-                
-                <!-- Profile Avatar Uploader -->
-                <form action="/upload-avatar" method="POST" enctype="multipart/form-data" style="margin: 0;">
-                    <label for="avatar-input" class="btn-upload">Change Avatar</label>
-                    <input id="avatar-input" type="file" name="file" onchange="this.form.submit()" style="display: none;" />
-                </form>
                 
                 <a href="/logout" class="logout-link">Log out</a>
             </div>
@@ -696,9 +1212,42 @@
 
     </div>
 
+    <!-- Full-Screen Now Playing View Overlay -->
+    <div id="fullscreen-player-modal" class="fullscreen-player">
+        <div class="fullscreen-player-header">
+            <button type="button" onclick="collapseFullscreenPlayer()" aria-label="Collapse Player">
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <span>NOW PLAYING</span>
+            <div style="width: 32px;"></div>
+        </div>
+
+        <div class="fullscreen-player-body">
+            <img id="fullscreen-track-img" src="/static/decoy/images/Today's Top Hits.jpg" alt="Album Cover" />
+            <div class="fullscreen-track-details">
+                <h2 id="fullscreen-track-title">Select a track to play</h2>
+                <p id="fullscreen-track-artist">Play a song from the library</p>
+            </div>
+
+            <div class="fullscreen-timeline">
+                <span id="fullscreen-time-current">0:00</span>
+                <div class="fullscreen-progress-bg" onclick="seekPlayer(event)">
+                    <div id="fullscreen-progress" class="fullscreen-progress-bar"></div>
+                </div>
+                <span id="fullscreen-time-duration">0:00</span>
+            </div>
+
+            <div class="fullscreen-controls">
+                <button type="button" onclick="prevTrack()"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="fullscreen-play-btn" type="button" onclick="togglePlayer()"><i class="fa-solid fa-play"></i></button>
+                <button type="button" onclick="nextTrack()"><i class="fa-solid fa-forward-step"></i></button>
+            </div>
+        </div>
+    </div>
+
     {% if user %}
     <!-- Logged in Player Bar -->
-    <div class="preview" style="background: #181818; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-top: 1px solid #282828;">
+    <div class="playbar" onclick="expandFullscreenPlayer()" style="cursor: pointer; background: #181818; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-top: 1px solid #282828;">
         <div class="player-track-info" style="display: flex; align-items: center; gap: 15px; width: 30%;">
             <img id="player-track-img" src="/static/decoy/images/Today's Top Hits.jpg" style="width: 56px; height: 56px; border-radius: 4px;" />
             <div>
@@ -707,7 +1256,7 @@
             </div>
         </div>
         
-        <div class="player-controls" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40%;">
+        <div class="player-controls" onclick="event.stopPropagation()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40%;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <button onclick="prevTrack()" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-backward-step"></i></button>
                 <button id="player-play-btn" onclick="togglePlayer()" style="background:white; border:none; color:black; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; font-weight:bold; padding:0; flex-shrink:0; box-sizing:border-box;"><i class="fa-solid fa-play"></i></button>
@@ -722,15 +1271,17 @@
             </div>
         </div>
 
-        <div class="player-volume" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 30%;">
+        <div class="player-volume" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 30%;">
             <i class="fa-solid fa-volume-high" style="color:#b3b3b3;"></i>
             <input type="range" min="0" max="100" value="50" oninput="setPlayerVolume(this.value)" style="accent-color:#1db954; cursor:pointer; width:100px;" />
         </div>
     </div>
     {% else %}
     <!-- Public Decoy Signup Bar -->
-    <div class="preview">
-        <div class="text">
+    <div class="preview" style="z-index: 1000;">
+        <!-- Closable Close Button -->
+        <span onclick="document.querySelector('.preview').style.display='none'; const p=document.querySelector('.sidebar .policies'); if(p) p.style.bottom='20px';" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ffffff; font-size: 24px; font-weight: bold; padding: 5px; z-index: 1002; line-height: 1;" aria-label="Close">&times;</span>
+        <div class="text" style="padding-right: 25px;">
             <h6>Preview of myTunes</h6>
             <p>Sign up to get unlimited songs and podcasts with occasional ads. No credit card needed.</p>
         </div>
@@ -803,6 +1354,13 @@
             document.getElementById("playlist-modal").style.display = "none";
         }
 
+        function closePreviewBanner() {
+            const preview = document.querySelector(".preview");
+            if (preview) preview.style.display = "none";
+            const policies = document.querySelector(".sidebar .policies");
+            if (policies) policies.style.bottom = "20px";
+        }
+
         function playDemoPlaylist(playlistName) {
             alert("Playing playlist: " + playlistName);
         }
@@ -844,15 +1402,28 @@
             }
         });
 
+        function expandFullscreenPlayer() {
+            const modal = document.getElementById("fullscreen-player-modal");
+            if (modal) modal.classList.add("active");
+        }
+
+        function collapseFullscreenPlayer() {
+            const modal = document.getElementById("fullscreen-player-modal");
+            if (modal) modal.classList.remove("active");
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                collapseFullscreenPlayer();
+            }
+        });
+
         function loadAndPlayTrack(index) {
             if (!player) return;
             currentTrackIdx = index;
             const track = tracks[currentTrackIdx];
             
-            player.src = track.file;
-            player.play();
-
-            // Update UI elements
+            // Update bottom playbar elements
             const trackImg = document.getElementById("player-track-img");
             const trackTitle = document.getElementById("player-track-title");
             const trackArtist = document.getElementById("player-track-artist");
@@ -862,17 +1433,40 @@
             if (trackTitle) trackTitle.textContent = track.title;
             if (trackArtist) trackArtist.textContent = track.artist;
             if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+
+            // Update fullscreen overlay elements
+            const fsImg = document.getElementById("fullscreen-track-img");
+            const fsTitle = document.getElementById("fullscreen-track-title");
+            const fsArtist = document.getElementById("fullscreen-track-artist");
+            const fsPlayBtn = document.getElementById("fullscreen-play-btn");
+
+            if (fsImg) fsImg.src = track.img;
+            if (fsTitle) fsTitle.textContent = track.title;
+            if (fsArtist) fsArtist.textContent = track.artist;
+            if (fsPlayBtn) fsPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+
+            player.src = track.file;
+            const playPromise = player.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.log("Playback interaction notice:", err);
+                });
+            }
         }
 
         function togglePlayer() {
             if (!player || !player.src) return;
             const playBtn = document.getElementById("player-play-btn");
+            const fsPlayBtn = document.getElementById("fullscreen-play-btn");
+            
             if (player.paused) {
                 player.play();
                 if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                if (fsPlayBtn) fsPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
             } else {
                 player.pause();
                 if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                if (fsPlayBtn) fsPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             }
         }
 
@@ -900,6 +1494,7 @@
             const duration = player.duration;
             const pct = (current / duration) * 100;
 
+            // Bottom bar progress & time
             const progress = document.getElementById("player-progress");
             const currentTxt = document.getElementById("player-time-current");
             const durationTxt = document.getElementById("player-time-duration");
@@ -907,6 +1502,15 @@
             if (progress) progress.style.width = pct + "%";
             if (currentTxt) currentTxt.textContent = formatTime(current);
             if (durationTxt) durationTxt.textContent = formatTime(duration);
+
+            // Fullscreen overlay progress & time
+            const fsProgress = document.getElementById("fullscreen-progress");
+            const fsCurrentTxt = document.getElementById("fullscreen-time-current");
+            const fsDurationTxt = document.getElementById("fullscreen-time-duration");
+
+            if (fsProgress) fsProgress.style.width = pct + "%";
+            if (fsCurrentTxt) fsCurrentTxt.textContent = formatTime(current);
+            if (fsDurationTxt) fsDurationTxt.textContent = formatTime(duration);
         }
 
         // Auto play next track when current ends

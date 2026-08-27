@@ -256,3 +256,207 @@ body {
     border-radius: 40px;
     cursor: pointer;
 }
+
+/* ========================================================================== */
+/* Mobile / Responsive Styles (max-width: 768px)                              */
+/* ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Sidebar to bottom navigation */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        padding: 10px 15px !important;
+        background-color: #000000 !important;
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        border-top: 1px solid #282828 !important;
+        border-right: none !important;
+        position: fixed !important;
+        z-index: 1001 !important;
+    }
+    
+    .sidebar .logo, 
+    .sidebar .policies, 
+    .sidebar .playlist-sidebar-header, 
+    .sidebar .playlist-sidebar-list,
+    .sidebar .navigation ul.playlist-sidebar-list {
+        display: none !important; /* Hide desktop decorations to save space */
+    }
+
+    .sidebar .navigation {
+        width: 100% !important;
+        margin-top: 0 !important;
+    }
+
+    .sidebar .navigation ul {
+        margin-top: 0 !important;
+        display: flex !important;
+        justify-content: space-around !important;
+        width: 100% !important;
+    }
+
+    .sidebar .navigation ul li {
+        padding: 5px 0px !important;
+    }
+
+    .sidebar .navigation ul li a {
+        font-size: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
+        color: #b3b3b3 !important;
+    }
+
+    .sidebar .navigation ul li .fa {
+        margin-right: 0 !important;
+        font-size: 16px !important;
+    }
+
+    /* 2. Main container adjustment */
+    .main-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-bottom: 220px !important; /* Space for bottom playbar and mobile sidebar */
+    }
+
+    /* 3. Topbar responsive alignment */
+    .topbar {
+        padding: 10px 15px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        height: 60px !important;
+        box-sizing: border-box !important;
+    }
+
+    .topbar .prev-next-buttons {
+        display: none !important;
+    }
+
+    .topbar .search-bar-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 200px !important;
+    }
+
+    .topbar .search-bar-wrapper input {
+        width: 100% !important;
+        font-size: 12px !important;
+        padding: 6px 10px 6px 28px !important;
+    }
+
+    .topbar .navbar,
+    .topbar .navbar-user {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 12px !important;
+        width: auto !important;
+        margin-top: 0 !important;
+    }
+
+    .topbar .navbar button,
+    .topbar .navbar-user .btn-upload,
+    .topbar .navbar-user .logout-link {
+        padding: 8px 16px !important;
+        font-size: 12px !important;
+    }
+    
+    body.light-theme .topbar .navbar button {
+        background-color: #1a202c !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    
+    .topbar .navbar-user {
+        margin-left: 0 !important;
+    }
+
+    /* 4. Playlists list wrapping */
+    .spotify-playlists {
+        padding: 15px !important;
+    }
+
+    .spotify-playlists .list {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important; /* 2 columns grid */
+        gap: 12px !important;
+        overflow: visible !important;
+    }
+
+    .spotify-playlists .list .item {
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 10px !important;
+    }
+    
+    .spotify-playlists .list .item h4 {
+        font-size: 12px !important;
+        margin-bottom: 5px !important;
+    }
+
+    .spotify-playlists .list .item p {
+        font-size: 10px !important;
+        line-height: 14px !important;
+    }
+
+    /* 5. Bottom Playbar controls responsive layout */
+    .playbar {
+        height: auto !important;
+        flex-direction: column !important;
+        padding: 10px 15px !important;
+        gap: 10px !important;
+        align-items: stretch !important;
+        bottom: 60px !important; /* Stand above bottom mobile navbar */
+        z-index: 1000 !important;
+    }
+
+    .playbar .player-track-info {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    
+    .playbar .player-track-info img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .playbar .player-controls {
+        width: 100% !important;
+        gap: 4px !important;
+    }
+
+    .playbar .player-volume-control {
+        display: none !important;
+    }
+
+    /* 6. Preview / Signup bar responsive stacking */
+    .preview {
+        padding: 10px 15px !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        align-items: center !important;
+        text-align: center !important;
+        bottom: 60px !important; /* Stand above bottom mobile navbar */
+        z-index: 1000 !important;
+    }
+
+    .preview .text p {
+        font-size: 11px !important;
+    }
+
+    .preview button {
+        padding: 10px 20px !important;
+        font-size: 13px !important;
+        width: 100% !important;
+    }
+}

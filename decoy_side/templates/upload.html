@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel.X | Configuration Upload</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-bg)',
+                        foreground: 'var(--color-fg)',
+                        muted: 'var(--color-muted)',
+                        'muted-foreground': 'var(--color-muted-fg)',
+                        accent: '#DFE104',
+                        'accent-foreground': '#000000',
+                        border: 'var(--color-border)',
+                        danger: '#ff0055',
+                        warning: '#ffcc00',
+                        success: '#00ffaa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg: #F4F4F5;
+            --color-fg: #09090B;
+            --color-muted: #E4E4E7;
+            --color-muted-fg: #52525B;
+            --color-border: #18181B;
+        }
+
+        html.dark {
+            --color-bg: #000000;
+            --color-fg: #E4E4E7;
+            --color-muted: #27272A;
+            --color-muted-fg: #A1A1AA;
+            --color-border: #3F3F46;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            mix-blend-mode: overlay;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased noise min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-accent-foreground">
+    
+    <!-- Top Nav matching Admin Dashboard -->
+    <nav class="flex justify-between items-center px-4 md:px-8 py-6 border-b-2 border-border bg-background relative z-40">
+        <a href="/" class="font-display font-bold text-2xl md:text-3xl uppercase tracking-tighter text-accent flex items-center gap-2">
+            <span>⌬</span> Sentinel.X
+        </a>
+
+        <div class="flex items-center gap-3">
+            <!-- Theme Toggle -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Light and Dark Mode" 
+                    class="px-3.5 py-2.5 border-2 border-border bg-background text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:text-accent transition-all cursor-pointer flex items-center gap-2">
+                <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span id="themeLabel">Theme</span>
+            </button>
+
+            <a href="/" class="px-6 py-2.5 border-2 border-border text-foreground font-display font-bold uppercase tracking-tighter text-xs md:text-sm hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300">
+                Return Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col p-4 md:p-8 lg:p-16 max-w-[95vw] mx-auto w-full relative">
+        <div class="absolute right-0 top-20 -z-10 text-[10rem] md:text-[20rem] lg:text-[25rem] font-display font-bold text-muted leading-none tracking-tighter opacity-40 select-none pointer-events-none">
+            UP
+        </div>
+
+        <div class="mb-12">
+            <h1 class="font-display font-bold uppercase text-[clamp(3rem,7vw,7rem)] leading-[0.85] tracking-tighter text-foreground mb-4">
+                Network<br>
+                <span class="text-accent">Config</span><br>
+                Upload
+            </h1>
+            <p class="text-lg md:text-xl text-muted-foreground font-display uppercase tracking-wider max-w-2xl">
+                Upload .yaml, .json, or script specs for automated honeynet syntax ingestion.
+            </p>
+        </div>
+
+        <div class="w-full max-w-4xl border-2 border-border bg-background p-4 md:p-8 flex flex-col">
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-8" id="uploadForm">
+                
+                <label for="file" class="flex flex-col items-center justify-center border-2 border-dashed border-border hover:border-accent hover:bg-accent/5 transition-all duration-300 cursor-pointer p-12 md:p-16 text-center group">
+                    <span class="font-display font-bold text-6xl md:text-8xl text-muted group-hover:text-accent mb-4 transition-colors duration-300">⇪</span>
+                    <span class="font-display font-bold uppercase text-2xl md:text-4xl tracking-tighter mb-2 text-foreground group-hover:text-accent transition-colors">Select Configuration</span>
+                    <span class="text-xs tracking-widest uppercase text-muted-foreground font-mono">Or Drag &amp; Drop Specs Here</span>
+                    
+                    <input type="file" id="file" name="file" required onchange="updateFileName(this)">
+                </label>
+
+                <div id="fileNameDisplay" class="hidden font-display font-bold uppercase tracking-tighter text-xl text-accent text-center p-4 border-2 border-border bg-muted/20">
+                    <!-- File name appears here -->
+                </div>
+
+                <button type="submit" class="w-full py-6 md:py-8 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl md:text-3xl hover:scale-[1.01] active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent cursor-pointer">
+                    Deploy Configuration
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-background text-muted-foreground py-8 px-4 md:px-8 border-t-2 border-border text-center font-mono text-xs uppercase tracking-wider">
+        &copy; 2026 Global Systems Integrity Corp. Automated SHA-256 Quarantine Vault.
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeButton();
+        }
+
+        function updateThemeButton() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            const themeLabel = document.getElementById('themeLabel');
+            if (isDark) {
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (themeLabel) themeLabel.textContent = 'Light';
+            } else {
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (themeLabel) themeLabel.textContent = 'Dark';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateThemeButton);
+
+        function updateFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files[0]) {
+                display.textContent = 'SELECTED SPEC: ' + input.files[0].name;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+        
+        const dropZone = document.querySelector('label[for="file"]');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('border-accent', 'bg-accent/10');
+                dropZone.classList.remove('border-border');
+            }, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('border-accent', 'bg-accent/10');
+                dropZone.classList.add('border-border');
+            }, false);
+        });
+        
+        dropZone.addEventListener('drop', e => {
+            let dt = e.dataTransfer;
+            if (dt.files.length > 0) {
+                document.getElementById('file').files = dt.files;
+                updateFileName(document.getElementById('file'));
+            }
+        });
+        
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'DEPLOYING TO ISOLATION GRID...';
+            btn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                const display = document.getElementById('fileNameDisplay');
+                display.classList.remove('hidden');
+                if (data.status === 'success') {
+                    display.textContent = 'UPLOAD SUCCESS: SPEC QUARANTINED FOR ANALYSIS';
+                    display.className = 'font-display font-bold uppercase tracking-tighter text-xl text-success text-center p-4 border-2 border-success bg-success/10';
+                } else {
+                    display.textContent = 'UPLOAD FAILED: INVALID SPEC FORMAT';
+                    display.className = 'font-display font-bold uppercase tracking-tighter text-xl text-danger text-center p-4 border-2 border-danger bg-danger/10';
+                }
+            } catch (err) {
+                console.error(err);
+                const display = document.getElementById('fileNameDisplay');
+                display.textContent = 'NETWORK COMMUNICATION ERROR';
+                display.className = 'font-display font-bold uppercase tracking-tighter text-xl text-danger text-center p-4 border-2 border-danger bg-danger/10';
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                document.getElementById('file').value = '';
+            }
+        });
+    </script>
+</body>
+
+</html>

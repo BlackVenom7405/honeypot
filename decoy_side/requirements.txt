@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pydantic-settings
+jinja2
+python-multipart
+aiofiles
+pandas
+matplotlib
+requests
+joblib
+scikit-learn
+reportlab

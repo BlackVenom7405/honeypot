@@ -1,4 +1,9 @@
+import sys
 import os
+
+# Ensure current directory is at top of sys.path for Vercel Serverless
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import re
 import hmac
 import hashlib
@@ -34,11 +39,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Ensure directories exist
-QUARANTINE_DIR = "uploads/quarantine"
-os.makedirs(QUARANTINE_DIR, exist_ok=True)
-os.makedirs("static/decoy", exist_ok=True)
-os.makedirs("logs", exist_ok=True)
+# Ensure directories exist (serverless safe)
+QUARANTINE_DIR = "/tmp/uploads/quarantine" if os.getenv("VERCEL") else "uploads/quarantine"
+try:
+    os.makedirs(QUARANTINE_DIR, exist_ok=True)
+    os.makedirs("static/decoy", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+except Exception:
+    pass
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -190,6 +198,9 @@ async def login_get(request: Request):
     error = request.query_params.get("error")
     return templates.TemplateResponse("decoy_login.html", {"request": request, "error": error})
 
+# Global tracker for failed decoy login attempts by IP
+decoy_login_failures = {}
+
 @app.post("/login")
 async def login_post(
     request: Request,
@@ -197,6 +208,8 @@ async def login_post(
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    ip_addr = get_client_ip(request)
+    
     # Check for SQL injection signature in username or password
     is_attack = False
     if check_and_log_attack(request, username, "Login username"):
@@ -211,22 +224,27 @@ async def login_post(
     # Authenticate user
     user = db.query(User).filter(User.username == username).first()
     if not user or user.password_hash != hash_password(password):
-        # Log this failed authentication attempt as a potential Brute Force / credential guess
-        ip_addr = get_client_ip(request)
-        ua = request.headers.get("user-agent", "Unknown")
-        log_attack(
-            ip_address=ip_addr,
-            user_agent=ua,
-            endpoint="/login (Credential verification)",
-            method="POST",
-            headers=dict(request.headers),
-            payload=f"username={username}",
-            attack_type="Brute Force",
-            severity="Medium"
-        )
+        # Increment failed attempt count
+        decoy_login_failures[ip_addr] = decoy_login_failures.get(ip_addr, 0) + 1
+        
+        # Log this failed attempt to the dashboard as a Brute Force threat only on/after the 4th attempt
+        if decoy_login_failures[ip_addr] >= 4:
+            decoy_login_failures[ip_addr] = 0  # Reset counter
+            ua = request.headers.get("user-agent", "Unknown")
+            log_attack(
+                ip_address=ip_addr,
+                user_agent=ua,
+                endpoint="/login (Credential verification)",
+                method="POST",
+                headers=dict(request.headers),
+                payload=f"username={username}",
+                attack_type="Brute Force",
+                severity="Medium"
+            )
         return templates.TemplateResponse("decoy_login.html", {"request": request, "error": "Incorrect username or password."})
 
-    # Successful Login
+    # Successful Login: reset failures
+    decoy_login_failures[ip_addr] = 0
     token = create_decoy_token(username)
     response = RedirectResponse(url="/?message=Logged in successfully.", status_code=303)
     response.set_cookie(key=COOKIE_NAME, value=token, httponly=True)

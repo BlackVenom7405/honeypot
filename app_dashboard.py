@@ -60,6 +60,26 @@ def get_current_admin(request: Request) -> Optional[dict]:
 
 # ROUTES
 
+@app.post("/api/remote-log")
+async def receive_remote_log(request: Request, db: Session = Depends(get_db)):
+    try:
+        data = await request.json()
+        new_log = AttackLog(
+            ip_address=data.get("ip_address", "Unknown"),
+            user_agent=data.get("user_agent", "Unknown"),
+            endpoint=data.get("endpoint", "/"),
+            method=data.get("method", "GET"),
+            headers=data.get("headers", {}),
+            payload=data.get("payload", ""),
+            attack_type=data.get("attack_type", "Suspicious Activity"),
+            severity=data.get("severity", "Low")
+        )
+        db.add(new_log)
+        db.commit()
+        return {"status": "success", "message": "Remote log received"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     # If logged in as admin, go to dashboard, otherwise login

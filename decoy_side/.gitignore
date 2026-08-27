@@ -1,0 +1,35 @@
+# ==============================================================================
+# Git Ignore - Standalone Decoy Node
+# ==============================================================================
+
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# SSL Keys & Certificates
+*.pem
+*.key
+*.crt
+cert.pem
+key.pem
+
+# Database Storage
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+
+# Logs & Malware Uploads
+logs/
+*.log
+uploads/
+uploads/quarantine/
+
+# Environment Variables & OS
+.env
+.env.*
+.vscode/
+.DS_Store
+Thumbs.db
+.vercel/
