@@ -20,3 +20,9 @@ Enable-NetFirewallRule -DisplayName "Honeypot Decoy Ports"
 ----------------------------------------
 Remove-NetFirewallRule -DisplayName "Honeypot Decoy Ports"
 ================================================================================
+ Block a Specific IP Address
+ New-NetFirewallRule -DisplayName "Block Malicious IP" -Direction Inbound -RemoteAddress "10.14.238.50" -Action Block
+
+Explicitly Create a Port Block Rule
+New-NetFirewallRule -DisplayName "Block Honeypot Ports" -Direction Inbound -LocalPort 443,8443 -Protocol TCP -Action Block
+

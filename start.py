@@ -1,8 +1,20 @@
 import subprocess
 import sys
 import time
+import socket
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
 
 def start_services():
+    local_ip = get_local_ip()
     print("==========================================================")
     print("           SENTINEL.X HONEYPOT SERVICE MANAGER            ")
     print("==========================================================")
@@ -16,8 +28,12 @@ def start_services():
     dashboard_proc = subprocess.Popen([sys.executable, "app_dashboard.py"])
     
     print("\n[+] Both applications started successfully!")
-    print("    - Public Decoy (HTTPS):   https://localhost")
-    print("    - Admin Dashboard:        http://127.0.0.1:8080/admin")
+    print("    [Local Access - This Machine]")
+    print("        - Decoy Site (HTTPS):   https://localhost")
+    print("        - Admin Dashboard:      http://127.0.0.1:8080/admin")
+    print(f"\n    [Network Access - Other Devices on Same Wi-Fi/LAN]")
+    print(f"        - Decoy Site (HTTPS):   https://{local_ip}")
+    print(f"        - Admin Dashboard:      http://{local_ip}:8080/admin")
     print("==========================================================")
     print("Press CTRL+C to stop both applications.")
     
