@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-2.0.0-yellow?style=for-the-badge&logo=shield" alt="Version 2.0.0">
+  <img src="https://img.shields.io/badge/Version-4.0.0-blue?style=for-the-badge&logo=shield" alt="Version 4.0.0">
   <img src="https://img.shields.io/badge/FastAPI-Framework-009688?style=for-the-badge&logo=fastapi" alt="FastAPI">
   <img src="https://img.shields.io/badge/TailwindCSS-Neo--Brutalist-06B6D4?style=for-the-badge&logo=tailwindcss" alt="TailwindCSS">
   <img src="https://img.shields.io/badge/Zero--Trust-Architecture-success?style=for-the-badge" alt="Zero Trust">

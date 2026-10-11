@@ -19,7 +19,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Sentinel.X Admin Console",
     description="Threat Intelligence & Cyber Deception Center Dashboard.",
-    version="2.0.0"
+    version="4.0.0"
 )
 
 app.add_middleware(
