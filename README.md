@@ -4,6 +4,24 @@
 
 **Deceive. Detect. Investigate.**
 
+[![BAITSCOPE Release](https://img.shields.io/github/v/tag/BlackVenom7405/honeypot?style=for-the-badge&label=Release&color=DFE104&labelColor=09090B)](https://github.com/BlackVenom7405/honeypot/releases/tag/v5.0.0)
+
+[![Tech Stack Icons](https://go-skill-icons.vercel.app/api/icons?i=python,fastapi,sqlalchemy,sqlite,pydantic,html,css,js,tailwind,chartjs,docker,vercel&theme=dark)](#4-technology-stack)
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](#4-technology-stack)
+[![FastAPI](https://img.shields.io/badge/FastAPI-ASGI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](#4-technology-stack)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](#4-technology-stack)
+[![SQLite](https://img.shields.io/badge/SQLite-Shared_DB-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](#4-technology-stack)
+[![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](#4-technology-stack)
+[![Jinja2](https://img.shields.io/badge/Jinja2-Templates-B41717?style=for-the-badge&logo=jinja&logoColor=white)](#4-technology-stack)
+[![HTML5](https://img.shields.io/badge/HTML5-Portal-E34F26?style=for-the-badge&logo=html5&logoColor=white)](#4-technology-stack)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-UI-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](#4-technology-stack)
+[![Chart.js](https://img.shields.io/badge/Chart.js-Telemetry-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](#4-technology-stack)
+[![JavaScript](https://img.shields.io/badge/JavaScript-SSE_Live-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#4-technology-stack)
+[![TLS](https://img.shields.io/badge/HTTPS_%2F_TLS-Cryptography-0F172A?style=for-the-badge&logo=letsencrypt&logoColor=white)](#4-technology-stack)
+[![Docker](https://img.shields.io/badge/Docker-Containers-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#4-technology-stack)
+[![Vercel](https://img.shields.io/badge/Vercel-Serverless-000000?style=for-the-badge&logo=vercel&logoColor=white)](#4-technology-stack)
+
 ---
 
 ## 1. Project Overview
@@ -52,9 +70,11 @@ Unlike monolithic honeypots that expose management interfaces alongside decoy tr
 | **Backend Framework** | FastAPI & Starlette | ASGI routing, middleware, dependency injection, SSE streaming |
 | **ASGI Server** | Uvicorn | Multi-port HTTP/HTTPS serving |
 | **ORM & Database** | SQLAlchemy + SQLite | Persistent attack logs, malware metadata, threat registry, rate limits |
-| **Templating & Frontend** | Jinja2, HTML5, CSS3, JavaScript | Server-rendered portals and reactive Threat Center UI |
-| **Real-Time Transport** | Server-Sent Events (`EventSource`) | Live attack pushes, heartbeats, cursor replay, health probing |
+| **Schema & Config Validation** | Pydantic v2 + `pydantic-settings` | Typed configuration & runtime schema validation |
+| **Templating & Frontend** | Jinja2, HTML5, CSS3, Tailwind CSS, JavaScript | Server-rendered portals and reactive Threat Center UI |
+| **Visualization & Real-Time** | Chart.js + Server-Sent Events (`EventSource`) | Live 5-vector attack distribution, SSE pushes, heartbeats, cursor replay |
 | **Reporting & Crypto** | ReportLab, `cryptography`, `python-dotenv` | Multi-page PDF audit exports, self-signed TLS generation, env config |
+| **Deployment & Packaging** | Docker, Docker Compose, Vercel | Containerized dual-service orchestration & optional ASGI deployment |
 | **Attack Simulation** | `requests` | Multi-vector local test client (`simulate_attacks.py`) |
 
 ---
