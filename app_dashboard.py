@@ -34,7 +34,7 @@ async def lifespan(app_instance: FastAPI):
 app = FastAPI(
     title="BAITSCOPE Admin Console",
     description="BAITSCOPE Threat Operations Center & Forensic Management Console (Deceive. Detect. Investigate.).",
-    version="5.0.0",
+    version="5.0",
     lifespan=lifespan,
 )
 

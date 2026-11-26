@@ -1,4 +1,4 @@
-# BAITSCOPE Standalone Decoy Node Dependencies (v5.0.0)
+# BAITSCOPE Standalone Decoy Node Dependencies (v5.0)
 fastapi>=0.135.0,<=0.136.0
 uvicorn>=0.30.0,<=0.42.0
 starlette>=0.52.0,<=1.0.0

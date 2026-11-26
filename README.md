@@ -1,10 +1,10 @@
 # BAITSCOPE
 
-**Cyber Deception and Threat Intelligence Platform**
+**Cyber Deception and Threat Intelligence Platform — BAITSCOPE v5.0**
 
 **Deceive. Detect. Investigate.**
 
-[![BAITSCOPE Release](https://img.shields.io/github/v/tag/BlackVenom7405/honeypot?style=for-the-badge&label=Release&color=DFE104&labelColor=09090B)](https://github.com/BlackVenom7405/honeypot/releases/tag/v5.0.0)
+[![BAITSCOPE v5.0](https://img.shields.io/github/v/tag/BlackVenom7405/honeypot?style=for-the-badge&label=Release&color=DFE104&labelColor=09090B)](https://github.com/BlackVenom7405/honeypot/releases/tag/v5.0)
 
 [![Tech Stack Icons](https://go-skill-icons.vercel.app/api/icons?i=python,fastapi,sqlalchemy,sqlite,pydantic,html,css,js,tailwind,chartjs,docker,vercel&theme=dark)](#4-technology-stack)
 
@@ -342,7 +342,7 @@ See [`decoy_side/README_DEPLOY.md`](decoy_side/README_DEPLOY.md) for deploying o
 
 ## 14. Version Information
 
-- **Release Version**: `5.0.0` (BAITSCOPE Version 5.0)
+- **Release Version**: `5.0` (BAITSCOPE v5.0)
 - **Release Date**: `2026-11-26`
 
 ---

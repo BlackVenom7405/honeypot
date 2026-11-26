@@ -1,5 +1,5 @@
 # ==============================================================================
-# Git Ignore — BAITSCOPE Cyber Deception & Threat Intelligence Platform (v5.0.0)
+# Git Ignore — BAITSCOPE Cyber Deception & Threat Intelligence Platform (v5.0)
 # Excludes non-runtime artifacts, research materials, tests, ML leftovers,
 # local databases, quarantine samples, logs, and environment secrets.
 # ==============================================================================

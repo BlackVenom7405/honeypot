@@ -36,7 +36,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="myTunes Web Player",
     description="Listen to music for everyone.",
-    version="5.0.0"
+    version="5.0"
 )
 
 app.add_middleware(
