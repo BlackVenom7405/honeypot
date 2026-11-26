@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAITSCOPE | Administrator Login</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <title>BAITSCOPE | Admin Login</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -87,22 +87,22 @@
                 <span>⌬</span> BAITSCOPE
             </a>
             <div class="font-mono text-xs uppercase px-3 py-1 border-2 border-border bg-muted/20 text-accent font-bold">
-                SECURITY GATEWAY // #0X-AUTH
+                ADMIN LOGIN // SECURE ACCESS
             </div>
         </div>
         
         <div class="relative z-10">
             <h1 class="font-display font-bold uppercase text-[5.5rem] leading-[0.85] tracking-tighter mb-6 text-foreground">
-                BAITSCOPE<br><span class="text-accent">Auth Gate</span>
+                BAITSCOPE<br><span class="text-accent">Admin Login</span>
             </h1>
             <p class="text-lg text-muted-foreground font-display uppercase tracking-widest leading-relaxed max-w-md">
-                Cyber Deception &amp; Threat Intelligence Clearance. Root Administrator Authentication.
+                Sign in to view live honeypot attacks, attacker IPs, and security logs.
             </p>
         </div>
         
         <div class="relative z-10 flex justify-between items-center font-mono text-xs text-muted-foreground border-t-2 border-border pt-6">
-            <span>CHALLENGE: PBKDF2 / HMAC-SHA256</span>
-            <span>BAITSCOPE MATRIX</span>
+            <span>SECURITY: PBKDF2 / HMAC-SHA256</span>
+            <span>BAITSCOPE CONSOLE</span>
         </div>
 
         <div class="absolute -right-20 -bottom-20 text-[32rem] font-display font-bold text-muted leading-none opacity-20 select-none pointer-events-none">
@@ -136,10 +136,10 @@
                     <span>⌬</span> BAITSCOPE
                 </div>
                 <h2 class="font-display font-bold uppercase text-4xl sm:text-5xl leading-[0.88] tracking-tighter text-foreground mb-2">
-                    Threat Center<br><span class="text-accent">Admin Login</span>
+                    Threat Center<br><span class="text-accent">Login</span>
                 </h2>
                 <p class="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                    Root administrator credentials required for unredacted threat intelligence.
+                    Enter your admin username and password to open the full dashboard.
                 </p>
             </div>
 
@@ -162,14 +162,14 @@
             <div class="mb-8 border-2 border-border p-4 bg-muted/15 flex items-center justify-between gap-4">
                 <div>
                     <div class="font-display font-bold text-xs uppercase tracking-wider text-foreground">
-                        Looking for Guest / Client Access?
+                        Looking for Guest View?
                     </div>
                     <div class="text-[11px] text-muted-foreground font-mono mt-0.5">
-                        No login required for client telemetry view.
+                        View a limited demo without logging in.
                     </div>
                 </div>
                 <a href="/client-portal" class="px-4 py-2 bg-accent text-accent-foreground font-display font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors shrink-0">
-                    Open Client Portal →
+                    Open Guest View →
                 </a>
             </div>
             {% endif %}
@@ -180,7 +180,7 @@
                 
                 <div>
                     <label for="username" class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Administrator Username
+                        Admin Username
                     </label>
                     <input type="text" id="username" name="username" placeholder="admin" required 
                            class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/30 rounded-none">
@@ -193,11 +193,11 @@
                         </label>
                         {% if is_dashboard %}
                         <button type="button" onclick="toggleRecoveryNotice()" id="resetAuthBtn" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:underline cursor-pointer">
-                            Reset Auth
+                            Forgot Password?
                         </button>
                         {% else %}
                         <a href="/forgot-password" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:underline">
-                            Reset Auth
+                            Forgot Password?
                         </a>
                         {% endif %}
                     </div>
@@ -213,12 +213,12 @@
 
                 {% if is_dashboard %}
                 <div id="recoveryNotice" class="hidden border-2 border-warning bg-warning/10 p-3 text-[11px] font-mono text-warning uppercase tracking-wider leading-relaxed">
-                    ADMIN RECOVERY POLICY: Root operator credentials are enforced locally via environment configuration (BAITSCOPE_ADMIN_PASSWORD_HASH / .env). Rotate credentials on the host console and restart the dashboard process.
+                    HOW TO RESET: Admin login details are stored in the server .env file (BAITSCOPE_ADMIN_PASSWORD or BAITSCOPE_ADMIN_PASSWORD_HASH). Update the password there on the server and restart the app.
                 </div>
                 {% endif %}
 
                 <button type="submit" class="w-full py-5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent cursor-pointer">
-                    Authenticate Administrator
+                    Log In
                 </button>
             </form>
 
@@ -229,7 +229,7 @@
         </div>
 
         <div class="text-center font-mono text-[10px] text-muted-foreground uppercase pt-6">
-            AUDIT TRAIL
+            SECURE ADMIN ACCESS
         </div>
     </div>
 

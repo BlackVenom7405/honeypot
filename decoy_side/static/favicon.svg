@@ -1,18 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Background Badge -->
-  <rect width="64" height="64" rx="14" fill="#09090B"/>
-  <rect width="64" height="64" rx="14" stroke="#DFE104" stroke-width="2.5" stroke-opacity="0.6"/>
-  
-  <!-- Outer Cyber Hexagon / Aperture -->
-  <polygon points="32,7 55,20 55,44 32,57 9,44 9,20" fill="none" stroke="#DFE104" stroke-width="3" stroke-linejoin="round"/>
-  
-  <!-- Inner Ring / Core Grid -->
-  <circle cx="32" cy="32" r="14" fill="#18181B" stroke="#DFE104" stroke-width="2" stroke-dasharray="3 2"/>
-  
-  <!-- Central BAITSCOPE Radar Mark -->
-  <path d="M24 24 L40 40 M40 24 L24 40" stroke="#DFE104" stroke-width="3.5" stroke-linecap="round"/>
-  
-  <!-- Glowing Center Blip -->
-  <circle cx="32" cy="32" r="3.5" fill="#ff0055"/>
-  <circle cx="32" cy="32" r="6" fill="none" stroke="#ff0055" stroke-width="1.5" stroke-opacity="0.8"/>
+  <!-- BAITSCOPE Hexagonal Shield Mark -->
+  <path fill="#E2F801" fill-rule="evenodd" d="M 32.00 2.50 L 57.55 17.25 L 57.55 46.75 L 32.00 61.50 L 6.45 46.75 L 6.45 17.25 Z M 12.44 20.71 L 12.44 43.29 L 32.00 54.58 L 51.56 43.29 L 51.56 20.71 L 32.00 9.42 Z"/>
+  <polygon fill="#E2F801" points="14.37,21.25 20.41,24.74 20.41,39.26 14.37,42.68"/>
+  <polygon fill="#E2F801" points="32.06,11.41 50.07,21.88 44.09,25.49 32.06,18.39"/>
+  <polygon fill="#E2F801" points="31.44,45.86 43.46,38.95 49.51,42.31 31.44,52.65"/>
 </svg>

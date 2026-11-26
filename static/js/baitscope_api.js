@@ -45,14 +45,14 @@
         try {
             response = await fetch(url, fetchOpts);
         } catch (networkErr) {
-            throw new ApiError('Network connection lost. Unable to reach BAITSCOPE server.', 0);
+            throw new ApiError('Could not connect to the BAITSCOPE server.', 0);
         }
 
         if (response.status === 401) {
             if (authExpiredHandler) {
                 authExpiredHandler();
             }
-            throw new ApiError('Administrator session expired. Please sign in again.', 401);
+            throw new ApiError('Your admin login expired. Please log in again.', 401);
         }
 
         const contentType = response.headers.get('content-type') || '';
@@ -115,14 +115,14 @@
         try {
             response = await fetch(url, { credentials: 'same-origin' });
         } catch (_) {
-            throw new ApiError('Download failed: server unreachable.', 0);
+            throw new ApiError('Download failed because the server could not be reached.', 0);
         }
         if (response.status === 401) {
             if (authExpiredHandler) authExpiredHandler();
-            throw new ApiError('Session expired. Please sign in to export reports.', 401);
+            throw new ApiError('Your login expired. Please log in again to download reports.', 401);
         }
         if (!response.ok) {
-            let msg = `Export failed (HTTP ${response.status})`;
+            let msg = `Download failed (HTTP ${response.status})`;
             try {
                 const errJson = await response.json();
                 msg = errJson.detail || errJson.error || msg;
@@ -210,7 +210,7 @@
             return {
                 badge: 'SYNTHETIC',
                 cls: 'border-warning text-warning bg-warning/10',
-                title: `Synthetic telemetry (${method})`,
+                title: `Test attack data (${method})`,
                 peerIp,
                 method,
                 status,
@@ -220,7 +220,7 @@
             return {
                 badge: 'VERIFIED PEER',
                 cls: 'border-success text-success bg-success/10',
-                title: `Direct TCP peer (${method})`,
+                title: `Direct connection IP (${method})`,
                 peerIp,
                 method,
                 status,
@@ -230,7 +230,7 @@
             return {
                 badge: 'PROXY CHAIN',
                 cls: 'border-accent text-accent bg-accent/10',
-                title: `Trusted reverse proxy chain (${method}${peerIp ? ', peer ' + peerIp : ''})`,
+                title: `Via trusted proxy (${method}${peerIp ? ', proxy ' + peerIp : ''})`,
                 peerIp,
                 method,
                 status,
@@ -240,7 +240,7 @@
             return {
                 badge: 'REMOTE NODE',
                 cls: 'border-blue-400 text-blue-400 bg-blue-500/10',
-                title: `Remote honeypot node (${method}${peerIp ? ', peer ' + peerIp : ''})`,
+                title: `Sent from remote honeypot (${method}${peerIp ? ', node ' + peerIp : ''})`,
                 peerIp,
                 method,
                 status,
@@ -249,7 +249,7 @@
         return {
             badge: 'HISTORICAL',
             cls: 'border-border text-muted-foreground bg-muted/20',
-            title: `Historical / unverified provenance (${method})`,
+            title: `Older log before IP check (${method})`,
             peerIp,
             method,
             status,

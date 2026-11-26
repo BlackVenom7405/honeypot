@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BAITSCOPE | Cyber Deception and Threat Intelligence Platform</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -132,6 +132,12 @@
             transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
+        :root:not(.dark) .system-radar {
+            background: radial-gradient(circle, rgba(223, 225, 4, 0.18) 0%, #F4F4F5 65%, #E4E4E7 100%);
+            border-color: rgba(122, 116, 0, 0.65) !important;
+            box-shadow: inset 0 0 24px rgba(122, 116, 0, 0.1), 0 0 0 1px rgba(122, 116, 0, 0.12) !important;
+        }
+
         .radar-sweep {
             position: absolute;
             top: 0;
@@ -144,9 +150,23 @@
             pointer-events: none;
         }
 
+        :root:not(.dark) .radar-sweep {
+            background: conic-gradient(from 0deg, transparent 75%, rgba(163, 152, 0, 0.16) 90%, rgba(138, 130, 0, 0.45) 100%);
+        }
+
         .system-radar.under-attack .radar-sweep {
             background: conic-gradient(from 0deg, transparent 75%, rgba(255, 0, 85, 0.2) 90%, rgba(255, 0, 85, 0.65) 100%);
             animation: sweep 1.2s linear infinite;
+        }
+
+        :root:not(.dark) .system-radar.under-attack {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.14) 0%, #FEF2F2 68%, #FEE2E2 100%);
+            border-color: rgba(220, 38, 38, 0.75) !important;
+            box-shadow: inset 0 0 24px rgba(220, 38, 38, 0.14), 0 0 20px rgba(220, 38, 38, 0.18) !important;
+        }
+
+        :root:not(.dark) .system-radar.under-attack .radar-sweep {
+            background: conic-gradient(from 0deg, transparent 75%, rgba(220, 38, 38, 0.16) 90%, rgba(220, 38, 38, 0.45) 100%);
         }
 
         @keyframes sweep {
@@ -204,6 +224,22 @@
             bottom: 0;
             width: 1px;
             background: rgba(223, 225, 4, 0.15);
+        }
+
+        :root:not(.dark) .radar-ring-1,
+        :root:not(.dark) .radar-ring-2,
+        :root:not(.dark) .radar-ring-3 {
+            border-color: rgba(122, 116, 0, 0.42);
+        }
+
+        :root:not(.dark) .radar-crosshair-h,
+        :root:not(.dark) .radar-crosshair-v {
+            background: rgba(122, 116, 0, 0.28);
+        }
+
+        :root:not(.dark) #home-radar-center-beacon {
+            background-color: #7A7400;
+            box-shadow: 0 0 0 3px rgba(223, 225, 4, 0.35);
         }
 
         /* Interactive Radar Threat Blip Dot */
@@ -265,18 +301,18 @@
     class="font-sans antialiased noise overflow-x-hidden selection:bg-accent selection:text-accent-foreground min-h-screen flex flex-col">
 
     <!-- Top Telemetry Status Header Bar -->
-    <aside aria-label="Live Telemetry"
+    <aside aria-label="Live Status"
         class="border-b-2 border-border bg-background px-4 py-2 text-xs font-mono flex justify-between items-center transition-colors">
         <div class="flex items-center gap-3">
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-success animate-ping"></span>
-            <span class="font-bold text-success tracking-wider">DEFENSE GRID ACTIVE</span>
+            <span class="font-bold text-success tracking-wider">HONEYPOT ACTIVE</span>
             <span class="text-muted-foreground hidden sm:inline">|</span>
-            <span class="text-muted-foreground hidden sm:inline">NODE: GSI-BAITSCOPE-X</span>
+            <span class="text-muted-foreground hidden sm:inline">NODE: BAITSCOPE-MAIN</span>
         </div>
         <div class="flex items-center gap-4 text-muted-foreground">
-            <span class="hidden md:inline">SYSTEM INTEGRITY: <span
-                    class="text-foreground font-bold font-mono">100.0%</span></span>
-            <span class="text-accent font-bold">STATUS: NOMINAL</span>
+            <span class="hidden md:inline">SYSTEM STATUS: <span
+                    class="text-foreground font-bold font-mono">100%</span></span>
+            <span class="text-accent font-bold">MONITORING: ON</span>
         </div>
     </aside>
 
@@ -295,10 +331,10 @@
 
         <!-- Desktop Nav Links -->
         <div class="hidden lg:flex gap-8 items-center text-xs uppercase tracking-widest font-display font-bold">
-            <a href="#capabilities" class="hover:text-accent transition-colors">Capabilities</a>
-            <a href="#architecture" class="hover:text-accent transition-colors">Architecture</a>
-            <a href="#metrics" class="hover:text-accent transition-colors">Threat Intel</a>
-            <a href="#contact" class="hover:text-accent transition-colors">Security Inquiry</a>
+            <a href="#capabilities" class="hover:text-accent transition-colors">Features</a>
+            <a href="#architecture" class="hover:text-accent transition-colors">How It Works</a>
+            <a href="#metrics" class="hover:text-accent transition-colors">Stats</a>
+            <a href="#contact" class="hover:text-accent transition-colors">Contact</a>
         </div>
 
         <!-- Right Action Controls -->
@@ -326,13 +362,13 @@
             <a href="/admin"
                 class="hidden sm:flex px-4 py-2.5 border-2 border-border text-foreground font-display font-bold uppercase tracking-widest text-xs hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-200 items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-danger animate-pulse"></span>
-                <span>Threat Center</span>
+                <span>Dashboard</span>
             </a>
 
             <!-- Client Portal Button (Direct 1-Click Guest Access) -->
             <a href="/client-portal"
                 class="px-5 py-2.5 bg-accent border-2 border-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-xs md:text-sm hover:scale-105 active:scale-95 transition-all duration-200">
-                Client Portal
+                Guest View
             </a>
         </div>
     </nav>
@@ -346,19 +382,18 @@
             <div
                 class="inline-flex items-center gap-2 px-3 py-1 border-2 border-border bg-muted/30 font-mono text-xs text-accent font-bold uppercase tracking-wider mb-6">
                 <span class="w-2 h-2 rounded-full bg-accent"></span>
-                AUTONOMOUS THREAT TRAP &amp; TELEMETRY
+                WEB HONEYPOT &amp; ATTACK MONITOR
             </div>
 
             <h1
                 class="font-display font-bold uppercase text-[clamp(2.8rem,7vw,7.5rem)] leading-[0.88] tracking-tighter text-foreground mb-6">
-                Critical<br>
-                <span class="text-accent">Infrastructure.</span><br>
-                Unrivaled.
+                Detect<br>
+                <span class="text-accent">Attacks.</span><br>
+                Early.
             </h1>
 
             <p class="text-base sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-8">
-                Global Systems Integrity provides the brutal backend security framework for the world's most sensitive
-                data networks, trapping adversarial bots with adaptive decoys and real-time payload quarantine.
+                BAITSCOPE catches attackers and automated bots using realistic fake web pages, checks harmful inputs in real time, and safely isolates suspicious uploaded files.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 max-w-lg">
@@ -368,7 +403,7 @@
                 </a>
                 <a href="#capabilities"
                     class="flex-1 text-center px-8 py-5 border-2 border-border text-foreground font-display font-bold uppercase tracking-tighter text-lg hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300">
-                    Learn More
+                    See Features
                 </a>
             </div>
         </div>
@@ -411,25 +446,24 @@
 
     <!-- Marquee Divider matching Admin Dashboard -->
     <div class="w-full border-y-2 border-border bg-background py-4 marquee-container">
-        <div
-            class="marquee-content animate-marqueeFast font-display font-bold uppercase text-xl md:text-3xl tracking-tighter text-accent flex items-center gap-12">
-            <span>ZERO TRUST ARCHITECTURE</span>
+        <div class="marquee-content animate-marqueeFast font-display font-bold uppercase text-xl md:text-3xl tracking-tighter text-accent flex items-center gap-12">
+            <span>HONEYPOT PROTECTION</span>
             <span class="text-foreground">✧</span>
-            <span>AUTONOMOUS HONEYNET</span>
+            <span>SQL INJECTION DETECTION</span>
             <span class="text-foreground">✧</span>
-            <span>REAL-TIME NEUTRALIZATION</span>
+            <span>XSS &amp; PATH TRAVERSAL</span>
             <span class="text-foreground">✧</span>
-            <span>MILITARY GRADE DECEPTION</span>
+            <span>LIVE ATTACK MONITORING</span>
             <span class="text-foreground">✧</span>
-            <span>AUTOMATED MALWARE QUARANTINE</span>
+            <span>SAFE FILE QUARANTINE</span>
             <span class="text-foreground">✧</span>
-            <span>ZERO TRUST ARCHITECTURE</span>
+            <span>HONEYPOT PROTECTION</span>
             <span class="text-foreground">✧</span>
-            <span>AUTONOMOUS HONEYNET</span>
+            <span>SQL INJECTION DETECTION</span>
             <span class="text-foreground">✧</span>
-            <span>REAL-TIME NEUTRALIZATION</span>
+            <span>XSS &amp; PATH TRAVERSAL</span>
             <span class="text-foreground">✧</span>
-            <span>MILITARY GRADE DECEPTION</span>
+            <span>LIVE ATTACK MONITORING</span>
             <span class="text-foreground">✧</span>
         </div>
     </div>
@@ -438,7 +472,7 @@
     <section id="metrics" class="py-16 px-4 md:px-8 max-w-[96vw] mx-auto w-full">
         <div
             class="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-            <span class="text-accent text-lg">■</span> LIVE TELEMETRY DECK METRICS
+            <span class="text-accent text-lg">■</span> SAMPLE SECURITY METRICS
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border border-2 border-border">
@@ -446,7 +480,7 @@
             <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
                 <div
                     class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
-                    Captured Intrusions
+                    Attacks Caught
                 </div>
                 <div
                     class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
@@ -457,7 +491,7 @@
             <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
                 <div
                     class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
-                    Unique Adversaries
+                    Unique Attacker IPs
                 </div>
                 <div
                     class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
@@ -468,7 +502,7 @@
             <div class="bg-background p-6 hover:bg-accent group transition-colors duration-300">
                 <div
                     class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent-foreground/70 mb-2">
-                    Quarantined Samples
+                    Isolated Malware Files
                 </div>
                 <div
                     class="font-mono font-extrabold text-5xl md:text-6xl text-foreground group-hover:text-accent-foreground transition-colors">
@@ -479,7 +513,7 @@
             <div class="bg-background p-6 hover:bg-danger group transition-colors duration-300">
                 <div
                     class="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground group-hover:text-black/70 mb-2">
-                    System Threat Level
+                    Threat Level
                 </div>
                 <div
                     class="font-mono font-extrabold text-5xl md:text-6xl text-danger group-hover:text-black transition-colors">
@@ -494,10 +528,10 @@
     <section id="capabilities" class="py-16 px-4 md:px-8 max-w-[96vw] mx-auto w-full scroll-mt-24">
         <div class="mb-10">
             <h2 class="font-display font-bold uppercase text-4xl md:text-7xl tracking-tighter text-foreground mb-2">
-                Core<br><span class="text-accent">Capabilities</span>
+                Core<br><span class="text-accent">Features</span>
             </h2>
             <p class="font-mono text-sm text-muted-foreground uppercase tracking-wider">
-                Multi-vector cyber deception and autonomous payload containment.
+                Real-time attack detection and safe file quarantine.
             </p>
         </div>
 
@@ -513,20 +547,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        TRAFFIC INTELLIGENCE</div>
+                        TRAFFIC MONITOR</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
-                        Real-Time<br>Traffic Analysis
+                        Live Traffic<br>Tracking
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        Continuous deep packet inspection and HTTP stream forensics monitor inbound network telemetry,
-                        dissecting malicious request headers, anomalous bot scanners, and unauthorized probe sweeps in microseconds.
+                        Watches incoming HTTP requests in real time to catch harmful inputs, unusual headers, and automated scanner bots.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    INSPECTION: 100% PACKET FLOW ✧ &lt; 1.2MS
+                    CHECKED: 100% OF REQUESTS
                 </div>
             </div>
 
@@ -540,20 +573,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        DEFENSE MITIGATION</div>
+                        INPUT CHECKER</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
-                        Automated<br>Mitigation
+                        Instant Attack<br>Detection
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        Real-time signature and heuristic inspection engine that intercepts SQL injection, XSS, and
-                        path traversal payloads before execution occurs.
+                        Checks user forms and URL inputs immediately to spot SQL Injection, XSS, Path Traversal, and Brute Force attacks.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    RESPONSE: &lt; 2.4MS SUB-SECOND
+                    COVERS: 5 ATTACK TYPES
                 </div>
             </div>
 
@@ -567,20 +599,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        SANDBOX VAULT</div>
+                        SAFE STORAGE</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
                         Malware<br>Quarantine
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        Uploaded web shells and suspicious scripts are hashed (SHA-256), isolated from system kernels,
-                        and preserved for intelligence analysis.
+                        Uploaded Web Shells and suspicious scripts are hashed with SHA-256 and saved in an isolated folder where they cannot run.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    INTEGRITY: 100% ISOLATION
+                    SAFETY: ISOLATED FOLDER
                 </div>
             </div>
 
@@ -594,20 +625,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        HEURISTIC SCORING</div>
+                        RISK SCORING</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
-                        Threat<br>Attribution
+                        IP Risk<br>Scoring
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        Deterministic heuristic scoring correlates attack frequency, vector diversity, and verified peer
-                        IP provenance to classify threat severity.
+                        Gives each attacker IP address a clear risk score from 0 to 100 based on how often it attacks, attack types, and connection source.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    SCORING: DETERMINISTIC WEIGHTS
+                    SCALE: 0–100 RISK SCORE
                 </div>
             </div>
 
@@ -621,20 +651,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        AUDIT &amp; EXPORT</div>
+                        REPORTS &amp; EXPORTS</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
-                        Automated<br>Reporting
+                        One-Click<br>Reports
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        One-click PDF intelligence reports, JSON structured telemetry streams, and CSV export compliant
-                        with HIPAA, SOC2, and ISO standards.
+                        Download clear security summaries and attack log exports with one click in PDF, TXT, JSON, or CSV formats.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    FORMAT: PDF / JSON / CSV
+                    FORMATS: PDF / TXT / JSON / CSV
                 </div>
             </div>
 
@@ -648,20 +677,19 @@
                 <div class="relative z-10">
                     <div
                         class="font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black mb-3">
-                        HONEYNET DECOY</div>
+                        DECOY PAGES</div>
                     <h3
                         class="font-display font-bold uppercase text-3xl md:text-4xl tracking-tighter mb-4 text-foreground group-hover:text-accent-foreground transition-colors duration-300">
-                        High-Interaction<br>Traps
+                        Realistic<br>Fake Traps
                     </h3>
                     <p
                         class="text-base text-muted-foreground group-hover:text-black/90 transition-colors duration-300 leading-relaxed">
-                        Convincing fake APIs, credentials forms, and file upload endpoints that waste attacker compute
-                        and record their exploits for analysis.
+                        Uses realistic fake API endpoints, login pages, and upload forms to attract attackers and record every attempt.
                     </p>
                 </div>
                 <div
                     class="relative z-10 font-mono text-xs font-bold uppercase text-foreground group-hover:text-black tracking-wider pt-4 border-t border-border group-hover:border-black/20">
-                    NODES: MULTI-ENDPOINT DECEPT
+                    TRAPS: MYTUNES &amp; API ROUTES
                 </div>
             </div>
 
@@ -676,12 +704,10 @@
                 <div>
                     <h2
                         class="font-display font-bold uppercase text-4xl md:text-6xl tracking-tighter text-foreground mb-4">
-                        Honeynet<br><span class="text-accent">Architecture</span>
+                        How It<br><span class="text-accent">Works</span>
                     </h2>
                     <p class="text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl">
-                        When an intrusion payload strikes GSI endpoints, BAITSCOPE deceives the adversary while
-                        extracting cryptographic hashes, IP telemetry, and request headers into our SQLite forensic
-                        store.
+                        When an attacker sends a request to a decoy page, BAITSCOPE shows a normal response while saving their IP address, headers, and input in a SQLite database.
                     </p>
                 </div>
 
@@ -689,10 +715,8 @@
                     <div class="p-4 border-2 border-border bg-background flex items-center gap-4">
                         <div class="font-mono font-bold text-accent text-xl">01</div>
                         <div>
-                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Decoy
-                                Traps &amp; Endpoints</div>
-                            <div class="text-xs text-muted-foreground">Simulates /login, /forgot-password, /upload,
-                                /api/v1/user</div>
+                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Fake Pages &amp; API Traps</div>
+                            <div class="text-xs text-muted-foreground">Includes /login, /forgot-password, /upload, and /api/v1/user</div>
                         </div>
                     </div>
 
@@ -700,19 +724,16 @@
                         <div class="font-mono font-bold text-accent text-xl">02</div>
                         <div>
                             <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">
-                                Real-time Signature Classification</div>
-                            <div class="text-xs text-muted-foreground">Regex &amp; heuristic detection for SQLi, XSS,
-                                Path Traversal</div>
+                                Live Attack Detection</div>
+                            <div class="text-xs text-muted-foreground">Checks for SQL Injection, XSS, Path Traversal, Brute Force, and Web Shells</div>
                         </div>
                     </div>
 
                     <div class="p-4 border-2 border-border bg-background flex items-center gap-4">
                         <div class="font-mono font-bold text-accent text-xl">03</div>
                         <div>
-                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Sandbox
-                                Quarantine Vault</div>
-                            <div class="text-xs text-muted-foreground">Isolates uploaded shells with unique timestamped
-                                SHA-256 names</div>
+                            <div class="font-display font-bold uppercase text-foreground text-sm tracking-wider">Safe Quarantine Folder</div>
+                            <div class="text-xs text-muted-foreground">Saves uploaded files with unique timestamped SHA-256 names</div>
                         </div>
                     </div>
                 </div>
@@ -727,35 +748,32 @@
                         <span class="w-3 h-3 rounded-full bg-warning"></span>
                         <span class="w-3 h-3 rounded-full bg-success"></span>
                         <span
-                            class="ml-2 font-display font-bold uppercase tracking-wider text-muted-foreground text-xs">GSI-BAITSCOPE-TELEMETRY.STREAM</span>
+                            class="ml-2 font-display font-bold uppercase tracking-wider text-muted-foreground text-xs">BAITSCOPE-LIVE-LOGS.STREAM</span>
                     </div>
                     <span class="text-success font-bold text-[10px] animate-pulse">● LIVE STREAM</span>
                 </div>
 
                 <div class="space-y-2.5 text-zinc-300 leading-relaxed overflow-hidden">
-                    <p class="text-zinc-500">[00:00:01] <span class="text-accent">BAITSCOPE:</span> Honeypot core
-                        initialized on port 8000 (PID 4920)</p>
-                    <p class="text-zinc-500">[00:01:24] <span class="text-warning">INTERCEPT:</span> POST /login [admin'
+                    <p class="text-zinc-500">[00:00:01] <span class="text-accent">BAITSCOPE:</span> Honeypot started on HTTPS port 8443</p>
+                    <p class="text-zinc-500">[00:01:24] <span class="text-warning">DETECTED:</span> POST /login [admin'
                         OR '1'='1] from 192.168.1.104</p>
-                    <p class="text-danger font-bold">&gt; SIGNATURE: SQL Injection (Severity: High) | Payload Decoyed
+                    <p class="text-danger font-bold">&gt; TYPE: SQL Injection (Risk: High) | Logged safely
                     </p>
-                    <p class="text-zinc-500">[00:02:11] <span class="text-warning">INTERCEPT:</span> GET
+                    <p class="text-zinc-500">[00:02:11] <span class="text-warning">DETECTED:</span> GET
                         /api/v1/user?file=../../etc/passwd from 10.0.0.87</p>
-                    <p class="text-warning font-bold">&gt; SIGNATURE: Path Traversal (Severity: High) | Deceptive dummy
-                        returned</p>
-                    <p class="text-zinc-500">[00:03:45] <span class="text-warning">INTERCEPT:</span> POST /upload
+                    <p class="text-warning font-bold">&gt; TYPE: Path Traversal (Risk: High) | Safe dummy response sent</p>
+                    <p class="text-zinc-500">[00:03:45] <span class="text-warning">DETECTED:</span> POST /upload
                         [r57_shell.php] (SHA256: 9e107d9...)</p>
-                    <p class="text-accent font-bold">&gt; QUARANTINE: Moved to uploads/quarantine/20260812_r57_shell.php
+                    <p class="text-accent font-bold">&gt; QUARANTINE: Saved to uploads/quarantine/20260812_r57_shell.php
                     </p>
-                    <p class="text-success font-bold">&gt; DATABASE: Incident successfully logged to
-                        sqlite:///honeypot.db</p>
-                    <p class="text-zinc-500 animate-pulse">&gt; _ Awaiting next threat vector...</p>
+                    <p class="text-success font-bold">&gt; DATABASE: Attack saved to SQLite database</p>
+                    <p class="text-zinc-500 animate-pulse">&gt; _ Waiting for next event...</p>
                 </div>
 
                 <div
                     class="pt-4 border-t-2 border-border mt-4 flex justify-between items-center text-zinc-500 text-[10px]">
-                    <span>BUFFER: 4096 KB</span>
-                    <a href="/admin" class="text-accent hover:underline font-bold">VIEW FULL BAITSCOPE CONSOLE &rarr;</a>
+                    <span>STATUS: MONITORING</span>
+                    <a href="/admin" class="text-accent hover:underline font-bold">OPEN ADMIN DASHBOARD &rarr;</a>
                 </div>
             </div>
 
@@ -768,19 +786,18 @@
 
         <div class="flex-1 relative z-10">
             <h2 class="font-display font-bold uppercase text-5xl md:text-8xl tracking-tighter text-foreground mb-6">
-                Consult<br><span class="text-accent">Our Experts</span>
+                Send a<br><span class="text-accent">Message</span>
             </h2>
             <p class="text-lg md:text-2xl text-muted-foreground max-w-xl leading-relaxed mb-8">
-                Request an enterprise honeynet deployment or report an adversarial incident. Our incident response unit
-                acts immediately.
+                Contact the security team to report an issue or ask a question about the system.
             </p>
 
             <div
                 class="font-mono text-xs space-y-3 text-muted-foreground border-2 border-border p-6 bg-muted/20 max-w-md">
-                <div class="text-accent font-bold uppercase tracking-wider mb-2">SECURE TRANSMISSION PROTOCOL:</div>
-                <div>• Zero logs retained outside encrypted SQLite quarantine</div>
-                <div>• Direct alert webhook integration with SIEM / SOAR</div>
-                <div>• SLA: Under 24-hour response for enterprise networks</div>
+                <div class="text-accent font-bold uppercase tracking-wider mb-2">HOW MESSAGES ARE CHECKED:</div>
+                <div>• Messages are checked automatically for unsafe scripts</div>
+                <div>• Saved safely in the SQLite monitoring database</div>
+                <div>• Protected by real-time XSS and attack detection</div>
             </div>
         </div>
 
@@ -790,7 +807,7 @@
                 <div>
                     <label for="name"
                         class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Full Name / Handle
+                        Your Name
                     </label>
                     <input type="text" id="name" name="name" placeholder="JOHN DOE" required
                         class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 rounded-none">
@@ -798,23 +815,23 @@
                 <div>
                     <label for="email"
                         class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Corporate Work Email
+                        Email Address
                     </label>
-                    <input type="email" id="email" name="email" placeholder="JOHN@ENTERPRISE.COM" required
+                    <input type="email" id="email" name="email" placeholder="JOHN@EXAMPLE.COM" required
                         class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 rounded-none">
                 </div>
                 <div>
                     <label for="message"
                         class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Deployment Scope / Threat Details
+                        Message Details
                     </label>
-                    <textarea id="message" name="message" rows="3" placeholder="DESCRIBE YOUR HONEYNET REQUIREMENTS..."
+                    <textarea id="message" name="message" rows="3" placeholder="WRITE YOUR MESSAGE HERE..."
                         required
                         class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/40 resize-none rounded-none"></textarea>
                 </div>
                 <button type="submit"
                     class="w-full py-6 mt-4 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 border-2 border-accent hover:bg-background hover:text-accent transition-all duration-300 cursor-pointer">
-                    Send Security Inquiry
+                    Send Message
                 </button>
             </form>
         </div>
@@ -829,20 +846,20 @@
                     <span>⌬</span> BAITSCOPE
                 </div>
                 <p class="font-mono text-xs text-muted-foreground uppercase tracking-widest mt-1">
-                    Threat Intelligence Center &amp; Cyber Deception Core
+                    Web Honeypot &amp; Threat Monitoring Platform
                 </p>
             </div>
 
             <div class="flex flex-wrap gap-6 font-display font-bold text-xs uppercase tracking-widest">
                 <a href="/" class="hover:text-accent transition-colors">Home</a>
-                <a href="/client-portal" class="hover:text-accent transition-colors">Client Portal</a>
-                <a href="/forgot-password" class="hover:text-accent transition-colors">Reset Auth</a>
-                <a href="/admin" class="text-accent hover:underline">BAITSCOPE Console</a>
+                <a href="/client-portal" class="hover:text-accent transition-colors">Guest View</a>
+                <a href="/forgot-password" class="hover:text-accent transition-colors">Forgot Password</a>
+                <a href="/admin" class="text-accent hover:underline">Admin Dashboard</a>
             </div>
 
             <div class="text-left md:text-right font-mono text-xs text-muted-foreground uppercase tracking-wider">
-                &copy; 2026 Global Systems Integrity Corp.<br>
-                All connection attempts logged to threat matrix.
+                &copy; 2026 BAITSCOPE Security Labs.<br>
+                All connection attempts are logged for monitoring.
             </div>
         </div>
     </footer>

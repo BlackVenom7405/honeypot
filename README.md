@@ -44,7 +44,7 @@ Unlike monolithic honeypots that expose management interfaces alongside decoy tr
 
 ## 3. Key Features
 
-- **Web-Based Honeypot and Decoy Environment**: Realistic `myTunes` web application (`/`, `/signup`, `/login`, `/logout`, `/search`, `/create-playlist`, `/upload-avatar`) alongside deception endpoints (`/upload`, `/contact`, `/forgot-password`, `/api/v1/user`, `/client-portal`).
+- **Web-Based Honeypot and Decoy Environment**: Realistic `myTunes` web application (`/`, `/signup`, `/login`, `/logout`, `/search`, `/create-playlist`, `/upload-avatar`, `/avatar`, `/delete-avatar`, `/health`) alongside deception endpoints (`/upload`, `/contact`, `/forgot-password`, `/api/v1/user`, `/client-portal`).
 - **SQL Injection Detection**: Multi-pass URL/HTML/comment canonicalization identifying boolean tautologies, UNION queries, blind sleep payloads, stacked queries, and schema introspection.
 - **Cross-Site Scripting (XSS) Detection**: Pattern detection covering `<script>` variants, `on*` event handlers, `javascript:`/`vbscript:` URIs, and DOM storage/cookie exfiltration.
 - **Path Traversal Detection**: Catches encoded and unencoded directory escapes (`../`, `..\\`, `%2e%2e%2f`), UNIX system files, Windows paths, and UNC share probes.

@@ -56,6 +56,7 @@ def run_migrations(db_engine=None):
             ("malware_metadata", "attribution_method", "VARCHAR(32) DEFAULT 'direct_peer'"),
             ("malware_metadata", "attribution_status", "VARCHAR(32) DEFAULT 'verified_peer'"),
             ("malware_metadata", "is_synthetic", "BOOLEAN DEFAULT 0"),
+            ("decoy_users", "avatar_filename", "VARCHAR"),
         ]
         
         for table, col, col_type in migrations:

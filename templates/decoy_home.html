@@ -53,20 +53,129 @@
             border: 1px solid #292929;
             text-transform: capitalize;
         }
-        .btn-upload {
-            background: #ffffff;
-            color: #000000;
-            padding: 8px 16px;
-            border-radius: 500px;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.2s, background-color 0.2s;
+        .user-avatar-frame {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            box-sizing: border-box;
+            border-radius: 50%;
+            border: 1px solid #292929;
+            background: #181818;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-upload:hover {
-            transform: scale(1.04);
-            background-color: #f6f6f6;
+        .user-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .user-avatar-blank {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dfe5e7;
+        }
+        .user-avatar-blank.is-hidden {
+            display: none;
+        }
+        .user-avatar-overlay-form {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+        .user-avatar-overlay-form.is-hidden {
+            display: none;
+        }
+        .user-avatar-frame:hover .user-avatar-overlay-form:not(.is-hidden),
+        .user-avatar-frame:focus-within .user-avatar-overlay-form:not(.is-hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        @media (hover: none), (pointer: coarse) {
+            .user-avatar-overlay-form:not(.is-hidden) {
+                opacity: 0.9;
+                pointer-events: auto;
+            }
+        }
+        .user-avatar-overlay-btn {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: none;
+            background: rgba(0, 0, 0, 0.42);
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            font-size: 13px;
+            border-radius: 50%;
+            outline: none;
+            transition: background-color 0.18s ease;
+        }
+        .user-avatar-frame:hover .user-avatar-overlay-btn,
+        .user-avatar-frame:focus-within .user-avatar-overlay-btn,
+        .user-avatar-overlay-btn:hover,
+        .user-avatar-overlay-btn:focus-visible {
+            background: rgba(0, 0, 0, 0.56);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            color: #ffffff;
+        }
+        .decoy-conn-alert {
+            position: fixed;
+            top: 14px;
+            left: 0;
+            right: 0;
+            margin-inline: auto;
+            width: fit-content;
+            max-width: calc(100% - 32px);
+            box-sizing: border-box;
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            background: rgba(24, 24, 24, 0.96);
+            border: 2px solid #e91429;
+            color: #ffffff;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        .decoy-conn-alert.visible {
+            display: flex;
+        }
+        .decoy-conn-alert-icon {
+            color: #e91429;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .decoy-conn-alert-title {
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: #ffffff;
+        }
+        .decoy-conn-alert-sub {
+            font-size: 12px;
+            color: #d4d4d4;
         }
         .logout-link {
             color: #a7a7a7;
@@ -266,12 +375,23 @@
             color: #1a202c;
             border-color: #cbd5e0;
         }
-        body.light-theme .btn-upload {
-            background: #1a202c;
-            color: #ffffff;
+        body.light-theme .user-avatar-frame {
+            background: #dfe5e7;
+            border-color: #cbd5e0;
         }
-        body.light-theme .btn-upload:hover {
-            background-color: #2d3748;
+        body.light-theme .user-avatar-blank {
+            background: #dfe5e7;
+        }
+        body.light-theme .decoy-conn-alert {
+            background: #ffffff;
+            color: #121212;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+        }
+        body.light-theme .decoy-conn-alert-title {
+            color: #121212;
+        }
+        body.light-theme .decoy-conn-alert-sub {
+            color: #4a5568;
         }
         body.light-theme .logout-link {
             color: #718096;
@@ -706,15 +826,15 @@
             .topbar .navbar-user {
                 display: flex !important;
                 flex-direction: row !important;
+                flex-wrap: wrap !important;
                 align-items: center !important;
                 justify-content: flex-end !important; /* Force items to the right */
-                gap: 15px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 margin-top: 0 !important;
             }
 
             .topbar .navbar button,
-            .topbar .navbar-user .btn-upload,
             .topbar .navbar-user .logout-link {
                 padding: 8px 16px !important;
                 font-size: 12px !important;
@@ -870,19 +990,22 @@
     </style>
 </head>
 
-<body>
+<body data-authenticated="{{ 'true' if user else 'false' }}">
+
+    <!-- Top-Centre Server Unreachable Alert -->
+    <div id="decoy-connection-alert" class="decoy-conn-alert" role="alert" aria-live="assertive" aria-hidden="true">
+        <i class="fa-solid fa-triangle-exclamation decoy-conn-alert-icon" aria-hidden="true"></i>
+        <div>
+            <div class="decoy-conn-alert-title">SERVER CONNECTION LOST</div>
+            <div class="decoy-conn-alert-sub">The server is not responding. Trying to reconnect...</div>
+        </div>
+    </div>
 
     <!-- Notification Toasts -->
-    {% if message %}
-    <div id="toast-banner" class="toast-notify">
-        <i class="fa-solid fa-circle-check"></i>
-        <span>{{ message }}</span>
-    </div>
-    {% endif %}
-    {% if error %}
-    <div id="toast-banner" class="toast-notify toast-error">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>{{ error }}</span>
+    {% if message or error %}
+    <div id="toast-banner" class="toast-notify{% if error %} toast-error{% endif %}">
+        <i class="fa-solid {{ 'fa-triangle-exclamation' if error else 'fa-circle-check' }}"></i>
+        <span>{{ error if error else message }}</span>
     </div>
     {% endif %}
 
@@ -935,7 +1058,7 @@
             <ul id="user-playlists" class="playlist-sidebar-list">
                 {% if user_playlists %}
                     {% for pl in user_playlists %}
-                    <li onclick="playDemoPlaylist('{{ pl.name }}')">
+                    <li data-playlist-name="{{ pl.name }}" onclick="playDemoPlaylist(this.dataset.playlistName)">
                         <i class="fa-solid fa-music"></i>
                         <span>{{ pl.name }}</span>
                     </li>
@@ -964,14 +1087,14 @@
     <div class="main-container">
         <div class="topbar">
             <div class="prev-next-buttons" style="display: flex; align-items: center;">
-                <button type="button" class="fa fas fa-chevron-left"></button>
-                <button type="button" class="fa fas fa-chevron-right"></button>
+                <button type="button" class="fa fas fa-chevron-left" aria-label="Previous page"></button>
+                <button type="button" class="fa fas fa-chevron-right" aria-label="Next page"></button>
                 
                 <!-- Search bar input nested in topbar -->
                 <div class="search-bar-wrapper">
                     <form action="/search" method="GET">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input id="main-search-input" type="text" name="q" placeholder="What do you want to listen to?" value="{{ q or '' }}" />
+                        <input id="main-search-input" type="text" name="q" placeholder="What do you want to listen to?" aria-label="Search tracks and playlists" value="{{ q or '' }}" />
                     </form>
                 </div>
             </div>
@@ -984,8 +1107,33 @@
                     <i class="fa-solid fa-moon"></i>
                 </button>
 
+                <div id="user-avatar" class="user-avatar-frame" aria-label="User Avatar">
+                    {% if has_avatar %}
+                    <img id="user-avatar-img" src="/avatar?v={{ avatar_token }}" alt="User Avatar" class="user-avatar-img"
+                         onerror="handleAvatarImageError(this)" />
+                    <form id="avatar-delete-form" class="user-avatar-overlay-form" action="/delete-avatar" method="POST">
+                        <button id="avatar-delete-btn" type="submit" class="user-avatar-overlay-btn" aria-label="Delete Avatar" title="Delete Avatar">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form id="avatar-edit-form" class="user-avatar-overlay-form{% if has_avatar %} is-hidden{% endif %}" action="/upload-avatar" method="POST" enctype="multipart/form-data">
+                        <label id="avatar-edit-btn" for="avatar-input" class="user-avatar-overlay-btn" role="button" tabindex="0" aria-label="Upload Avatar" title="Upload Avatar"
+                               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('avatar-input').click();}">
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                        </label>
+                        <input id="avatar-input" type="file" name="file" onchange="this.form.submit()" style="display: none;" />
+                    </form>
+                    <span id="user-avatar-blank" class="user-avatar-blank{% if has_avatar %} is-hidden{% endif %}">
+                        <svg viewBox="0 0 34 34" aria-hidden="true" style="width:100%;height:100%;display:block;">
+                            <circle cx="17" cy="12.5" r="5.5" fill="#8696a0"/>
+                            <path d="M5.5 31.5c0-5.8 5.1-9.5 11.5-9.5s11.5 3.7 11.5 9.5" fill="#8696a0"/>
+                        </svg>
+                    </span>
+                </div>
+
                 <span class="user-name-badge">Hi, {{ user.username }}</span>
-                
+
                 <a href="/logout" class="logout-link">Log out</a>
             </div>
             {% else %}
@@ -1011,7 +1159,7 @@
 
             <div class="list">
                 <div class="item">
-                    <img src="/static/decoy/images/Today's Top Hits.jpg" />
+                    <img src="/static/decoy/images/Today's Top Hits.jpg" alt="Today's Top Hits" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1020,7 +1168,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/RapCaviar.jpg" />
+                    <img src="/static/decoy/images/RapCaviar.jpg" alt="RapCaviar" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1029,7 +1177,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/All Out 2010s.jpg" />
+                    <img src="/static/decoy/images/All Out 2010s.jpg" alt="All out 2010s" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1038,7 +1186,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Rock Classics.jpg" />
+                    <img src="/static/decoy/images/Rock Classics.jpg" alt="Rock Classics" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1047,7 +1195,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Chill Hits.jpg" />
+                    <img src="/static/decoy/images/Chill Hits.jpg" alt="Chill Hits" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1056,7 +1204,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Viva Latino.jpg" />
+                    <img src="/static/decoy/images/Viva Latino.jpg" alt="Viva Latino" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1067,7 +1215,7 @@
 
 
                 <div class="item">
-                    <img src="/static/decoy/images/All Out 80s.jpg" />
+                    <img src="/static/decoy/images/All Out 80s.jpg" alt="All out 80s" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1081,7 +1229,7 @@
             <h2>Focus</h2>
             <div class="list">
                 <div class="item">
-                    <img src="/static/decoy/images/Peaceful Piano.jpg" />
+                    <img src="/static/decoy/images/Peaceful Piano.jpg" alt="Peaceful Piano" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1090,7 +1238,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Deep Focus.jpg" />
+                    <img src="/static/decoy/images/Deep Focus.jpg" alt="Deep Focus" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1099,7 +1247,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Instrumental Study.jpg" />
+                    <img src="/static/decoy/images/Instrumental Study.jpg" alt="Instrumental Study" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1110,7 +1258,7 @@
 
 
                 <div class="item">
-                    <img src="/static/decoy/images/Focus Flow.jpg" />
+                    <img src="/static/decoy/images/Focus Flow.jpg" alt="Focus Flow" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1119,7 +1267,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Beats to think to.jpg" />
+                    <img src="/static/decoy/images/Beats to think to.jpg" alt="Beats to think to" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1128,7 +1276,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Reading Adventure.jpg" />
+                    <img src="/static/decoy/images/Reading Adventure.jpg" alt="Reading Adventure" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1137,7 +1285,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/Workday Lounge.jpg" />
+                    <img src="/static/decoy/images/Workday Lounge.jpg" alt="Workday Lounge" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1151,7 +1299,7 @@
             <h2>Sound of India</h2>
             <div class="list">
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Mumbai.jpg" />
+                    <img src="/static/decoy/images/The Sound of Mumbai.jpg" alt="The Sound of Mumbai" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1160,7 +1308,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Kolkata.jpg" />
+                    <img src="/static/decoy/images/The Sound of Kolkata.jpg" alt="The Sound of Kolkata" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1169,7 +1317,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Delhi.jpg" />
+                    <img src="/static/decoy/images/The Sound of Delhi.jpg" alt="The Sound of Delhi" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1178,7 +1326,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Bengaluru.jpg" />
+                    <img src="/static/decoy/images/The Sound of Bengaluru.jpg" alt="The Sound of Bengaluru" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1187,7 +1335,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Chennai.jpg" />
+                    <img src="/static/decoy/images/The Sound of Chennai.jpg" alt="The Sound of Chennai" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1196,7 +1344,7 @@
                 </div>
 
                 <div class="item">
-                    <img src="/static/decoy/images/The Sound of Hyderabad.jpg" />
+                    <img src="/static/decoy/images/The Sound of Hyderabad.jpg" alt="The Sound of Hyderabad" />
                     <div class="play">
                         <span class="fa fa-play"></span>
                     </div>
@@ -1238,9 +1386,9 @@
             </div>
 
             <div class="fullscreen-controls">
-                <button type="button" onclick="prevTrack()"><i class="fa-solid fa-backward-step"></i></button>
-                <button id="fullscreen-play-btn" type="button" onclick="togglePlayer()"><i class="fa-solid fa-play"></i></button>
-                <button type="button" onclick="nextTrack()"><i class="fa-solid fa-forward-step"></i></button>
+                <button type="button" onclick="prevTrack()" aria-label="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="fullscreen-play-btn" type="button" onclick="togglePlayer()" aria-label="Play or Pause"><i class="fa-solid fa-play"></i></button>
+                <button type="button" onclick="nextTrack()" aria-label="Next Track"><i class="fa-solid fa-forward-step"></i></button>
             </div>
         </div>
     </div>
@@ -1249,7 +1397,7 @@
     <!-- Logged in Player Bar -->
     <div class="playbar" onclick="expandFullscreenPlayer()" style="cursor: pointer; background: #181818; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-top: 1px solid #282828;">
         <div class="player-track-info" style="display: flex; align-items: center; gap: 15px; width: 30%;">
-            <img id="player-track-img" src="/static/decoy/images/Today's Top Hits.jpg" style="width: 56px; height: 56px; border-radius: 4px;" />
+            <img id="player-track-img" src="/static/decoy/images/Today's Top Hits.jpg" alt="Current Track Cover" style="width: 56px; height: 56px; border-radius: 4px;" />
             <div>
                 <h6 id="player-track-title" style="margin: 0; color: white; font-size: 14px; font-weight: bold;">Select a track to play</h6>
                 <p id="player-track-artist" style="margin: 3px 0 0 0; color: #b3b3b3; font-size: 11px;">Play a song from the library</p>
@@ -1258,9 +1406,9 @@
         
         <div class="player-controls" onclick="event.stopPropagation()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40%;">
             <div style="display: flex; align-items: center; gap: 20px;">
-                <button onclick="prevTrack()" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-backward-step"></i></button>
-                <button id="player-play-btn" onclick="togglePlayer()" style="background:white; border:none; color:black; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; font-weight:bold; padding:0; flex-shrink:0; box-sizing:border-box;"><i class="fa-solid fa-play"></i></button>
-                <button onclick="nextTrack()" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-forward-step"></i></button>
+                <button type="button" onclick="prevTrack()" aria-label="Previous Track" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="player-play-btn" type="button" onclick="togglePlayer()" aria-label="Play or Pause" style="background:white; border:none; color:black; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; font-weight:bold; padding:0; flex-shrink:0; box-sizing:border-box;"><i class="fa-solid fa-play"></i></button>
+                <button type="button" onclick="nextTrack()" aria-label="Next Track" style="background:none; border:none; color:#b3b3b3; font-size:16px; cursor:pointer;"><i class="fa-solid fa-forward-step"></i></button>
             </div>
             <div style="display:flex; align-items:center; gap:10px; width:100%;">
                 <span id="player-time-current" style="color:#b3b3b3; font-size:11px;">0:00</span>
@@ -1273,7 +1421,7 @@
 
         <div class="player-volume" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 30%;">
             <i class="fa-solid fa-volume-high" style="color:#b3b3b3;"></i>
-            <input type="range" min="0" max="100" value="50" oninput="setPlayerVolume(this.value)" style="accent-color:#1db954; cursor:pointer; width:100px;" />
+            <input type="range" min="0" max="100" value="50" aria-label="Volume" oninput="setPlayerVolume(this.value)" style="accent-color:#1db954; cursor:pointer; width:100px;" />
         </div>
     </div>
     {% else %}
@@ -1296,7 +1444,7 @@
         <div class="modal-content">
             <h3>Create Playlist</h3>
             <form action="/create-playlist" method="POST">
-                <input id="playlist-name-input" type="text" name="name" placeholder="My Playlist #1" required autocomplete="off" />
+                <input id="playlist-name-input" type="text" name="name" placeholder="My Playlist #1" aria-label="Playlist Name" required autocomplete="off" />
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="closeCreatePlaylist()">Cancel</button>
                     <button type="submit" class="btn-submit">Create</button>
@@ -1323,6 +1471,7 @@
 
         let currentTrackIdx = 0;
         const player = document.getElementById("decoy-audio-player");
+        const isDecoyAuthenticated = document.body.dataset.authenticated === "true";
 
         // Auto-dismiss banners
         setTimeout(() => {
@@ -1343,11 +1492,11 @@
         }
 
         function triggerCreatePlaylist() {
-            {% if user %}
+            if (isDecoyAuthenticated) {
                 document.getElementById("playlist-modal").style.display = "flex";
-            {% else %}
+            } else {
                 location.href = "/login?error=Please log in to create a playlist";
-            {% endif %}
+            }
         }
 
         function closeCreatePlaylist() {
@@ -1369,30 +1518,28 @@
         document.addEventListener("DOMContentLoaded", () => {
             const items = document.querySelectorAll(".spotify-playlists .item");
             items.forEach((item, index) => {
-                const trackData = tracks[index % tracks.length];
-                
                 // Add click listener to play button overlays
                 const playBtn = item.querySelector(".play");
                 if (playBtn) {
                     playBtn.style.cursor = "pointer";
                     playBtn.addEventListener("click", (e) => {
                         e.stopPropagation();
-                        {% if user %}
-                        loadAndPlayTrack(index % tracks.length);
-                        {% else %}
-                        location.href = "/signup?error=Sign up to listen to full tracks and playlists.";
-                        {% endif %}
+                        if (isDecoyAuthenticated) {
+                            loadAndPlayTrack(index % tracks.length);
+                        } else {
+                            location.href = "/signup?error=Sign up to listen to full tracks and playlists.";
+                        }
                     });
                 }
 
                 // Also make the entire card clickable
                 item.style.cursor = "pointer";
                 item.addEventListener("click", () => {
-                    {% if user %}
-                    loadAndPlayTrack(index % tracks.length);
-                    {% else %}
-                    location.href = "/signup?error=Sign up to listen to full tracks and playlists.";
-                    {% endif %}
+                    if (isDecoyAuthenticated) {
+                        loadAndPlayTrack(index % tracks.length);
+                    } else {
+                        location.href = "/signup?error=Sign up to listen to full tracks and playlists.";
+                    }
                 });
             });
             
@@ -1544,6 +1691,25 @@
             updateThemeUI(isLight);
         }
 
+        function handleAvatarImageError(imgEl) {
+            if (imgEl) imgEl.style.display = "none";
+            const blank = document.getElementById("user-avatar-blank");
+            if (blank) {
+                blank.classList.remove("is-hidden");
+                blank.style.display = "flex";
+            }
+            const delForm = document.getElementById("avatar-delete-form");
+            if (delForm) {
+                delForm.classList.add("is-hidden");
+                delForm.style.display = "none";
+            }
+            const editForm = document.getElementById("avatar-edit-form");
+            if (editForm) {
+                editForm.classList.remove("is-hidden");
+                editForm.style.display = "flex";
+            }
+        }
+
         function updateThemeUI(isLight) {
             const btns = document.querySelectorAll("#themeToggleBtn");
             btns.forEach(btn => {
@@ -1557,7 +1723,7 @@
             });
         }
 
-        // Initialize Theme on startup
+        // Initialize Theme & Decoy Server Health Watchdog on startup
         document.addEventListener("DOMContentLoaded", () => {
             const savedTheme = localStorage.getItem("decoyTheme");
             if (savedTheme === "light") {
@@ -1566,7 +1732,88 @@
             } else {
                 updateThemeUI(false);
             }
+            startDecoyHealthWatchdog();
         });
+
+        /* ========================================== */
+        /* Server Availability Watchdog               */
+        /* ========================================== */
+        const DECOY_HEALTH_INTERVAL_MS = 5000;
+        const DECOY_HEALTH_CONFIRM_MS = 1000;
+        const DECOY_HEALTH_TIMEOUT_MS = 2500;
+        const DECOY_HEALTH_FAILURE_THRESHOLD = 2;
+
+        let decoyHealthFailures = 0;
+        let decoyHealthInFlight = false;
+        let decoyHealthTimer = null;
+        let decoyConfirmTimer = null;
+
+        function setDecoyConnectionAlertVisible(visible) {
+            const el = document.getElementById("decoy-connection-alert");
+            if (!el) return;
+            el.classList.toggle("visible", Boolean(visible));
+            el.setAttribute("aria-hidden", visible ? "false" : "true");
+        }
+
+        async function runDecoyHealthCheck() {
+            if (decoyHealthInFlight) return;
+            decoyHealthInFlight = true;
+            const ctrl = new AbortController();
+            const timeoutId = setTimeout(() => ctrl.abort(), DECOY_HEALTH_TIMEOUT_MS);
+            try {
+                const resp = await fetch("/health", {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: { "Accept": "application/json" },
+                    signal: ctrl.signal
+                });
+                let ok = resp.ok;
+                if (ok) {
+                    const data = await resp.json().catch(() => null);
+                    ok = Boolean(data && data.status === "ok");
+                }
+                if (ok) {
+                    decoyHealthFailures = 0;
+                    if (decoyConfirmTimer) {
+                        clearTimeout(decoyConfirmTimer);
+                        decoyConfirmTimer = null;
+                    }
+                    setDecoyConnectionAlertVisible(false);
+                } else {
+                    handleDecoyHealthFailure();
+                }
+            } catch (_) {
+                handleDecoyHealthFailure();
+            } finally {
+                clearTimeout(timeoutId);
+                decoyHealthInFlight = false;
+            }
+        }
+
+        function handleDecoyHealthFailure() {
+            decoyHealthFailures += 1;
+            if (decoyHealthFailures >= DECOY_HEALTH_FAILURE_THRESHOLD) {
+                setDecoyConnectionAlertVisible(true);
+                return;
+            }
+            if (!decoyConfirmTimer) {
+                decoyConfirmTimer = setTimeout(() => {
+                    decoyConfirmTimer = null;
+                    runDecoyHealthCheck();
+                }, DECOY_HEALTH_CONFIRM_MS);
+            }
+        }
+
+        function startDecoyHealthWatchdog() {
+            if (decoyHealthTimer) clearInterval(decoyHealthTimer);
+            decoyHealthTimer = setInterval(runDecoyHealthCheck, DECOY_HEALTH_INTERVAL_MS);
+            window.addEventListener("offline", () => {
+                runDecoyHealthCheck();
+            });
+            window.addEventListener("online", () => {
+                runDecoyHealthCheck();
+            });
+        }
     </script>
 </body>
 

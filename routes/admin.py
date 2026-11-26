@@ -65,6 +65,7 @@ def serialize_attack_log(
     log: AttackLog,
     is_guest: bool = False,
     max_payload_len: Optional[int] = None,
+    watchlisted_set: Optional[Set[str]] = None,
 ) -> Dict[str, Any]:
     """Serialize an AttackLog ORM row cleanly with optional payload truncation and guest redaction."""
     raw_payload = log.payload or ""
@@ -100,6 +101,7 @@ def serialize_attack_log(
         "payload": payload_display,
         "payload_truncated": payload_truncated,
         "user_agent": ua_display,
+        "is_watchlisted": bool(watchlisted_set and log.ip_address in watchlisted_set),
     }
 
 
@@ -177,7 +179,17 @@ def build_active_distribution(db: Session) -> Dict[str, int]:
     return distribution
 
 
-def compute_dashboard_metrics(db: Session, latest_row: Optional[AttackLog] = None) -> Dict[str, Any]:
+def get_watchlisted_ip_set(db: Session) -> Set[str]:
+    """Return the exact set of attributed IP addresses currently flagged on the watchlist."""
+    rows = db.query(IPThreatRegistry.ip_address).filter(IPThreatRegistry.is_watchlisted == True).all()
+    return {r[0] for r in rows if r and r[0]}
+
+
+def compute_dashboard_metrics(
+    db: Session,
+    latest_row: Optional[AttackLog] = None,
+    watchlisted_set: Optional[Set[str]] = None,
+) -> Dict[str, Any]:
     """Compute shared dashboard KPIs, 5-vector distribution, status, and threat intel counts."""
     total_attacks = db.query(func.count(AttackLog.id)).scalar() or 0
     unique_ips = db.query(AttackLog.ip_address).distinct().count()
@@ -195,9 +207,10 @@ def compute_dashboard_metrics(db: Session, latest_row: Optional[AttackLog] = Non
         last_ts, last_sev, now_utc
     )
 
+    wl_set = watchlisted_set if watchlisted_set is not None else get_watchlisted_ip_set(db)
     total_tracked_ips = db.query(func.count(IPThreatRegistry.id)).scalar() or 0
     repeat_offenders = db.query(func.count(IPThreatRegistry.id)).filter(IPThreatRegistry.total_events > 1).scalar() or 0
-    watchlisted_ips = db.query(func.count(IPThreatRegistry.id)).filter(IPThreatRegistry.is_watchlisted == True).scalar() or 0
+    watchlisted_ips = len(wl_set)
     classifications = {
         "Critical": db.query(func.count(IPThreatRegistry.id)).filter(IPThreatRegistry.threat_classification == "Critical").scalar() or 0,
         "High": db.query(func.count(IPThreatRegistry.id)).filter(IPThreatRegistry.threat_classification == "High").scalar() or 0,
@@ -278,6 +291,7 @@ class RealtimeStreamBroker:
         self._last_attack_ts: Optional[datetime] = None
         self._last_attack_severity: str = "Low"
         self._last_emitted_status: str = "NOMINAL"
+        self._last_watchlisted_ips: Set[str] = set()
         self._baseline_ready = False
 
     def _ensure_loop_state(self) -> asyncio.AbstractEventLoop:
@@ -307,7 +321,8 @@ class RealtimeStreamBroker:
                 func.count(MalwareMetadata.id),
             ).one()
             latest_row = db.query(AttackLog).order_by(AttackLog.timestamp.desc(), AttackLog.id.desc()).first()
-            metrics = compute_dashboard_metrics(db, latest_row=latest_row)
+            watchlisted_set = get_watchlisted_ip_set(db)
+            metrics = compute_dashboard_metrics(db, latest_row=latest_row, watchlisted_set=watchlisted_set)
 
             self._last_attack_id = int(max_id or 0)
             self._last_attack_count = int(total_attacks or 0)
@@ -316,6 +331,7 @@ class RealtimeStreamBroker:
             self._last_attack_ts = latest_row.timestamp if latest_row else None
             self._last_attack_severity = (latest_row.severity or "Low") if latest_row else "Low"
             self._last_emitted_status = metrics["system_status"]
+            self._last_watchlisted_ips = set(watchlisted_set)
             self._baseline_ready = True
 
             if last_event_id is None:
@@ -363,7 +379,12 @@ class RealtimeStreamBroker:
                     .all()
                 )
                 serialized = [
-                    serialize_attack_log(r, is_guest=is_guest, max_payload_len=SSE_PAYLOAD_PREVIEW_LIMIT)
+                    serialize_attack_log(
+                        r,
+                        is_guest=is_guest,
+                        max_payload_len=SSE_PAYLOAD_PREVIEW_LIMIT,
+                        watchlisted_set=watchlisted_set,
+                    )
                     for r in missed
                 ]
                 mal_rows = db.query(MalwareMetadata).order_by(MalwareMetadata.timestamp.desc()).limit(50).all()
@@ -410,8 +431,10 @@ class RealtimeStreamBroker:
 
             attack_changed = (max_id != self._last_attack_id) or (total_attacks != self._last_attack_count)
             malware_changed = (max_mal_id != self._last_malware_id) or (total_malware != self._last_malware_count)
+            watchlisted_set = get_watchlisted_ip_set(db)
+            watchlist_changed = (watchlisted_set != self._last_watchlisted_ips)
 
-            if not attack_changed and not malware_changed:
+            if not attack_changed and not malware_changed and not watchlist_changed:
                 # Check in-memory Threat Level decay transitions (UNDER ATTACK -> MITIGATING -> NOMINAL) without full scans
                 if self._last_emitted_status != "NOMINAL":
                     now_utc = datetime.utcnow()
@@ -440,7 +463,7 @@ class RealtimeStreamBroker:
 
             # Detect history clear / DB reset across processes
             if (total_attacks == 0 and self._last_attack_count > 0) or max_id < self._last_attack_id:
-                metrics = compute_dashboard_metrics(db, latest_row=None)
+                metrics = compute_dashboard_metrics(db, latest_row=None, watchlisted_set=watchlisted_set)
                 self._last_attack_id = max_id
                 self._last_attack_count = total_attacks
                 self._last_malware_id = max_mal_id
@@ -448,6 +471,7 @@ class RealtimeStreamBroker:
                 self._last_attack_ts = None
                 self._last_attack_severity = "Low"
                 self._last_emitted_status = metrics["system_status"]
+                self._last_watchlisted_ips = set(watchlisted_set)
                 return {
                     "event": "reset",
                     "id": max_id,
@@ -470,9 +494,14 @@ class RealtimeStreamBroker:
                 )
 
             latest_row = new_rows[-1] if new_rows else db.query(AttackLog).order_by(AttackLog.timestamp.desc(), AttackLog.id.desc()).first()
-            metrics = compute_dashboard_metrics(db, latest_row=latest_row)
+            metrics = compute_dashboard_metrics(db, latest_row=latest_row, watchlisted_set=watchlisted_set)
             serialized_attacks = [
-                serialize_attack_log(r, is_guest=False, max_payload_len=SSE_PAYLOAD_PREVIEW_LIMIT)
+                serialize_attack_log(
+                    r,
+                    is_guest=False,
+                    max_payload_len=SSE_PAYLOAD_PREVIEW_LIMIT,
+                    watchlisted_set=watchlisted_set,
+                )
                 for r in new_rows
             ]
 
@@ -485,6 +514,7 @@ class RealtimeStreamBroker:
             self._last_attack_count = total_attacks
             self._last_malware_id = max_mal_id
             self._last_malware_count = total_malware
+            self._last_watchlisted_ips = set(watchlisted_set)
             if latest_row:
                 self._last_attack_ts = latest_row.timestamp
                 self._last_attack_severity = latest_row.severity or "Low"
@@ -728,19 +758,20 @@ async def get_stats(request: Request, db: Session = Depends(get_db)):
     
     is_guest = (user["role"] == "guest")
 
+    watchlisted_set = get_watchlisted_ip_set(db)
     recent_attacks = (
         db.query(AttackLog)
         .order_by(AttackLog.timestamp.desc(), AttackLog.id.desc())
         .limit(100)
         .all()
     )
-    recent_logs = [serialize_attack_log(log, is_guest=is_guest, max_payload_len=None) for log in recent_attacks]
+    recent_logs = [serialize_attack_log(log, is_guest=is_guest, max_payload_len=None, watchlisted_set=watchlisted_set) for log in recent_attacks]
 
     malware_list = db.query(MalwareMetadata).order_by(MalwareMetadata.timestamp.desc()).limit(50).all()
     malware_data = [serialize_malware_item(m, is_guest=is_guest) for m in malware_list]
 
     latest_row = recent_attacks[0] if recent_attacks else None
-    metrics = compute_dashboard_metrics(db, latest_row=latest_row)
+    metrics = compute_dashboard_metrics(db, latest_row=latest_row, watchlisted_set=watchlisted_set)
 
     # Top Threats summary for Threat Intel overview strip
     top_threat_records = db.query(IPThreatRegistry).order_by(IPThreatRegistry.threat_score.desc()).limit(5).all()

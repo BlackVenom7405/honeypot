@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from database import engine, Base, SessionLocal
+from database import engine, Base, SessionLocal, run_migrations
 from models import User, DecoyPlaylist, AttackLog, MalwareMetadata
 from detection import detect_attack
 from logger import log_attack
@@ -30,8 +30,9 @@ from source_attribution import extract_source_attribution, SourceAttribution
 
 logger = logging.getLogger("baitscope.decoy")
 
-# Ensure database tables exist
+# Ensure database tables exist and apply additive column migrations
 Base.metadata.create_all(bind=engine)
+run_migrations(engine)
 
 app = FastAPI(
     title="myTunes Web Player",
@@ -49,8 +50,10 @@ app.add_middleware(
 
 # Ensure directories exist (serverless safe)
 QUARANTINE_DIR = "/tmp/uploads/quarantine" if os.getenv("VERCEL") else "uploads/quarantine"
+AVATARS_DIR = "/tmp/uploads/avatars" if os.getenv("VERCEL") else "uploads/avatars"
 try:
     os.makedirs(QUARANTINE_DIR, exist_ok=True)
+    os.makedirs(AVATARS_DIR, exist_ok=True)
     os.makedirs("static/decoy", exist_ok=True)
     os.makedirs("logs", exist_ok=True)
 except Exception:
@@ -247,7 +250,112 @@ def save_quarantined_file(original_filename: str, content: bytes) -> str:
     # Return normalized relative path for database storage
     return os.path.relpath(target_real, os.getcwd())
 
+
+ALLOWED_IMAGE_EXTENSIONS = {"", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
+
+
+def detect_safe_image(content: bytes) -> Optional[tuple[str, str]]:
+    """Inspect magic bytes to permit only safe raster image formats (no SVG/HTML/executables)."""
+    if not content or len(content) < 4:
+        return None
+    if content.startswith(b"\x89PNG\r\n\x1a\n"):
+        return ".png", "image/png"
+    if content.startswith(b"\xff\xd8\xff"):
+        return ".jpg", "image/jpeg"
+    if content.startswith((b"GIF87a", b"GIF89a")):
+        return ".gif", "image/gif"
+    if len(content) >= 12 and content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+        return ".webp", "image/webp"
+    return None
+
+
+def save_user_avatar(user_id: int, content: bytes, ext: str) -> str:
+    """Store validated user avatar image inside AVATARS_DIR using an opaque generated filename."""
+    safe_filename = f"avatar_{user_id}_{secrets.token_hex(8)}{ext}"
+    avatars_real = os.path.realpath(AVATARS_DIR)
+    os.makedirs(avatars_real, exist_ok=True)
+    target_real = os.path.realpath(os.path.join(avatars_real, safe_filename))
+
+    try:
+        is_contained = (
+            os.path.commonpath([avatars_real, target_real]) == avatars_real
+            and target_real != avatars_real
+        )
+    except ValueError:
+        is_contained = False
+
+    if not is_contained or not target_real.startswith(avatars_real + os.sep):
+        raise ValueError("Invalid avatar storage path")
+
+    with open(target_real, "wb") as f:
+        f.write(content)
+    return safe_filename
+
+
+def resolve_user_avatar_path(avatar_filename: Optional[str]) -> Optional[tuple[str, str]]:
+    """Resolve and validate a user's stored avatar file inside AVATARS_DIR without exposing paths."""
+    if not avatar_filename or not re.fullmatch(r"[a-zA-Z0-9_.-]+", avatar_filename):
+        return None
+    avatars_real = os.path.realpath(AVATARS_DIR)
+    target_real = os.path.realpath(os.path.join(avatars_real, avatar_filename))
+    try:
+        is_contained = (
+            os.path.commonpath([avatars_real, target_real]) == avatars_real
+            and target_real != avatars_real
+        )
+    except ValueError:
+        return None
+    if not is_contained or not target_real.startswith(avatars_real + os.sep) or not os.path.isfile(target_real):
+        return None
+    try:
+        with open(target_real, "rb") as f:
+            head = f.read(16)
+    except OSError:
+        return None
+    img_info = detect_safe_image(head)
+    if not img_info:
+        return None
+    return target_real, img_info[1]
+
+
+def delete_avatar_file(avatar_filename: Optional[str]) -> None:
+    """Safely remove a replaced avatar file inside AVATARS_DIR."""
+    resolved = resolve_user_avatar_path(avatar_filename)
+    if resolved:
+        try:
+            os.remove(resolved[0])
+        except OSError:
+            pass
+
+
+def build_decoy_home_context(user: Optional[User], playlists: list, **extra) -> dict:
+    """Build template context for decoy_home.html including verified per-user avatar state."""
+    has_avatar = False
+    avatar_token = ""
+    if user and getattr(user, "avatar_filename", None):
+        if resolve_user_avatar_path(user.avatar_filename):
+            has_avatar = True
+            avatar_token = hashlib.sha256(user.avatar_filename.encode("utf-8")).hexdigest()[:12]
+    return {
+        "user": user,
+        "user_playlists": playlists,
+        "has_avatar": has_avatar,
+        "avatar_token": avatar_token,
+        **extra,
+    }
+
+
 # ROUTES
+
+@app.get("/health")
+async def decoy_health():
+    """Lightweight public availability check for the decoy web application."""
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok"},
+        headers={"Cache-Control": "no-store, no-cache"},
+    )
+
 
 @app.get("/", response_class=HTMLResponse)
 async def decoy_home(request: Request, db: Session = Depends(get_db)):
@@ -263,12 +371,38 @@ async def decoy_home(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request=request,
         name="decoy_home.html", 
-        context={
-            "user": user, 
-            "user_playlists": playlists,
-            "message": message,
-            "error": error
-        }
+        context=build_decoy_home_context(
+            user,
+            playlists,
+            message=message,
+            error=error,
+        ),
+    )
+
+
+@app.get("/avatar")
+async def decoy_get_avatar(request: Request, db: Session = Depends(get_db)):
+    """Serve the authenticated user's own uploaded avatar without exposing filesystem paths."""
+    user = get_current_decoy_user(request, db)
+    if not user:
+        return Response(status_code=401)
+    resolved = resolve_user_avatar_path(getattr(user, "avatar_filename", None))
+    if not resolved:
+        return Response(status_code=404)
+    target_path, mime_type = resolved
+    try:
+        with open(target_path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return Response(status_code=404)
+    return Response(
+        content=data,
+        media_type=mime_type,
+        headers={
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "no-store, private",
+            "Content-Security-Policy": "default-src 'none'",
+        },
     )
 
 @app.get("/signup", response_class=HTMLResponse)
@@ -406,7 +540,7 @@ async def decoy_search(request: Request, q: str = "", db: Session = Depends(get_
         return templates.TemplateResponse(
             request=request,
             name="decoy_home.html",
-            context={"user": user, "user_playlists": playlists, "q": q, "error": f"No results found for '{q}'."}
+            context=build_decoy_home_context(user, playlists, q=q, error=f"No results found for '{q}'."),
         )
 
     playlists = []
@@ -417,7 +551,7 @@ async def decoy_search(request: Request, q: str = "", db: Session = Depends(get_
     return templates.TemplateResponse(
         request=request,
         name="decoy_home.html",
-        context={"user": user, "user_playlists": playlists, "q": q, "message": f"Showing results for '{q}'."}
+        context=build_decoy_home_context(user, playlists, q=q, message=f"Showing results for '{q}'."),
     )
 
 @app.post("/create-playlist")
@@ -535,8 +669,37 @@ async def decoy_upload_avatar(
         # Deceptive return response to keep the attacker blind
         return RedirectResponse(url="/?message=Profile picture updated successfully!", status_code=303)
 
-    # Safe file path (mock upload success)
+    # Safe image upload validation (verify magic bytes & allowed extensions)
+    img_info = detect_safe_image(content)
+    if not img_info or ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return RedirectResponse(url="/?error=Please upload a valid image file (PNG, JPG, GIF, or WEBP).", status_code=303)
+
+    safe_ext, _ = img_info
+    old_avatar = getattr(user, "avatar_filename", None)
+    new_avatar = save_user_avatar(user.id, content, safe_ext)
+    user.avatar_filename = new_avatar
+    db.commit()
+    if old_avatar and old_avatar != new_avatar:
+        delete_avatar_file(old_avatar)
+
     return RedirectResponse(url="/?message=Profile picture updated successfully!", status_code=303)
+
+
+@app.post("/delete-avatar")
+async def decoy_delete_avatar(request: Request, db: Session = Depends(get_db)):
+    """Remove the authenticated user's uploaded avatar and revert to the default placeholder."""
+    user = get_current_decoy_user(request, db)
+    if not user:
+        return RedirectResponse(url="/login?error=Please log in to remove your avatar.", status_code=303)
+
+    old_avatar = getattr(user, "avatar_filename", None)
+    if old_avatar:
+        user.avatar_filename = None
+        db.commit()
+        delete_avatar_file(old_avatar)
+        return RedirectResponse(url="/?message=Profile picture removed.", status_code=303)
+
+    return RedirectResponse(url="/", status_code=303)
 
 # LEGACY DECOY ROUTES (For backwards compatibility with penetration testing & simulation)
 

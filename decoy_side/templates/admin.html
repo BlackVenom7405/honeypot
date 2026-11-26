@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BAITSCOPE | Threat Intelligence Center</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=5">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
@@ -213,16 +213,37 @@
             border: 1px solid rgba(223, 225, 4, 0.4);
             box-shadow: inset 0 0 25px rgba(223, 225, 4, 0.08), 0 0 25px rgba(223, 225, 4, 0.12);
             overflow: hidden;
-            transition: all 0.5s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         :root:not(.dark) .system-radar {
-            background: radial-gradient(circle, rgba(223, 225, 4, 0.15) 0%, rgba(24, 24, 27, 0.94) 78%);
+            background: radial-gradient(circle, rgba(223, 225, 4, 0.18) 0%, #F4F4F5 65%, #E4E4E7 100%);
+            border-color: rgba(122, 116, 0, 0.65);
+            box-shadow: inset 0 0 22px rgba(122, 116, 0, 0.1), 0 0 0 1px rgba(122, 116, 0, 0.12);
+        }
+
+        :root:not(.dark) .radar-sweep {
+            background: conic-gradient(from 0deg, rgba(138, 130, 0, 0.42) 0deg, rgba(163, 152, 0, 0.14) 45deg, transparent 70deg, transparent 360deg);
+        }
+
+        :root:not(.dark) #radar-grid > div.bg-accent {
+            background-color: #7A7400;
+            box-shadow: 0 0 0 3px rgba(223, 225, 4, 0.35);
         }
 
         .system-radar.danger-mode {
             border-color: rgba(255, 68, 68, 0.65);
             box-shadow: inset 0 0 30px rgba(255, 68, 68, 0.18), 0 0 25px rgba(255, 68, 68, 0.25);
+        }
+
+        :root:not(.dark) .system-radar.danger-mode {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.14) 0%, #FEF2F2 68%, #FEE2E2 100%);
+            border-color: rgba(220, 38, 38, 0.75);
+            box-shadow: inset 0 0 24px rgba(220, 38, 38, 0.14), 0 0 18px rgba(220, 38, 38, 0.18);
+        }
+
+        :root:not(.dark) .radar-sweep.alert-state {
+            background: conic-gradient(from 0deg, rgba(220, 38, 38, 0.45) 0deg, rgba(220, 38, 38, 0.12) 45deg, transparent 70deg, transparent 360deg);
         }
 
         .radar-circle-1,
@@ -237,6 +258,12 @@
             pointer-events: none;
         }
 
+        :root:not(.dark) .radar-circle-1,
+        :root:not(.dark) .radar-circle-2,
+        :root:not(.dark) .radar-circle-3 {
+            border-color: rgba(122, 116, 0, 0.42);
+        }
+
         .radar-circle-1 { width: 52px; height: 52px; }
         .radar-circle-2 { width: 108px; height: 108px; }
         .radar-circle-3 { width: 162px; height: 162px; }
@@ -245,6 +272,12 @@
         .system-radar.danger-mode .radar-circle-2,
         .system-radar.danger-mode .radar-circle-3 {
             border-color: rgba(255, 68, 68, 0.35);
+        }
+
+        :root:not(.dark) .system-radar.danger-mode .radar-circle-1,
+        :root:not(.dark) .system-radar.danger-mode .radar-circle-2,
+        :root:not(.dark) .system-radar.danger-mode .radar-circle-3 {
+            border-color: rgba(220, 38, 38, 0.45);
         }
     </style>
 </head>
@@ -263,7 +296,7 @@
         <!-- Brand Header + Desktop Rail Collapse Toggle -->
         <div class="sidebar-header-inner p-5 border-b-2 border-border flex items-center justify-between gap-2">
             <div class="min-w-0">
-                <a href="/admin" title="BAITSCOPE Operational Deck" aria-label="BAITSCOPE Operational Deck"
+                <a href="/admin" title="BAITSCOPE Dashboard" aria-label="BAITSCOPE Dashboard"
                     class="font-display font-bold text-2xl uppercase tracking-tighter text-accent flex items-center gap-2">
                     <span class="text-3xl leading-none shrink-0">⌬</span>
                     <span class="sidebar-expanded-only truncate">BAITSCOPE</span>
@@ -291,14 +324,14 @@
         <nav class="sidebar-nav-list flex-1 p-3.5 space-y-1.5 font-display text-xs uppercase tracking-wider overflow-y-auto custom-scrollbar"
             aria-label="Primary Console Navigation">
             <button type="button" onclick="switchTab('operational')" id="nav-operational"
-                aria-label="Operational Deck" title="Operational Deck"
+                aria-label="Overview" title="Overview"
                 class="tab-btn relative group w-full text-left px-3.5 py-2.5 bg-accent text-accent-foreground font-bold flex items-center gap-3 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
                     <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
                 </svg>
-                <span class="sidebar-expanded-only truncate">Operational Deck</span>
-                <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Operational Deck</span>
+                <span class="sidebar-expanded-only truncate">Overview</span>
+                <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Overview</span>
             </button>
             <button type="button" onclick="switchTab('traffic')" id="nav-traffic"
                 aria-label="Traffic Analysis" title="Traffic Analysis"
@@ -329,14 +362,14 @@
                 <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Malware Vault</span>
             </button>
             <button type="button" onclick="switchTab('reports')" id="nav-reports"
-                aria-label="Forensic Reports" title="Forensic Reports"
+                aria-label="Reports" title="Reports"
                 class="tab-btn relative group w-full text-left px-3.5 py-2.5 text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-colors flex items-center gap-3 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
                 </svg>
-                <span class="sidebar-expanded-only truncate">Forensic Reports</span>
-                <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Forensic Reports</span>
+                <span class="sidebar-expanded-only truncate">Reports</span>
+                <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Reports</span>
             </button>
             <button type="button" onclick="switchTab('system')" id="nav-system"
                 aria-label="System Status" title="System Status"
@@ -363,7 +396,7 @@
         <!-- Auth Clearance Status Footer -->
         <div class="sidebar-footer p-4 border-t-2 border-border space-y-2.5 flex flex-col">
             <div class="sidebar-expanded-only w-full">
-                <div class="font-mono text-[10px] text-muted-foreground uppercase mb-1">Authenticated Operator:</div>
+                <div class="font-mono text-[10px] text-muted-foreground uppercase mb-1">Logged In As:</div>
                 <div class="flex items-center justify-between gap-2">
                     <span class="font-display font-bold text-sm text-foreground uppercase truncate">{{ username }}</span>
                     <span
@@ -375,7 +408,7 @@
 
             <a href="/logout"
                 class="sidebar-expanded-only w-full py-2 border-2 border-border hover:border-accent hover:bg-accent hover:text-accent-foreground text-foreground font-display font-bold uppercase text-xs tracking-wider transition-all items-center justify-center gap-2 flex">
-                Sign Out &rarr;
+                Log Out &rarr;
             </a>
 
             <div class="sidebar-expanded-only font-mono text-[11px] space-y-1 text-muted-foreground pt-2 border-t border-border/60 w-full flex-col">
@@ -394,16 +427,16 @@
 
             <!-- Compact Rail Footer Controls (Shown Only When Sidebar Collapsed on Desktop) -->
             <div class="sidebar-collapsed-only hidden flex-col items-center gap-2.5 w-full">
-                <span title="Operator: {{ username }} ({{ user_role }})" aria-label="Operator: {{ username }} ({{ user_role }})"
+                <span title="User: {{ username }} ({{ user_role }})" aria-label="User: {{ username }} ({{ user_role }})"
                     class="w-9 h-9 flex items-center justify-center border-2 font-display font-bold text-[10px] uppercase {% if user_role == 'admin' %}bg-accent text-accent-foreground border-accent{% else %}bg-warning/20 text-warning border-warning/40{% endif %}">
                     {{ user_role[:2]|upper }}
                 </span>
-                <a href="/logout" aria-label="Sign Out" title="Sign Out"
+                <a href="/logout" aria-label="Log Out" title="Log Out"
                     class="rail-hover-target relative w-9 h-9 border-2 border-border hover:border-accent hover:bg-accent hover:text-black text-foreground flex items-center justify-center transition-colors">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
-                    <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Sign Out</span>
+                    <span role="tooltip" class="rail-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap bg-card border-2 border-accent text-foreground px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider shadow-[0_0_16px_rgba(0,0,0,0.7)]">Log Out</span>
                 </a>
                 <span id="sidebar-status-dot" title="System Status: NOMINAL" class="w-2.5 h-2.5 rounded-full bg-success"></span>
             </div>
@@ -433,10 +466,10 @@
             <div class="min-w-0">
                 <h1 id="header-title"
                     class="font-display font-bold uppercase text-3xl sm:text-4xl lg:text-5xl tracking-tighter text-foreground leading-none">
-                    Threat <span class="text-accent">Intel Deck</span>
+                    Threat <span class="text-accent">Dashboard</span>
                 </h1>
                 <p id="header-subtitle" class="text-xs text-muted-foreground font-mono uppercase tracking-wider mt-1.5">
-                    Adaptive Honeynet Monitoring Live Adversarial Interactions.
+                    Honeypot dashboard tracking live attacks and suspicious activity.
                 </p>
             </div>
 
@@ -467,7 +500,7 @@
 
                 <!-- Manual Refresh Button (Icon-Only) -->
                 <button id="manual-refresh-btn" onclick="triggerManualRefresh()" type="button"
-                    aria-label="Refresh Dashboard Telemetry" title="Refresh Dashboard Telemetry"
+                    aria-label="Refresh dashboard data" title="Refresh dashboard data"
                     class="w-10 h-10 border-2 border-border text-foreground hover:border-accent hover:text-accent transition-all duration-300 inline-flex items-center justify-center cursor-pointer shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
                     <svg id="manual-refresh-icon" class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                         <polyline points="23 4 23 10 17 10" />
@@ -486,14 +519,14 @@
                 {% if user_role != 'guest' %}
                 <button type="button" onclick="confirmClearHistory()" id="clear-history-btn"
                     class="px-3.5 py-2.5 border-2 border-border text-muted-foreground hover:border-danger hover:bg-danger hover:text-white font-display font-bold uppercase tracking-widest text-xs transition-all duration-300 flex items-center gap-2 cursor-pointer whitespace-nowrap"
-                    title="Purge captured attack history">
+                    title="Delete saved attack logs">
                     <span class="text-danger group-hover:text-white">✕</span>
                     Clear History
                 </button>
                 {% endif %}
 
                 <!-- Live View Status Pill -->
-                <button type="button" onclick="fetchData(true)" id="live-status-pill" title="Click to force immediate telemetry refresh"
+                <button type="button" onclick="fetchData(true)" id="live-status-pill" title="Click to refresh data now"
                     class="px-3.5 py-2.5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-widest text-xs flex items-center gap-2 cursor-pointer whitespace-nowrap">
                     <span id="live-pulse-dot" class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
@@ -519,7 +552,7 @@
             <div class="flex items-center gap-2 shrink-0">
                 <a id="global-alert-login" href="/login?next=/admin&auth_required=1"
                     class="hidden px-3 py-1 bg-danger text-white font-display font-bold uppercase text-[10px] tracking-widest">
-                    Re-Authenticate
+                    Log In Again
                 </a>
                 <button type="button" id="global-alert-dismiss" onclick="dismissGlobalAlert()"
                     class="px-2 py-1 border border-danger text-danger hover:bg-danger hover:text-white text-[10px] uppercase font-bold cursor-pointer">
@@ -535,15 +568,15 @@
             <div class="flex items-center gap-3">
                 <span class="text-base">🔒</span>
                 <div>
-                    <div>Limited Guest Telemetry Clearance Mode</div>
+                    <div>Guest View (Limited Access)</div>
                     <div class="text-[11px] font-mono font-normal text-warning/90 mt-0.5">
-                        Sensitive IP nodes, attack payload contents, user agents, malware vault paths, watchlist writes, and forensic downloads are redacted or locked.
+                        Full IP addresses, harmful inputs, browser details, file paths, watchlist edits, and report downloads are hidden in guest mode.
                     </div>
                 </div>
             </div>
             <a href="/logout"
                 class="px-3 py-1.5 border border-warning hover:bg-warning hover:text-black transition-colors shrink-0">
-                Upgrade Clearance &rarr;
+                Log In as Admin &rarr;
             </a>
         </div>
         {% endif %}
@@ -554,7 +587,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-2 border-border divide-y-2 md:divide-y-0 md:divide-x-2 divide-border bg-card">
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Captured Intrusions
+                        Total Attacks
                     </div>
                     <div id="stat-total-attacks"
                         class="font-display font-bold text-5xl md:text-6xl text-foreground tracking-tighter leading-none">
@@ -564,7 +597,7 @@
 
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Unique Adversaries
+                        Unique Attacker IPs
                     </div>
                     <div id="stat-unique-ips"
                         class="font-display font-bold text-5xl md:text-6xl text-foreground tracking-tighter leading-none">
@@ -574,7 +607,7 @@
 
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-2">
-                        Quarantined Samples
+                        Isolated Malware Files
                     </div>
                     <div id="stat-total-malware"
                         class="font-display font-bold text-5xl md:text-6xl text-foreground tracking-tighter leading-none">
@@ -599,11 +632,11 @@
                 <div class="lg:col-span-2 border-2 border-border bg-card flex flex-col min-w-0">
                     <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                         <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                            <span class="text-accent">▤</span> Recent Adversarial Events
+                            <span class="text-accent">▤</span> Recent Attacks
                         </h3>
                         <button type="button" onclick="switchTab('traffic')"
                             class="font-display text-xs font-bold uppercase tracking-widest text-accent hover:underline cursor-pointer">
-                            View All Telemetry &rarr;
+                            View All Attacks &rarr;
                         </button>
                     </div>
 
@@ -612,16 +645,16 @@
                             <thead class="sticky top-0 z-10 bg-card">
                                 <tr class="border-b-2 border-border text-muted-foreground uppercase bg-muted/10">
                                     <th class="py-2.5 px-4 font-bold tracking-wider">Time</th>
-                                    <th class="py-2.5 px-4 font-bold tracking-wider">Source Node</th>
-                                    <th class="py-2.5 px-4 font-bold tracking-wider">Endpoint</th>
-                                    <th class="py-2.5 px-4 font-bold tracking-wider">Classification</th>
+                                    <th class="py-2.5 px-4 font-bold tracking-wider">Attacker IP</th>
+                                    <th class="py-2.5 px-4 font-bold tracking-wider">Target Page</th>
+                                    <th class="py-2.5 px-4 font-bold tracking-wider">Attack Type</th>
                                     <th class="py-2.5 px-4 font-bold tracking-wider">Risk</th>
                                 </tr>
                             </thead>
                             <tbody id="recent-attacks-body" class="divide-y divide-border/50">
                                 <tr>
                                     <td colspan="5" class="py-10 text-center text-muted-foreground">
-                                        [INITIALIZING TELEMETRY FEED...]
+                                        Loading recent attacks...
                                     </td>
                                 </tr>
                             </tbody>
@@ -635,7 +668,7 @@
                     <div class="border-2 border-border bg-card flex flex-col">
                         <div class="px-6 py-4 border-b-2 border-border bg-muted/20">
                             <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                                <span class="text-accent">◎</span> Vector Distribution
+                                <span class="text-accent">◎</span> Attack Types
                             </h3>
                         </div>
                         <div class="p-5 flex-1 flex items-center justify-center relative h-[230px]"
@@ -659,7 +692,7 @@
                                 Scanner: <span id="radar-status" class="text-muted-foreground font-bold">IDLE</span>
                             </div>
                             <div id="radar-subtext" class="font-mono text-[9px] text-muted-foreground uppercase tracking-widest mt-0.5">
-                                Awaiting newly detected incoming threat activity
+                                Waiting for new attacks
                             </div>
                         </div>
                     </div>
@@ -670,28 +703,28 @@
             <div class="border-2 border-border bg-card">
                 <div class="px-6 py-4 border-b-2 border-border flex flex-wrap justify-between items-center gap-3 bg-muted/20">
                     <h3 class="font-display font-bold uppercase text-base tracking-wider flex items-center gap-2">
-                        <span class="text-accent">◈</span> Persistent Threat Intelligence Summary
+                        <span class="text-accent">◈</span> Attacker IP Summary
                     </h3>
                     <button type="button" onclick="switchTab('watchlist')"
                         class="font-display text-xs font-bold uppercase tracking-widest text-accent hover:underline cursor-pointer">
-                        Manage IP Watchlist &rarr;
+                        Open IP Watchlist &rarr;
                     </button>
                 </div>
                 <div class="grid grid-cols-2 lg:grid-cols-4 divide-y-2 lg:divide-y-0 lg:divide-x-2 divide-border">
                     <div class="p-4">
-                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Tracked Threat IPs</div>
+                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Tracked IPs</div>
                         <div id="ti-tracked-ips" class="font-display font-bold text-3xl text-foreground mt-1">0</div>
                     </div>
                     <div class="p-4">
-                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Repeat Offenders</div>
+                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Repeat Attackers</div>
                         <div id="ti-repeat-offenders" class="font-display font-bold text-3xl text-warning mt-1">0</div>
                     </div>
                     <div class="p-4">
-                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Watchlisted Nodes</div>
+                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Watchlisted IPs</div>
                         <div id="ti-watchlisted-ips" class="font-display font-bold text-3xl text-accent mt-1">0</div>
                     </div>
                     <div class="p-4">
-                        <div class="font-mono text-[10px] uppercase text-muted-foreground">Critical / High Risk IPs</div>
+                        <div class="font-mono text-[10px] uppercase text-muted-foreground">High &amp; Critical Risk IPs</div>
                         <div id="ti-critical-high" class="font-display font-bold text-3xl text-danger mt-1">0</div>
                     </div>
                 </div>
@@ -701,11 +734,11 @@
             <div class="border-2 border-border bg-card">
                 <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                     <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                        <span class="text-danger">☢</span> Malware Laboratory
+                        <span class="text-danger">☢</span> Saved Malware Files
                     </h3>
                     <button type="button" onclick="switchTab('malware')"
                         class="font-display text-xs font-bold uppercase tracking-widest text-accent hover:underline cursor-pointer">
-                        Explore Vault &rarr;
+                        View All Files &rarr;
                     </button>
                 </div>
 
@@ -713,17 +746,17 @@
                     <table class="w-full text-left font-mono text-xs border-collapse">
                         <thead>
                             <tr class="border-b-2 border-border text-muted-foreground uppercase bg-muted/10">
-                                <th class="py-3 px-4 font-bold tracking-wider">Filename</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">SHA-256 Digest</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Size</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">MIME Type</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Source IP</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Name</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">SHA-256 Hash</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Size</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Type</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Uploaded By (IP)</th>
                             </tr>
                         </thead>
                         <tbody id="malware-overview-body" class="divide-y divide-border/50">
                             <tr>
                                 <td colspan="5" class="py-8 text-center text-muted-foreground">
-                                    [MALWARE LABORATORY STANDBY]
+                                    Waiting for uploaded files...
                                 </td>
                             </tr>
                         </tbody>
@@ -739,19 +772,19 @@
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
                     <div class="relative flex-1 w-full">
                         <input type="text" id="log-search" oninput="filterLogs()"
-                            placeholder="Filter by IP, peer IP, endpoint, payload or user-agent..."
+                            placeholder="Search by IP address, target page, input, or browser..."
                             class="w-full bg-background border-2 border-border focus:border-accent px-4 py-3 text-sm font-mono outline-none text-foreground placeholder:text-muted-foreground/60">
                     </div>
                     <div class="flex gap-2 font-display text-xs uppercase tracking-wider shrink-0">
                         <span id="filtered-count"
                             class="px-4 py-3 border-2 border-border font-bold text-foreground bg-muted/20">
-                            Filtered Logs: 0
+                            Matching Logs: 0
                         </span>
                     </div>
                 </div>
 
                 <div class="flex gap-2 flex-wrap font-display font-bold text-xs tracking-widest uppercase items-center">
-                    <span class="text-muted-foreground self-center mr-1">Vector:</span>
+                    <span class="text-muted-foreground self-center mr-1">Attack Type:</span>
                     <button type="button" onclick="setVectorFilter('ALL')" id="filter-vec-all"
                         class="px-3 py-1.5 border-2 border-accent bg-accent text-accent-foreground cursor-pointer">ALL</button>
                     <button type="button" onclick="setVectorFilter('SQL Injection')" id="filter-vec-sqli"
@@ -771,10 +804,10 @@
             <div class="border-2 border-border bg-card flex flex-col">
                 <div class="px-6 py-4 border-b-2 border-border flex flex-wrap justify-between items-center gap-2 bg-muted/20">
                     <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                        <span class="text-accent">⚡</span> Adversarial Stream &amp; Payload Inspector
+                        <span class="text-accent">⚡</span> All Recorded Attacks
                     </h3>
                     <span id="traffic-stream-note" class="font-mono text-xs text-accent uppercase tracking-widest">
-                        Real-Time Ingestion Active (Latest 100 Buffered)
+                        Live Updates Active (Latest 100 Events)
                     </span>
                 </div>
 
@@ -782,20 +815,20 @@
                     <table class="w-full text-left font-mono text-xs border-collapse">
                         <thead>
                             <tr class="border-b-2 border-border text-muted-foreground uppercase bg-muted/10">
-                                <th class="py-3 px-4 font-bold tracking-wider">Timestamp</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Source IP</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Method &amp; Target</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Attack Vector</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Time</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Attacker IP</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Request &amp; Page</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Attack Type</th>
                                 <th class="py-3 px-4 font-bold tracking-wider">Risk</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Intercepted Payload</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">User-Agent</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Suspicious Input</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Browser / Tool</th>
                                 <th class="py-3 px-4 font-bold tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="all-attacks-body" class="divide-y divide-border/50">
                             <tr>
                                 <td colspan="8" class="py-10 text-center text-muted-foreground">
-                                    [LOADING TELEMETRY STREAM...]
+                                    Loading attack logs...
                                 </td>
                             </tr>
                         </tbody>
@@ -811,7 +844,7 @@
                 class="border-2 border-border bg-card p-6 space-y-4">
                 <div class="flex justify-between items-center border-b border-border pb-3">
                     <h3 class="font-display font-bold uppercase text-base tracking-wider text-foreground">
-                        Add IP Address to Persistent Watchlist
+                        Add an IP Address to the Watchlist
                     </h3>
                     <span id="watchlist-form-feedback" class="font-mono text-xs"></span>
                 </div>
@@ -819,7 +852,7 @@
                     <div class="md:col-span-4">
                         <label for="watchlist-add-ip"
                             class="block font-display font-bold text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                            Target IPv4 / IPv6 Address
+                            IP Address (IPv4 or IPv6)
                         </label>
                         <input type="text" id="watchlist-add-ip" required placeholder="e.g. 203.0.113.50"
                             class="w-full bg-background border-2 border-border focus:border-accent px-3.5 py-2.5 text-sm font-mono outline-none text-foreground">
@@ -827,15 +860,15 @@
                     <div class="md:col-span-6">
                         <label for="watchlist-add-notes"
                             class="block font-display font-bold text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                            Analyst Escalation Notes
+                            Notes
                         </label>
-                        <input type="text" id="watchlist-add-notes" placeholder="Reason for watchlist flagging..."
+                        <input type="text" id="watchlist-add-notes" placeholder="Why are you watching this IP?..."
                             class="w-full bg-background border-2 border-border focus:border-accent px-3.5 py-2.5 text-sm font-mono outline-none text-foreground">
                     </div>
                     <div class="md:col-span-2">
                         <button type="submit"
                             class="w-full py-2.5 bg-accent text-accent-foreground border-2 border-accent hover:bg-background hover:text-accent font-display font-bold uppercase text-xs tracking-wider transition-colors cursor-pointer">
-                            Flag IP
+                            Add to Watchlist
                         </button>
                     </div>
                 </div>
@@ -845,27 +878,27 @@
             <div class="border-2 border-border bg-card flex flex-col">
                 <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                     <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                        <span class="text-accent">★</span> Active Priority Watchlist
+                        <span class="text-accent">★</span> Watched IP Addresses
                     </h3>
                     <span id="watchlist-count-badge" class="font-mono text-xs text-accent font-bold uppercase">
-                        0 Watchlisted Nodes
+                        0 Watched IPs
                     </span>
                 </div>
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left font-mono text-xs border-collapse">
                         <thead>
                             <tr class="border-b-2 border-border text-muted-foreground uppercase bg-muted/10">
-                                <th class="py-3 px-4 font-bold tracking-wider">Adversary IP</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Score &amp; Tier</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Events</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Analyst Notes</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">IP Address</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Risk Score</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Attacks</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Notes</th>
                                 <th class="py-3 px-4 font-bold tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="watchlist-table-body" class="divide-y divide-border/50">
                             <tr>
                                 <td colspan="5" class="py-10 text-center text-muted-foreground">
-                                    [LOADING WATCHLISTED ENTITIES...]
+                                    Loading watchlist...
                                 </td>
                             </tr>
                         </tbody>
@@ -879,22 +912,22 @@
             <div class="grid grid-cols-1 md:grid-cols-3 border-2 border-border divide-y-2 md:divide-y-0 md:divide-x-2 divide-border bg-card">
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-1">
-                        Isolated Binaries
+                        Saved Malware Files
                     </div>
                     <div id="stat-total-malware-2" class="font-display font-bold text-4xl text-foreground">0</div>
                 </div>
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-1">
-                        Web Shell Scripts
+                        Web Shell Files
                     </div>
                     <div id="malware-shells-count" class="font-display font-bold text-4xl text-danger">0</div>
                 </div>
                 <div class="p-6">
                     <div class="font-display font-bold text-xs tracking-widest uppercase text-muted-foreground mb-1">
-                        Vault Storage Location
+                        Quarantine Folder
                     </div>
                     <div class="font-mono text-xs text-accent font-bold mt-2 break-all">
-                        {% if user_role == 'guest' %}[REDACTED VAULT STORAGE]{% else %}/uploads/quarantine/ (LOCKED){% endif %}
+                        {% if user_role == 'guest' %}[Hidden in Guest Mode]{% else %}/uploads/quarantine/ (Safe Storage){% endif %}
                     </div>
                 </div>
             </div>
@@ -902,10 +935,10 @@
             <div class="border-2 border-border bg-card flex flex-col">
                 <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                     <h3 class="font-display font-bold uppercase text-lg tracking-wider flex items-center gap-2">
-                        <span class="text-danger">☢</span> Quarantined Weaponized Samples &amp; Cryptographic Signatures
+                        <span class="text-danger">☢</span> Isolated Suspicious Files &amp; SHA-256 Hashes
                     </h3>
                     <span class="font-mono text-xs text-danger uppercase border border-danger px-2 py-0.5">
-                        Isolation Secure
+                        Safely Isolated
                     </span>
                 </div>
 
@@ -913,18 +946,18 @@
                     <table class="w-full text-left font-mono text-xs border-collapse">
                         <thead>
                             <tr class="border-b-2 border-border text-muted-foreground uppercase bg-muted/10">
-                                <th class="py-3 px-4 font-bold tracking-wider">Ingestion Date</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Filename &amp; SHA-256</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Size</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">MIME Type</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Origin Node</th>
-                                <th class="py-3 px-4 font-bold tracking-wider">Quarantine Path</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Time Uploaded</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Name &amp; SHA-256 Hash</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Size</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">File Type</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Uploader IP</th>
+                                <th class="py-3 px-4 font-bold tracking-wider">Saved File Path</th>
                             </tr>
                         </thead>
                         <tbody id="all-malware-body" class="divide-y divide-border/50">
                             <tr>
                                 <td colspan="6" class="py-10 text-center text-muted-foreground">
-                                    [SCANNING QUARANTINE VAULT...]
+                                    Loading isolated files...
                                 </td>
                             </tr>
                         </tbody>
@@ -937,7 +970,7 @@
         <div id="tab-reports" class="tab-content hidden p-4 sm:p-8 space-y-8 flex-1">
             {% if user_role == 'guest' %}
             <div class="border-2 border-warning bg-warning/10 p-6 text-warning font-mono text-xs uppercase">
-                Guest Analyst clearance does not authorize exporting unredacted PDF/TXT forensic reports, Threat Registry dumps, or executing log purge actions.
+                Guest users cannot download full reports, export IP data, or delete saved attack logs.
             </div>
             {% endif %}
 
@@ -946,39 +979,39 @@
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <span class="px-2.5 py-1 border border-danger text-danger font-display font-bold text-xs">PDF REPORT</span>
-                            <span class="font-mono text-[10px] text-accent uppercase">Executive Audit</span>
+                            <span class="font-mono text-[10px] text-accent uppercase">Full Summary</span>
                         </div>
                         <h3 class="font-display font-bold uppercase text-xl text-foreground mb-2">
-                            Executive Incident Audit Report (.PDF)
+                            Full PDF Security Report (.PDF)
                         </h3>
                         <p class="font-mono text-xs text-muted-foreground leading-relaxed">
-                            ReportLab-generated security assessment with vector summary, quarantined malware SHA-256 digests, attributed source telemetry, and mitigation guidance.
+                            Creates a PDF report with attack counts, isolated file SHA-256 hashes, event logs, and security tips.
                         </p>
                     </div>
                     <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
                         onclick="handleDownload('/admin/api/logs/download/pdf', 'baitscope_forensic_report.pdf')"
                         class="w-full py-3 bg-accent text-accent-foreground border-2 border-accent hover:bg-background hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
-                        Generate &amp; Download PDF
+                        Download PDF Report
                     </button>
                 </div>
 
                 <div class="border-2 border-border bg-card p-6 flex flex-col justify-between space-y-4">
                     <div>
                         <div class="flex items-center justify-between mb-3">
-                            <span class="px-2.5 py-1 border border-border text-foreground font-display font-bold text-xs">TXT DUMP</span>
-                            <span class="font-mono text-[10px] text-muted-foreground uppercase">Raw SIEM / Grep</span>
+                            <span class="px-2.5 py-1 border border-border text-foreground font-display font-bold text-xs">TXT LOGS</span>
+                            <span class="font-mono text-[10px] text-muted-foreground uppercase">Plain Text File</span>
                         </div>
                         <h3 class="font-display font-bold uppercase text-xl text-foreground mb-2">
-                            Raw Plaintext Incident Dump (.TXT)
+                            Plain Text Attack Logs (.TXT)
                         </h3>
                         <p class="font-mono text-xs text-muted-foreground leading-relaxed">
-                            Complete plain-text attack log stream containing timestamps, attributed IPs, raw peer IPs, endpoints, payloads, user agents, and quarantine paths.
+                            Downloads all recorded attack logs as plain text, including times, IP addresses, target pages, inputs, browsers, and file paths.
                         </p>
                     </div>
                     <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
                         onclick="handleDownload('/admin/api/logs/download/txt', 'baitscope_attack_logs.txt')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
-                        Download Plaintext Log
+                        Download Text Logs
                     </button>
                 </div>
 
@@ -986,19 +1019,19 @@
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <span class="px-2.5 py-1 border border-accent text-accent font-display font-bold text-xs">THREAT JSON</span>
-                            <span class="font-mono text-[10px] text-muted-foreground uppercase">IPThreatRegistry</span>
+                            <span class="font-mono text-[10px] text-muted-foreground uppercase">IP Risk Data</span>
                         </div>
                         <h3 class="font-display font-bold uppercase text-xl text-foreground mb-2">
-                            Threat Intelligence Registry (.JSON)
+                            Tracked IP Risk List (.JSON)
                         </h3>
                         <p class="font-mono text-xs text-muted-foreground leading-relaxed">
-                            Machine-readable JSON export of scored adversarial IPs, risk tiers, event counts, attribution metadata, and analyst notes.
+                            Exports tracked attacker IPs, risk scores, attack counts, source details, and notes in JSON format.
                         </p>
                     </div>
                     <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
                         onclick="handleDownload('/admin/api/threats/export?format=json', 'baitscope_threats.json')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
-                        Export Threat JSON
+                        Download JSON
                     </button>
                 </div>
 
@@ -1009,16 +1042,16 @@
                             <span class="font-mono text-[10px] text-muted-foreground uppercase">Spreadsheet Ready</span>
                         </div>
                         <h3 class="font-display font-bold uppercase text-xl text-foreground mb-2">
-                            Threat Intelligence Registry (.CSV)
+                            Tracked IP Risk List (.CSV)
                         </h3>
                         <p class="font-mono text-xs text-muted-foreground leading-relaxed">
-                            Comma-separated inventory of all tracked IP threat nodes sorted descending by calculated risk score for offline triage.
+                            Exports all tracked attacker IPs and risk scores as a CSV spreadsheet sorted from highest risk to lowest.
                         </p>
                     </div>
                     <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
                         onclick="handleDownload('/admin/api/threats/export?format=csv', 'baitscope_threats.csv')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
-                        Export Threat CSV
+                        Download CSV
                     </button>
                 </div>
             </div>
@@ -1027,15 +1060,15 @@
             <div class="border-2 border-danger bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <div class="font-display font-bold uppercase text-lg text-danger">
-                        Danger Zone // Purge Telemetry Storage
+                        Danger Zone — Clear Attack Logs
                     </div>
                     <p class="font-mono text-xs text-muted-foreground mt-1">
-                        Permanently removes captured incident events and malware quarantine metadata from SQLite (the Threat Intelligence IP Registry remains preserved for long-term scoring continuity).
+                        Permanently deletes all saved attack logs and malware records from the SQLite database (tracked IP risk scores and watchlist entries are kept).
                     </p>
                 </div>
                 <button type="button" onclick="confirmClearHistory()"
                     class="px-5 py-3 border-2 border-danger text-danger hover:bg-danger hover:text-white font-display font-bold uppercase text-xs tracking-widest shrink-0 cursor-pointer transition-colors">
-                    Initiate Log Purge...
+                    Clear All Logs...
                 </button>
             </div>
             {% endif %}
@@ -1045,19 +1078,19 @@
         <div id="tab-system" class="tab-content hidden p-4 sm:p-8 space-y-6 flex-1">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-2 border-border divide-y-2 md:divide-y-0 md:divide-x-2 divide-border bg-card">
                 <div class="p-6">
-                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Operational State</div>
+                    <div class="font-mono text-[10px] uppercase text-muted-foreground">System Status</div>
                     <div id="sys-status-text" class="font-display font-bold text-3xl text-success uppercase mt-1">NOMINAL</div>
                 </div>
                 <div class="p-6">
-                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Process Uptime</div>
+                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Server Uptime</div>
                     <div id="sys-uptime-formatted" class="font-display font-bold text-3xl text-foreground mt-1">--</div>
                 </div>
                 <div class="p-6">
-                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Reliability Index</div>
+                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Availability</div>
                     <div id="sys-uptime-pct" class="font-display font-bold text-3xl text-accent mt-1">99.99%</div>
                 </div>
                 <div class="p-6">
-                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Idle Since Last Event</div>
+                    <div class="font-mono text-[10px] uppercase text-muted-foreground">Time Since Last Attack</div>
                     <div id="sys-sec-since" class="font-display font-bold text-3xl text-foreground mt-1">--</div>
                 </div>
             </div>
@@ -1065,34 +1098,34 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="border-2 border-border bg-card p-6 space-y-4">
                     <h3 class="font-display font-bold uppercase text-lg border-b border-border pb-3">
-                        Dual-Process Architecture &amp; Bindings
+                        Running Services &amp; Network Setup
                     </h3>
                     <div class="space-y-3 font-mono text-xs">
                         <div class="flex justify-between gap-4 py-2 border-b border-border/50">
-                            <span class="text-muted-foreground">ADMIN CONSOLE SERVICE</span>
-                            <span class="text-accent font-bold">127.0.0.1:8080 (HTTP Loopback Only)</span>
+                            <span class="text-muted-foreground">ADMIN DASHBOARD</span>
+                            <span class="text-accent font-bold">127.0.0.1:8080 (Localhost HTTP Only)</span>
                         </div>
                         <div class="flex justify-between gap-4 py-2 border-b border-border/50">
-                            <span class="text-muted-foreground">PUBLIC DECEPTION SENSOR</span>
-                            <span class="text-foreground font-bold">0.0.0.0:443 / 8443 TLS (myTunes)</span>
+                            <span class="text-muted-foreground">PUBLIC HONEYPOT SITE</span>
+                            <span class="text-foreground font-bold">0.0.0.0:443 / 8443 HTTPS (TLS myTunes)</span>
                         </div>
                         <div class="flex justify-between gap-4 py-2 border-b border-border/50">
-                            <span class="text-muted-foreground">SOURCE ATTRIBUTION PIPELINE</span>
-                            <span class="text-success font-bold">Direct Peer + Trusted Proxy Chain</span>
+                            <span class="text-muted-foreground">SOURCE IP CHECK</span>
+                            <span class="text-success font-bold">Direct IP + Trusted Proxies</span>
                         </div>
                         <div class="flex justify-between gap-4 py-2">
-                            <span class="text-muted-foreground">DATA PERSISTENCE BACKEND</span>
-                            <span class="text-foreground font-bold">SQLite + Local File Quarantine</span>
+                            <span class="text-muted-foreground">DATABASE &amp; STORAGE</span>
+                            <span class="text-foreground font-bold">SQLite Database + Quarantine Folder</span>
                         </div>
                     </div>
                     <p class="font-mono text-[11px] text-muted-foreground pt-2 border-t border-border/60">
-                        Note: Process restarts and firewall bindings are controlled externally on the host OS via <code>start.py</code> for strict attack-surface isolation.
+                        Note: Service restarts and firewall rules are controlled on the host computer via <code>start.py</code> to keep the admin dashboard separate from the public honeypot.
                     </p>
                 </div>
 
                 <div class="border-2 border-border bg-card p-6 space-y-4">
                     <h3 class="font-display font-bold uppercase text-lg border-b border-border pb-3">
-                        Threat Scoring Matrix (Severity Weights)
+                        How IP Risk Scores Are Calculated
                     </h3>
                     <div class="grid grid-cols-2 gap-3 font-mono text-xs">
                         <div class="p-3 border border-border flex justify-between"><span>Web Shell Detection</span><span class="text-danger font-bold">+25</span></div>
@@ -1103,7 +1136,7 @@
                         <div class="p-3 border border-border flex justify-between"><span>Rate Limit Exceeded</span><span class="text-muted-foreground font-bold">+6</span></div>
                     </div>
                     <div class="font-mono text-[11px] text-muted-foreground pt-2 border-t border-border/60">
-                        Tier Cutoffs: <span class="text-danger font-bold">Critical &ge; 75</span> · <span class="text-warning font-bold">High &ge; 50</span> · <span class="text-accent font-bold">Medium &ge; 25</span> · <span class="text-success font-bold">Low &lt; 25</span>
+                        Risk Levels: <span class="text-danger font-bold">Critical &ge; 75</span> · <span class="text-warning font-bold">High &ge; 50</span> · <span class="text-accent font-bold">Medium &ge; 25</span> · <span class="text-success font-bold">Low &lt; 25</span>
                     </div>
                 </div>
             </div>
@@ -1114,13 +1147,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="border-2 border-border bg-card p-6 space-y-5">
                     <h3 class="font-display font-bold uppercase text-lg border-b border-border pb-3">
-                        Interface &amp; Telemetry Preferences
+                        Display &amp; Update Settings
                     </h3>
 
                     <div class="flex items-center justify-between gap-4 py-2 border-b border-border/50">
                         <div>
-                            <div class="font-display font-bold uppercase text-sm text-foreground">Visual Surface Theme</div>
-                            <div class="font-mono text-xs text-muted-foreground">Brutalist Dark or High-Contrast Light persisted in browser storage.</div>
+                            <div class="font-display font-bold uppercase text-sm text-foreground">Color Theme</div>
+                            <div class="font-mono text-xs text-muted-foreground">Choose dark mode or light mode (saved in your browser).</div>
                         </div>
                         <button type="button" onclick="toggleTheme()"
                             class="px-4 py-2 border-2 border-accent text-accent hover:bg-accent hover:text-black font-display font-bold uppercase text-xs tracking-wider cursor-pointer transition-colors">
@@ -1130,20 +1163,20 @@
 
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
                         <div>
-                            <div class="font-display font-bold uppercase text-sm text-foreground">Live Telemetry Update Mode</div>
-                            <div class="font-mono text-xs text-muted-foreground">Controls real-time server push (SSE) or automatic background polling cadence.</div>
+                            <div class="font-display font-bold uppercase text-sm text-foreground">Dashboard Refresh Mode</div>
+                            <div class="font-mono text-xs text-muted-foreground">Choose live server updates (SSE) or automatic timed refreshes.</div>
                         </div>
                         <div class="flex flex-col sm:items-end gap-1.5 shrink-0">
                             <select id="polling-interval-select" onchange="updatePollingInterval(this.value)"
                                 class="bg-background border-2 border-border focus:border-accent px-3 py-2 font-mono text-xs uppercase text-foreground outline-none cursor-pointer">
-                                <option value="realtime">Real-Time (Server Push)</option>
-                                <option value="5000">5 Seconds (Default)</option>
-                                <option value="10000">10 Seconds</option>
-                                <option value="30000">30 Seconds</option>
+                                <option value="realtime">Real-Time (Live SSE Updates)</option>
+                                <option value="5000">Every 5 Seconds (Default)</option>
+                                <option value="10000">Every 10 Seconds</option>
+                                <option value="30000">Every 30 Seconds</option>
                                 <option value="0">Manual Only</option>
                             </select>
                             <div class="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                                Link Status: <span id="settings-stream-status" class="font-bold text-accent">5S POLLING</span>
+                                Connection Status: <span id="settings-stream-status" class="font-bold text-accent">5S POLLING</span>
                             </div>
                         </div>
                     </div>
@@ -1151,7 +1184,7 @@
 
                 <div class="border-2 border-border bg-card p-6 space-y-4">
                     <h3 class="font-display font-bold uppercase text-lg border-b border-border pb-3">
-                        Active Operator Session &amp; Server Policy
+                        Current User &amp; Security Settings
                     </h3>
                     <div class="space-y-2.5 font-mono text-xs">
                         <div class="flex justify-between py-1.5 border-b border-border/50">
@@ -1163,16 +1196,16 @@
                             <span class="text-foreground font-bold">{{ display_name }}</span>
                         </div>
                         <div class="flex justify-between py-1.5 border-b border-border/50">
-                            <span class="text-muted-foreground">CLEARANCE ROLE</span>
+                            <span class="text-muted-foreground">USER ROLE</span>
                             <span class="text-accent font-bold uppercase">{{ user_role }}</span>
                         </div>
                         <div class="flex justify-between py-1.5">
-                            <span class="text-muted-foreground">SESSION PROTECTION</span>
+                            <span class="text-muted-foreground">LOGIN COOKIE SECURITY</span>
                             <span class="text-success font-bold">HttpOnly SameSite=Lax HMAC Cookie</span>
                         </div>
                     </div>
                     <p class="font-mono text-[11px] text-muted-foreground pt-2 border-t border-border/60">
-                        Security Policy: Trusted proxy CIDR chains, PBKDF2 admin password hashes, and webhook keys are immutable from the web UI and must be managed via environment variables on the host.
+                        Security Note: Trusted proxy IPs, password hashes, and API keys cannot be changed from this page. Update them in the server .env file.
                     </p>
                 </div>
             </div>
@@ -1187,7 +1220,7 @@
             <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                 <h3 class="font-display font-bold uppercase text-xl tracking-wider flex items-center gap-2 text-foreground">
                     <span class="text-accent">⌬</span>
-                    Export Intelligence Logs
+                    Download Logs &amp; Reports
                 </h3>
                 <button type="button" onclick="closeDownloadModal()"
                     class="text-muted-foreground hover:text-foreground cursor-pointer p-1 font-bold">
@@ -1197,13 +1230,13 @@
 
             <div class="p-6 space-y-4">
                 <p class="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                    Select Telemetry &amp; Audit Report Format
+                    Choose a file format to download:
                 </p>
 
                 {% if user_role == 'guest' %}
                 <div class="p-4 border-2 border-warning bg-warning/10 text-warning font-mono text-xs uppercase space-y-2">
-                    <div class="font-bold text-sm">🔒 Authorization Restricted</div>
-                    <p>Guest analysts do not have clearance to export forensic dumps or download raw threat telemetry reports. Full reporting is reserved for Root Administrators.</p>
+                    <div class="font-bold text-sm">🔒 Access Restricted</div>
+                    <p>Guest users cannot download full reports or raw logs. Only administrators can export files.</p>
                 </div>
                 {% else %}
                 <button type="button"
@@ -1214,11 +1247,11 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="font-display font-bold uppercase text-foreground tracking-wider flex items-center gap-2 flex-wrap">
-                            Executive PDF Threat Report
-                            <span class="px-1.5 py-0.5 bg-accent text-accent-foreground text-[9px] font-bold">PROFESSIONAL</span>
+                            Full PDF Security Report
+                            <span class="px-1.5 py-0.5 bg-accent text-accent-foreground text-[9px] font-bold">SUMMARY</span>
                         </div>
                         <p class="font-mono text-[11px] text-muted-foreground mt-1 leading-normal">
-                            Comprehensive executive intelligence report with vector distribution, quarantined malware SHA-256 hashes, incident log tables, and mitigation guidance.
+                            Creates a PDF report with attack counts, isolated file SHA-256 hashes, event logs, and security tips.
                         </p>
                     </div>
                     <span class="text-muted-foreground group-hover:text-accent shrink-0">⬇</span>
@@ -1232,10 +1265,10 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="font-display font-bold uppercase text-foreground tracking-wider">
-                            Raw Plaintext Log Dump (.TXT)
+                            Plain Text Attack Logs (.TXT)
                         </div>
                         <p class="font-mono text-[11px] text-muted-foreground mt-1 leading-normal">
-                            Full plaintext telemetry containing attributed source IPs, raw peer IPs, endpoints, captured payloads, user-agents, and quarantine metadata.
+                            Downloads all recorded attack logs as plain text, including times, IP addresses, pages, inputs, browsers, and file paths.
                         </p>
                     </div>
                     <span class="text-muted-foreground group-hover:text-accent shrink-0">⬇</span>
@@ -1258,7 +1291,7 @@
         <div class="border-2 border-accent bg-card w-full max-w-2xl shadow-[0_0_50px_rgba(223,225,4,0.18)] flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                 <h3 class="font-display font-bold uppercase text-lg tracking-wider text-foreground flex items-center gap-2">
-                    <span class="text-accent">⚡</span> Intercepted Attack Telemetry
+                    <span class="text-accent">⚡</span> Attack Details
                 </h3>
                 <button type="button" onclick="closeAttackDetailModal()"
                     class="text-muted-foreground hover:text-foreground cursor-pointer p-1 font-bold">✕</button>
@@ -1281,13 +1314,13 @@
         <div class="border-2 border-accent bg-card w-full max-w-3xl shadow-[0_0_50px_rgba(223,225,4,0.18)] flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-muted/20">
                 <h3 class="font-display font-bold uppercase text-lg tracking-wider text-foreground flex items-center gap-2">
-                    <span class="text-accent">◈</span> Adversary Threat Dossier
+                    <span class="text-accent">◈</span> Attacker IP Details
                 </h3>
                 <button type="button" onclick="closeThreatDossierModal()"
                     class="text-muted-foreground hover:text-foreground cursor-pointer p-1 font-bold">✕</button>
             </div>
             <div id="threat-dossier-body" class="p-6 overflow-y-auto custom-scrollbar space-y-5 font-mono text-xs">
-                Loading threat dossier...
+                Loading IP details...
             </div>
             <div class="px-6 py-4 border-t-2 border-border bg-muted/10 flex justify-end">
                 <button type="button" onclick="closeThreatDossierModal()"
@@ -1304,21 +1337,21 @@
         <div class="border-2 border-danger bg-card w-full max-w-md shadow-[0_0_50px_rgba(255,68,68,0.2)] flex flex-col">
             <div class="px-6 py-4 border-b-2 border-border flex justify-between items-center bg-danger/10">
                 <h3 class="font-display font-bold uppercase text-lg tracking-wider text-danger flex items-center gap-2">
-                    <span>⚠</span> Confirm Telemetry Purge
+                    <span>⚠</span> Confirm Delete All Logs
                 </h3>
                 <button type="button" onclick="closeClearLogsModal()"
                     class="text-muted-foreground hover:text-foreground cursor-pointer p-1 font-bold">✕</button>
             </div>
             <form onsubmit="executeClearLogs(event)" class="p-6 space-y-4 font-mono text-xs">
                 <p class="text-foreground leading-relaxed">
-                    This will <strong class="text-danger">PERMANENTLY DELETE</strong> all captured attack log rows and quarantined malware metadata from the active database.
+                    This will <strong class="text-danger">PERMANENTLY DELETE</strong> all saved attack logs and malware records from the database.
                 </p>
                 <p class="text-muted-foreground leading-relaxed">
-                    Note: Persistent IP Threat Registry profiles remain retained to preserve historical risk attribution.
+                    Note: Tracked IP risk scores and watchlist entries will stay saved.
                 </p>
                 <div>
                     <label for="confirm-purge-input" class="block uppercase font-bold text-muted-foreground mb-1.5">
-                        Type <span class="text-danger">CONFIRM</span> below to unlock purge:
+                        Type <span class="text-danger">CONFIRM</span> below to enable delete:
                     </label>
                     <input type="text" id="confirm-purge-input" oninput="validatePurgeInput()" autocomplete="off"
                         placeholder="CONFIRM"
@@ -1332,7 +1365,7 @@
                     </button>
                     <button type="submit" id="confirm-purge-submit" disabled
                         class="px-4 py-2 bg-danger text-white border-2 border-danger font-display font-bold uppercase text-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
-                        Purge All Logs
+                        Delete All Logs
                     </button>
                 </div>
             </form>
@@ -1395,7 +1428,7 @@
             authExpiredState = true;
             stopHealthWatchdog();
             clearUpdateTransports();
-            showGlobalAlert('Administrator session expired or revoked. Please sign in again.', true);
+            showGlobalAlert('Your admin login expired. Please log in again.', true);
         });
 
         function hideAlertBannerElement() {
@@ -1443,7 +1476,7 @@
             }
             banner.className = 'mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-success bg-success/10 text-success font-mono text-xs flex items-center justify-between gap-4';
             if (prefixEl) prefixEl.textContent = '✓ SERVER CONNECTION RESTORED —';
-            msgEl.textContent = 'Backend connectivity re-established. Telemetry synchronized.';
+            msgEl.textContent = 'Connected to the server again. Dashboard data updated.';
             if (loginEl) loginEl.classList.add('hidden');
             if (dismissBtn) {
                 dismissBtn.className = 'px-2 py-1 border border-success text-success hover:bg-success hover:text-black text-[10px] uppercase font-bold cursor-pointer';
@@ -1534,13 +1567,13 @@
         }
 
         const TAB_META = {
-            operational: ['Threat <span class="text-accent">Intel Deck</span>', 'Adaptive Honeynet Monitoring Live Adversarial Interactions.'],
-            traffic: ['Traffic <span class="text-accent">Analysis</span>', 'Adversary Network Traffic Stream, Source Attribution & Payload Inspector.'],
-            watchlist: ['IP <span class="text-accent">Watchlist</span>', 'Priority Adversarial Monitoring Nodes & Analyst Escalation Notes.'],
-            malware: ['Malware <span class="text-danger">Vault</span>', 'Quarantined Malicious Binaries, Web Shells, and Cryptographic SHA-256 Signatures.'],
-            reports: ['Forensic <span class="text-accent">Reports</span>', 'Executive Audits, Raw Telemetry Dumps, Threat Registry Exports & Log Purge.'],
-            system: ['System <span class="text-accent">Status</span>', 'Live Engine Health, Dual-Process Topology & Source Attribution Pipeline.'],
-            settings: ['Console <span class="text-accent">Settings</span>', 'Operator Interface Preferences, Polling Cadence & Security Policy Summary.']
+            operational: ['Threat <span class="text-accent">Dashboard</span>', 'Honeypot dashboard tracking live attacks and suspicious activity.'],
+            traffic: ['Traffic <span class="text-accent">Analysis</span>', 'View all recorded attacks, attacker IPs, and suspicious user inputs.'],
+            watchlist: ['IP <span class="text-accent">Watchlist</span>', 'Manage important attacker IP addresses and investigation notes.'],
+            malware: ['Malware <span class="text-danger">Vault</span>', 'View isolated suspicious files, Web Shells, and SHA-256 hashes.'],
+            reports: ['Security <span class="text-accent">Reports</span>', 'Download PDF, TXT, JSON, or CSV reports and manage old logs.'],
+            system: ['System <span class="text-accent">Status</span>', 'Check server health, running services, and IP risk score rules.'],
+            settings: ['Console <span class="text-accent">Settings</span>', 'Change theme colors, update intervals, and check login security.']
         };
 
         function switchTab(tabId) {
@@ -1731,14 +1764,14 @@
             const prevScrollTop = scroller ? scroller.scrollTop : 0;
 
             if (allAttacks.length === 0) {
-                recentBody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-muted-foreground">[NO INCIDENTS CAPTURED]</td></tr>';
+                recentBody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-muted-foreground">No attacks recorded yet</td></tr>';
             } else {
                 recentBody.innerHTML = allAttacks.slice(0, RECENT_DISPLAY_LIMIT).map((a, idx) => {
                     const displayVec = normalizeDisplayVector(a.attack_type);
                     return `
                         <tr onclick="openAttackDetail(${idx})"
                             class="hover:bg-muted/15 transition-colors cursor-pointer"
-                            title="Click to inspect full telemetry and source attribution">
+                            title="Click to view full attack details">
                             <td class="py-2.5 px-4 text-muted-foreground whitespace-nowrap">${escapeHtml(formatUtcTimeOnly(a.timestamp))}</td>
                             <td class="py-2.5 px-4 font-bold text-foreground whitespace-nowrap">${escapeHtml(a.ip_address)}</td>
                             <td class="py-2.5 px-4 text-muted-foreground">${escapeHtml(a.endpoint)}</td>
@@ -1769,7 +1802,7 @@
             const malOverviewBody = document.getElementById('malware-overview-body');
             if (malOverviewBody) {
                 if (allMalware.length === 0) {
-                    malOverviewBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-muted-foreground">[NO MALWARE IN SANDBOX]</td></tr>';
+                    malOverviewBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-muted-foreground">No suspicious files uploaded yet</td></tr>';
                 } else {
                     malOverviewBody.innerHTML = allMalware.slice(0, 3).map(m => `
                         <tr class="hover:bg-muted/10 transition-colors">
@@ -1788,7 +1821,7 @@
             const allMalBody = document.getElementById('all-malware-body');
             if (allMalBody) {
                 if (allMalware.length === 0) {
-                    allMalBody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-muted-foreground">[QUARANTINE VAULT EMPTY]</td></tr>';
+                    allMalBody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-muted-foreground">No isolated files found</td></tr>';
                 } else {
                     allMalBody.innerHTML = allMalware.map(m => `
                         <tr class="hover:bg-muted/10 transition-colors">
@@ -1914,7 +1947,7 @@
                     return;
                 }
                 if (err.status !== 401) {
-                    showGlobalAlert(err.message || 'Failed to sync dashboard telemetry.');
+                    showGlobalAlert(err.message || 'Could not refresh dashboard data.');
                 }
             }
         }
@@ -1975,11 +2008,11 @@
                 return matchVec && matchSearch;
             });
 
-            document.getElementById('filtered-count').textContent = `Filtered Logs: ${filtered.length}`;
+            document.getElementById('filtered-count').textContent = `Matching Logs: ${filtered.length}`;
             const tbody = document.getElementById('all-attacks-body');
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center text-muted-foreground">[NO MATCHING TELEMETRY EVENTS FOUND]</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center text-muted-foreground">No matching attacks found</td></tr>';
                 return;
             }
 
@@ -2005,12 +2038,12 @@
                     <td class="py-3 px-4 text-right whitespace-nowrap space-x-1">
                         <button type="button" onclick="openAttackDetail(${idx})"
                             class="px-2 py-1 border border-border hover:border-accent text-foreground hover:text-accent uppercase text-[10px] font-bold cursor-pointer">
-                            Inspect
+                            View
                         </button>
                         ${!IS_GUEST && a.ip_address && !String(a.ip_address).includes('*') ? `
                         <button type="button" onclick="openThreatDossier('${escapeHtml(a.ip_address)}')"
                             class="px-2 py-1 border border-border hover:border-accent text-accent uppercase text-[10px] font-bold cursor-pointer">
-                            Dossier
+                            IP Details
                         </button>` : ''}
                     </td>
                 </tr>
@@ -2024,10 +2057,10 @@
             try {
                 const res = await api.getThreats({ watchlisted: 'true', limit: 100, offset: 0 });
                 const list = res.threats || [];
-                if (badge) badge.textContent = `${res.total ?? list.length} Watchlisted Nodes`;
+                if (badge) badge.textContent = `${res.total ?? list.length} Watched IPs`;
 
                 if (!list.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-muted-foreground">[NO IP ADDRESSES CURRENTLY WATCHLISTED]</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-muted-foreground">No IP addresses on watchlist yet</td></tr>';
                     return;
                 }
 
@@ -2050,7 +2083,7 @@
                             <td class="py-3 px-4 text-right whitespace-nowrap space-x-1.5">
                                 <button type="button" onclick="openThreatDossier('${safeIp}')"
                                     class="px-2.5 py-1 border border-border hover:border-accent text-foreground hover:text-accent uppercase text-[10px] font-bold cursor-pointer">
-                                    Dossier
+                                    Details
                                 </button>
                                 ${!IS_GUEST ? `
                                 <button type="button" onclick="removeWatchlistIp('${safeIp}')"
@@ -2076,7 +2109,7 @@
 
             if (!ip || !/^[0-9a-fA-F:.]+$/.test(ip)) {
                 fb.className = 'font-mono text-xs text-danger';
-                fb.textContent = 'Enter a valid IPv4 or IPv6 address.';
+                fb.textContent = 'Please enter a valid IPv4 or IPv6 IP address.';
                 return;
             }
 
@@ -2089,7 +2122,7 @@
                 await Promise.all([fetchData(), loadWatchlist()]);
             } catch (err) {
                 fb.className = 'font-mono text-xs text-danger';
-                fb.textContent = err.message || 'Failed to add IP.';
+                fb.textContent = err.message || 'Could not add IP.';
             }
         }
 
@@ -2098,7 +2131,7 @@
                 await api.updateWatchlist(ip, 'remove');
                 await Promise.all([fetchData(), loadWatchlist()]);
             } catch (err) {
-                showGlobalAlert(err.message || 'Failed to remove IP from watchlist.');
+                showGlobalAlert(err.message || 'Could not remove IP from watchlist.');
             }
         }
 
@@ -2113,37 +2146,37 @@
             body.innerHTML = `
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-border pb-4">
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">Source Node IP</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Attacker IP</div>
                         <div class="text-base font-bold text-foreground">${escapeHtml(a.ip_address)}</div>
                     </div>
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">Direct Peer IP</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Direct Connection IP</div>
                         <div class="text-foreground font-bold">${escapeHtml(a.peer_ip || 'N/A')}</div>
                         <div class="mt-0.5 text-[10px] text-muted-foreground">Method: ${escapeHtml(a.attribution_method || 'none')}</div>
                     </div>
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">Timestamp (IST)</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Time (IST)</div>
                         <div class="text-foreground">${escapeHtml(formatUtcToIst(a.timestamp))}</div>
                     </div>
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">HTTP Target</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Target Request</div>
                         <div class="text-accent font-bold">${escapeHtml(a.method)} ${escapeHtml(a.endpoint)}</div>
                     </div>
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">Classification</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Attack Type</div>
                         <div class="mt-1"><span class="px-2 py-0.5 border ${getVectorBadgeClass(a.attack_type)} font-bold uppercase">${escapeHtml(normalizeDisplayVector(a.attack_type))}</span></div>
                     </div>
                     <div>
-                        <div class="text-muted-foreground text-[10px] uppercase">Severity &amp; Telemetry Type</div>
-                        <div class="${getSeverityColor(a.severity)} mt-1">${escapeHtml(a.severity)} ${a.is_synthetic ? '(SYNTHETIC)' : ''}</div>
+                        <div class="text-muted-foreground text-[10px] uppercase">Risk &amp; Source</div>
+                        <div class="${getSeverityColor(a.severity)} mt-1">${escapeHtml(a.severity)} ${a.is_synthetic ? '(Test Data)' : ''}</div>
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted-foreground text-[10px] uppercase mb-1">Intercepted Payload</div>
-                    <pre id="attack-detail-payload" class="bg-background border-2 border-border p-3 text-danger whitespace-pre-wrap break-all max-h-48 overflow-y-auto">${escapeHtml(a.payload || 'N/A')}${a.payload_truncated ? '\n\n[Loading complete payload...]' : ''}</pre>
+                    <div class="text-muted-foreground text-[10px] uppercase mb-1">Suspicious Input</div>
+                    <pre id="attack-detail-payload" class="bg-background border-2 border-border p-3 text-danger whitespace-pre-wrap break-all max-h-48 overflow-y-auto">${escapeHtml(a.payload || 'N/A')}${a.payload_truncated ? '\n\n[Loading full input...]' : ''}</pre>
                 </div>
                 <div>
-                    <div class="text-muted-foreground text-[10px] uppercase mb-1">User-Agent</div>
+                    <div class="text-muted-foreground text-[10px] uppercase mb-1">Browser / Tool</div>
                     <div class="bg-background border border-border p-2.5 text-muted-foreground break-all">${escapeHtml(a.user_agent || 'Unknown')}</div>
                 </div>
             `;
@@ -2153,7 +2186,7 @@
                 actions.innerHTML = `
                     <button type="button" onclick="closeAttackDetailModal(); openThreatDossier('${safeIp}')"
                         class="px-4 py-2 bg-accent text-black border-2 border-accent font-display font-bold uppercase text-xs cursor-pointer">
-                        Open Threat Dossier &rarr;
+                        View IP Details &rarr;
                     </button>
                 `;
             } else {
@@ -2191,7 +2224,7 @@
             const body = document.getElementById('threat-dossier-body');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            body.innerHTML = `<div class="py-8 text-center text-muted-foreground">[LOADING DOSSIER FOR ${escapeHtml(ip)}...]</div>`;
+            body.innerHTML = `<div class="py-8 text-center text-muted-foreground">Loading details for ${escapeHtml(ip)}...</div>`;
 
             try {
                 const res = await api.getThreatDossier(ip);
@@ -2204,12 +2237,12 @@
                 body.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-2 border-border p-4 bg-background">
                         <div>
-                            <div class="text-[10px] uppercase text-muted-foreground">Tracked IP</div>
+                            <div class="text-[10px] uppercase text-muted-foreground">IP Address</div>
                             <div class="text-lg font-bold text-foreground">${safeIp}</div>
-                            <div class="text-[10px] text-muted-foreground mt-0.5">${escapeHtml(t.ip_version || 'IPv4')} · ${t.total_events || 0} Total Events</div>
+                            <div class="text-[10px] text-muted-foreground mt-0.5">${escapeHtml(t.ip_version || 'IPv4')} · ${t.total_events || 0} Total Attacks</div>
                         </div>
                         <div>
-                            <div class="text-[10px] uppercase text-muted-foreground">Risk Score &amp; Classification</div>
+                            <div class="text-[10px] uppercase text-muted-foreground">Risk Score &amp; Level</div>
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="text-2xl font-display font-bold text-accent">${score}/100</span>
                                 <span class="px-2 py-0.5 border text-[10px] font-bold uppercase ${getClassificationBadge(t.threat_classification)}">
@@ -2218,15 +2251,15 @@
                             </div>
                         </div>
                         <div>
-                            <div class="text-[10px] uppercase text-muted-foreground">Observed Peer IP</div>
+                            <div class="text-[10px] uppercase text-muted-foreground">Direct Connection IP</div>
                             <div class="text-foreground font-bold mt-1">${escapeHtml(t.peer_ip || 'N/A')}</div>
                             <div class="text-[10px] text-muted-foreground mt-0.5">Method: ${escapeHtml(t.attribution_method || 'none')}</div>
                         </div>
                     </div>
 
                     <div class="border border-border p-3 bg-background">
-                        <div class="text-[10px] uppercase text-muted-foreground mb-1">Score Calculation Justification</div>
-                        <div class="text-foreground leading-relaxed">${escapeHtml(t.score_explanation || 'No explanation recorded.')}</div>
+                        <div class="text-[10px] uppercase text-muted-foreground mb-1">Why This IP Got This Score</div>
+                        <div class="text-foreground leading-relaxed">${escapeHtml(t.score_explanation || 'No explanation saved.')}</div>
                         <div class="flex flex-wrap gap-2 mt-3">
                             ${countsEntries.map(([vec, cnt]) => {
                                 const displayVec = normalizeDisplayVector(vec);
@@ -2241,9 +2274,9 @@
 
                     ${!IS_GUEST ? `
                     <div class="border border-border p-4 bg-background space-y-3">
-                        <div class="text-[10px] uppercase text-muted-foreground font-bold">Watchlist &amp; Analyst Notes</div>
+                        <div class="text-[10px] uppercase text-muted-foreground font-bold">Watchlist &amp; Notes</div>
                         <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="text" id="dossier-notes-input" value="${escapeHtml(t.notes || '')}" placeholder="Enter analyst notes..."
+                            <input type="text" id="dossier-notes-input" value="${escapeHtml(t.notes || '')}" placeholder="Write notes about this IP..."
                                 class="flex-1 bg-card border-2 border-border focus:border-accent px-3 py-2 text-xs font-mono text-foreground outline-none">
                             <button type="button" onclick="saveDossierWatchlist('${safeIp}', '${t.is_watchlisted ? 'remove' : 'add'}')"
                                 class="px-4 py-2 ${t.is_watchlisted ? 'border-2 border-danger text-danger hover:bg-danger hover:text-white' : 'bg-accent text-black border-2 border-accent'} font-display font-bold uppercase text-xs cursor-pointer">
@@ -2257,15 +2290,15 @@
                     </div>` : ''}
 
                     <div>
-                        <div class="text-[10px] uppercase text-muted-foreground font-bold mb-2">Recent Activity for ${safeIp}</div>
+                        <div class="text-[10px] uppercase text-muted-foreground font-bold mb-2">Recent Attacks from ${safeIp}</div>
                         <div class="overflow-x-auto border border-border">
                             <table class="w-full text-left text-[11px]">
                                 <thead>
                                     <tr class="border-b border-border bg-muted/20 text-muted-foreground uppercase">
                                         <th class="p-2">Time</th>
-                                        <th class="p-2">Endpoint</th>
-                                        <th class="p-2">Vector</th>
-                                        <th class="p-2">Payload</th>
+                                        <th class="p-2">Target Page</th>
+                                        <th class="p-2">Attack Type</th>
+                                        <th class="p-2">Input</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border/50">
@@ -2279,7 +2312,7 @@
                                             <td class="p-2 text-danger max-w-xs truncate">${escapeHtml(l.payload || 'N/A')}</td>
                                         </tr>
                                     `;
-                                    }).join('') : '<tr><td colspan="4" class="p-4 text-center text-muted-foreground">No raw event rows linked (logs may have been purged).</td></tr>'}
+                                    }).join('') : '<tr><td colspan="4" class="p-4 text-center text-muted-foreground">No recent logs found (old logs may have been deleted).</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -2303,7 +2336,7 @@
                 await fetchData();
                 if (activeTab === 'watchlist') await loadWatchlist();
             } catch (err) {
-                showGlobalAlert(err.message || 'Failed to update dossier watchlist.');
+                showGlobalAlert(err.message || 'Could not update watchlist.');
             }
         }
 
@@ -2519,8 +2552,8 @@
             }
             if (subtext) {
                 subtext.textContent = hasActivity
-                    ? `${blips.length} new attack event${blips.length > 1 ? 's' : ''} detected · click blip to inspect`
-                    : 'Awaiting newly detected incoming threat activity';
+                    ? `${blips.length} new attack${blips.length > 1 ? 's' : ''} detected · click dot for details`
+                    : 'Waiting for new attacks';
             }
 
             if (!hasActivity) {
@@ -2578,7 +2611,7 @@
             const errBox = document.getElementById('clear-logs-error');
             if (!input || input.value.trim() !== 'CONFIRM') {
                 if (errBox) {
-                    errBox.textContent = 'You must type CONFIRM in uppercase to authorize log purge.';
+                    errBox.textContent = 'Please type CONFIRM in uppercase to delete all logs.';
                     errBox.classList.remove('hidden');
                 }
                 return;
@@ -2593,7 +2626,7 @@
                 await fetchData(true);
             } catch (err) {
                 if (errBox) {
-                    errBox.textContent = err.message || 'Failed to purge attack logs.';
+                    errBox.textContent = err.message || 'Could not delete attack logs.';
                     errBox.classList.remove('hidden');
                 }
             }
@@ -2604,7 +2637,7 @@
             try {
                 await api.downloadReport(url, fallbackFilename);
             } catch (err) {
-                showGlobalAlert(err.message || 'Failed to download forensic export.');
+                showGlobalAlert(err.message || 'Could not download the report.');
             }
         }
 
@@ -2867,7 +2900,7 @@
                     stopHealthWatchdog();
                     clearUpdateTransports();
                     setConnectionStatus('OFFLINE');
-                    showGlobalAlert('Administrator session expired or revoked. Please sign in again.', true);
+                    showGlobalAlert('Your admin login expired. Please log in again.', true);
                     return;
                 }
                 if (res.reachable) {
@@ -3008,7 +3041,7 @@
                     stopHealthWatchdog();
                     clearUpdateTransports();
                     setConnectionStatus('OFFLINE');
-                    showGlobalAlert('Administrator session expired or revoked. Please sign in again.', true);
+                    showGlobalAlert('Your admin login expired. Please log in again.', true);
                     return;
                 }
 
