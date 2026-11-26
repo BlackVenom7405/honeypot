@@ -138,7 +138,7 @@ async def handle_login(
 
     # Return deceptive honeypot error response
     return templates.TemplateResponse(request=request, name="login.html", context={
-        "error": "Invalid administrator credentials. Security incident recorded in Sentinel threat matrix.",
+        "error": "Invalid administrator credentials. Security incident recorded in BAITSCOPE threat matrix.",
         "next": next
     })
 

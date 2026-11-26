@@ -3,7 +3,7 @@ version: '3.8'
 services:
   decoy:
     build: .
-    container_name: sentinel_decoy
+    container_name: baitscope_decoy
     command: python app_decoy.py
     ports:
       # Exposes HTTPS on port 443 publicly
@@ -17,7 +17,7 @@ services:
 
   dashboard:
     build: .
-    container_name: sentinel_dashboard
+    container_name: baitscope_dashboard
     command: python app_dashboard.py
     ports:
       # Restricts the admin dashboard strictly to localhost 127.0.0.1 on the host machine

@@ -9,18 +9,26 @@ import hmac
 import hashlib
 import shutil
 import datetime
+import secrets
+import logging
 from typing import Optional, List
-from fastapi import FastAPI, Request, Form, UploadFile, File, Depends
+from fastapi import FastAPI, Request, Form, UploadFile, File, Depends, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from database import engine, Base, SessionLocal
 from models import User, DecoyPlaylist, AttackLog, MalwareMetadata
 from detection import detect_attack
 from logger import log_attack
+from source_attribution import extract_source_attribution, SourceAttribution
+
+logger = logging.getLogger("baitscope.decoy")
 
 # Ensure database tables exist
 Base.metadata.create_all(bind=engine)
@@ -28,7 +36,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="myTunes Web Player",
     description="Listen to music for everyone.",
-    version="4.0.0"
+    version="5.0.0"
 )
 
 app.add_middleware(
@@ -53,29 +61,70 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-# Secret key for signing sessions
-SECRET_KEY = "decoy-spotify-session-secret-key-2026"
+# Secret key for signing decoy sessions
+_decoy_secret = os.getenv("BAITSCOPE_DECOY_SECRET_KEY") or os.getenv("SENTINEL_DECOY_SECRET_KEY")
+if not _decoy_secret:
+    logger.warning(
+        "[!] SECURITY WARNING: BAITSCOPE_DECOY_SECRET_KEY is not configured (checked SENTINEL_DECOY_SECRET_KEY fallback). "
+        "Generating an ephemeral runtime secret for decoy sessions."
+    )
+    SECRET_KEY = secrets.token_hex(32)
+else:
+    SECRET_KEY = _decoy_secret
+
 COOKIE_NAME = "decoy_session"
+DECOY_SALT = os.getenv("BAITSCOPE_DECOY_SALT") or os.getenv("SENTINEL_DECOY_SALT", "decoy_spotify_salt_2026")
+MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE_BYTES", 5 * 1024 * 1024))
 
 # Helper function to hash passwords
 def hash_password(password: str) -> str:
-    salt = "decoy_spotify_salt_2026"
-    return hashlib.sha256((password + salt).encode()).hexdigest()
+    return hashlib.sha256((password + DECOY_SALT).encode("utf-8")).hexdigest()
 
-# Helper function to get client IP
+# Helper function to get client IP using trustworthy proxy extraction
 def get_client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip()
-    return request.client.host if request.client else "127.0.0.1"
+    try:
+        return extract_source_attribution(request).client_ip
+    except Exception:
+        return request.client.host if (request and request.client) else "127.0.0.1"
+
+def check_and_enforce_rate_limit(request: Request, db: Session, bucket: str, limit: int, window_sec: int = 60) -> Optional[Response]:
+    """
+    Applies SQLite-backed rate limiting per IP and bucket.
+    If exceeded, logs attack and returns HTTP 429 response with provenance fields.
+    """
+    try:
+        from threat_intel import check_rate_limit
+        attr = extract_source_attribution(request)
+        client_ip = attr.client_ip
+        allowed, count, retry_after = check_rate_limit(db, client_ip, bucket, limit, window_sec)
+        if not allowed:
+            log_attack(
+                ip_address=client_ip,
+                user_agent=request.headers.get("user-agent", "Unknown"),
+                endpoint=f"{request.url.path} (Rate Limit Exceeded)",
+                method=request.method,
+                headers=dict(request.headers),
+                payload=f"Bucket: {bucket}, Hit limit: {count}/{limit} req in {window_sec}s",
+                attack_type="Rate Limit Exceeded",
+                severity="Medium",
+                peer_ip=attr.peer_ip,
+                attribution_method=attr.attribution_method,
+                attribution_status=attr.attribution_status,
+                is_synthetic=attr.is_synthetic
+            )
+            return JSONResponse(
+                status_code=429,
+                content={"error": "Too Many Requests. Rate limit exceeded.", "retry_after": retry_after},
+                headers={"Retry-After": str(retry_after)}
+            )
+    except Exception:
+        pass
+    return None
 
 # Session tokens
 def create_decoy_token(username: str) -> str:
     payload = f"{username}"
-    sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    sig = hmac.new(SECRET_KEY.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
     return f"{payload}:{sig}"
 
 def verify_decoy_token(token: str) -> Optional[str]:
@@ -85,7 +134,7 @@ def verify_decoy_token(token: str) -> Optional[str]:
     if len(parts) != 2:
         return None
     username, sig = parts
-    expected_sig = hmac.new(SECRET_KEY.encode(), username.encode(), hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(SECRET_KEY.encode("utf-8"), username.encode("utf-8"), hashlib.sha256).hexdigest()
     if hmac.compare_digest(sig, expected_sig):
         return username
     return None
@@ -113,21 +162,90 @@ def check_and_log_attack(request: Request, payload: str, location: str) -> bool:
     attack_type = detect_attack(payload)
     if attack_type != "none":
         severity = "High" if attack_type in ["SQL Injection", "Path Traversal"] else "Medium"
-        ip_addr = get_client_ip(request)
+        attr = extract_source_attribution(request)
         ua = request.headers.get("user-agent", "Unknown")
         headers = dict(request.headers)
         log_attack(
-            ip_address=ip_addr,
+            ip_address=attr.client_ip,
             user_agent=ua,
             endpoint=f"{request.url.path} ({location})",
             method=request.method,
             headers=headers,
             payload=payload,
             attack_type=attack_type,
-            severity=severity
+            severity=severity,
+            peer_ip=attr.peer_ip,
+            attribution_method=attr.attribution_method,
+            attribution_status=attr.attribution_status,
+            is_synthetic=attr.is_synthetic
         )
         return True
     return False
+
+# --- TASK 2: Secure Upload Helpers ---
+def sanitize_upload_filename(filename: str) -> str:
+    """Sanitize user-provided filename to prevent directory traversal and remove unsafe chars."""
+    if not filename:
+        return "unnamed_upload.bin"
+    # Strip any directory path components (both UNIX / and Windows \)
+    base = os.path.basename(filename.replace("\\", "/"))
+    # Remove null bytes and non-printable control characters
+    clean = re.sub(r'[\x00-\x1f\x7f]', '', base)
+    # Strip leading/trailing dots and spaces
+    clean = clean.strip(". ")
+    # Replace dangerous characters with underscores
+    clean = re.sub(r'[^a-zA-Z0-9._-]', '_', clean)
+    if not clean:
+        clean = "sanitized_upload.bin"
+    return clean
+
+async def read_bounded_upload(file: UploadFile, max_size: int = MAX_UPLOAD_SIZE) -> tuple[bytes, bool]:
+    """Read file content in bounded chunks (64 KB) to prevent Out-Of-Memory (OOM) DoS."""
+    chunks = []
+    total = 0
+    chunk_size = 64 * 1024
+    while True:
+        chunk = await file.read(chunk_size)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_size:
+            return b"", True
+        chunks.append(chunk)
+    return b"".join(chunks), False
+
+def save_quarantined_file(original_filename: str, content: bytes) -> str:
+    """
+    Saves suspicious payload into quarantine directory with cryptographic randomness.
+    Strictly verifies destination path remains contained inside QUARANTINE_DIR
+    using canonical resolved filesystem paths (realpath & commonpath).
+    """
+    sanitized = sanitize_upload_filename(original_filename)
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    rand_token = secrets.token_hex(4)
+    safe_filename = f"{timestamp}_{rand_token}_{sanitized}"
+    
+    quarantine_real = os.path.realpath(QUARANTINE_DIR)
+    os.makedirs(quarantine_real, exist_ok=True)
+    target_real = os.path.realpath(os.path.join(quarantine_real, safe_filename))
+    
+    # Resolved filesystem containment verification (defense-in-depth against symlinks / reparse points)
+    try:
+        is_contained = (
+            os.path.commonpath([quarantine_real, target_real]) == quarantine_real
+            and target_real != quarantine_real
+        )
+    except ValueError:
+        is_contained = False
+        
+    if not is_contained or not target_real.startswith(quarantine_real + os.sep):
+        raise ValueError(f"Path traversal detected: {target_real} outside {quarantine_real}")
+        
+    with open(target_real, "wb") as f:
+        f.write(content)
+        
+    # Return normalized relative path for database storage
+    return os.path.relpath(target_real, os.getcwd())
 
 # ROUTES
 
@@ -143,9 +261,9 @@ async def decoy_home(request: Request, db: Session = Depends(get_db)):
     error = request.query_params.get("error")
     
     return templates.TemplateResponse(
-        "decoy_home.html", 
-        {
-            "request": request, 
+        request=request,
+        name="decoy_home.html", 
+        context={
             "user": user, 
             "user_playlists": playlists,
             "message": message,
@@ -155,7 +273,7 @@ async def decoy_home(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_get(request: Request):
-    return templates.TemplateResponse("decoy_signup.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="decoy_signup.html", context={})
 
 @app.post("/signup")
 async def signup_post(
@@ -165,18 +283,22 @@ async def signup_post(
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    rate_err = check_and_enforce_rate_limit(request, db, "signup", limit=20, window_sec=60)
+    if rate_err:
+        return rate_err
+
     # Check inputs for attacks
     if check_and_log_attack(request, username, "Signup username"):
-        return templates.TemplateResponse("decoy_signup.html", {"request": request, "error": "Database error code: X09A. Registration halted."})
+        return templates.TemplateResponse(request=request, name="decoy_signup.html", context={"error": "Database error code: X09A. Registration halted."})
     if check_and_log_attack(request, email, "Signup email"):
-        return templates.TemplateResponse("decoy_signup.html", {"request": request, "error": "Invalid email formatting validation error."})
+        return templates.TemplateResponse(request=request, name="decoy_signup.html", context={"error": "Invalid email formatting validation error."})
     if check_and_log_attack(request, password, "Signup password"):
-        return templates.TemplateResponse("decoy_signup.html", {"request": request, "error": "Password fails custom security criteria."})
+        return templates.TemplateResponse(request=request, name="decoy_signup.html", context={"error": "Password fails custom security criteria."})
 
     # Check if user already exists
     existing_user = db.query(User).filter((User.username == username) | (User.email == email)).first()
     if existing_user:
-        return templates.TemplateResponse("decoy_signup.html", {"request": request, "error": "Email or username is already registered."})
+        return templates.TemplateResponse(request=request, name="decoy_signup.html", context={"error": "Email or username is already registered."})
 
     # Create new user
     new_user = User(
@@ -190,13 +312,14 @@ async def signup_post(
     # Automatically set cookie session
     token = create_decoy_token(username)
     response = RedirectResponse(url="/?message=Registration successful! Welcome to myTunes.", status_code=303)
-    response.set_cookie(key=COOKIE_NAME, value=token, httponly=True)
+    is_https = (request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https")
+    response.set_cookie(key=COOKIE_NAME, value=token, httponly=True, samesite="lax", secure=is_https)
     return response
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_get(request: Request):
     error = request.query_params.get("error")
-    return templates.TemplateResponse("decoy_login.html", {"request": request, "error": error})
+    return templates.TemplateResponse(request=request, name="decoy_login.html", context={"error": error})
 
 # Global tracker for failed decoy login attempts by IP
 decoy_login_failures = {}
@@ -208,7 +331,12 @@ async def login_post(
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    ip_addr = get_client_ip(request)
+    rate_err = check_and_enforce_rate_limit(request, db, "login", limit=20, window_sec=60)
+    if rate_err:
+        return rate_err
+
+    attr = extract_source_attribution(request)
+    ip_addr = attr.client_ip
     
     # Check for SQL injection signature in username or password
     is_attack = False
@@ -219,7 +347,7 @@ async def login_post(
 
     if is_attack:
         # Deceptive return for attackers
-        return templates.TemplateResponse("decoy_login.html", {"request": request, "error": "Invalid username or password."})
+        return templates.TemplateResponse(request=request, name="decoy_login.html", context={"error": "Invalid username or password."})
 
     # Authenticate user
     user = db.query(User).filter(User.username == username).first()
@@ -239,25 +367,34 @@ async def login_post(
                 headers=dict(request.headers),
                 payload=f"username={username}",
                 attack_type="Brute Force",
-                severity="Medium"
+                severity="Medium",
+                peer_ip=attr.peer_ip,
+                attribution_method=attr.attribution_method,
+                attribution_status=attr.attribution_status,
+                is_synthetic=attr.is_synthetic
             )
-        return templates.TemplateResponse("decoy_login.html", {"request": request, "error": "Incorrect username or password."})
+        return templates.TemplateResponse(request=request, name="decoy_login.html", context={"error": "Incorrect username or password."})
 
     # Successful Login: reset failures
     decoy_login_failures[ip_addr] = 0
     token = create_decoy_token(username)
     response = RedirectResponse(url="/?message=Logged in successfully.", status_code=303)
-    response.set_cookie(key=COOKIE_NAME, value=token, httponly=True)
+    is_https = (request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https")
+    response.set_cookie(key=COOKIE_NAME, value=token, httponly=True, samesite="lax", secure=is_https)
     return response
 
 @app.get("/logout")
 async def logout(request: Request):
     response = RedirectResponse(url="/?message=Logged out successfully.", status_code=303)
-    response.delete_cookie(COOKIE_NAME)
+    response.delete_cookie(COOKIE_NAME, httponly=True, samesite="lax")
     return response
 
 @app.get("/search")
 async def decoy_search(request: Request, q: str = "", db: Session = Depends(get_db)):
+    rate_err = check_and_enforce_rate_limit(request, db, "search", limit=60, window_sec=60)
+    if rate_err:
+        return rate_err
+
     user = get_current_decoy_user(request, db)
     
     # Intercept attack signatures
@@ -266,14 +403,22 @@ async def decoy_search(request: Request, q: str = "", db: Session = Depends(get_
         playlists = []
         if user:
             playlists = db.query(DecoyPlaylist).filter(DecoyPlaylist.user_id == user.id).all()
-        return templates.TemplateResponse("decoy_home.html", {"request": request, "user": user, "user_playlists": playlists, "q": q, "error": f"No results found for '{q}'."})
+        return templates.TemplateResponse(
+            request=request,
+            name="decoy_home.html",
+            context={"user": user, "user_playlists": playlists, "q": q, "error": f"No results found for '{q}'."}
+        )
 
     playlists = []
     if user:
         playlists = db.query(DecoyPlaylist).filter(DecoyPlaylist.user_id == user.id).all()
     
     # Simulated search response
-    return templates.TemplateResponse("decoy_home.html", {"request": request, "user": user, "user_playlists": playlists, "q": q, "message": f"Showing results for '{q}'."})
+    return templates.TemplateResponse(
+        request=request,
+        name="decoy_home.html",
+        context={"user": user, "user_playlists": playlists, "q": q, "message": f"Showing results for '{q}'."}
+    )
 
 @app.post("/create-playlist")
 async def decoy_create_playlist(
@@ -309,15 +454,19 @@ async def decoy_upload_avatar(
     if not user:
         return RedirectResponse(url="/login?error=Please log in to change your avatar.", status_code=303)
 
-    filename = file.filename
-    content = await file.read()
+    original_filename = file.filename or "avatar.bin"
     
+    # Bounded chunk read with max size check (prevents OOM DoS)
+    content, is_exceeded = await read_bounded_upload(file)
+    if is_exceeded:
+        return RedirectResponse(url="/?error=File size exceeds maximum allowable limit (5MB).", status_code=303)
+
     # Check for malicious Web Shell signatures
     is_malicious = False
     reasons = []
     
     # 1. File extension checking
-    ext = os.path.splitext(filename)[1].lower()
+    ext = os.path.splitext(original_filename)[1].lower()
     if ext in [".php", ".phtml", ".php5", ".asp", ".aspx", ".jsp", ".jspx", ".pl", ".py", ".sh"]:
         is_malicious = True
         reasons.append(f"Executable extension: {ext}")
@@ -343,22 +492,25 @@ async def decoy_upload_avatar(
         sha256 = hashlib.sha256(content).hexdigest()
         file_size = len(content)
         mime_type = file.content_type or "application/octet-stream"
-        ip_addr = get_client_ip(request)
+        attr = extract_source_attribution(request)
+        ip_addr = attr.client_ip
         ua = request.headers.get("user-agent", "Unknown")
 
-        # Isolated sandboxed save
-        quarantine_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-        quarantine_path = os.path.join(QUARANTINE_DIR, quarantine_filename)
-        with open(quarantine_path, "wb") as f:
-            f.write(content)
+        # Isolated sandboxed save with strict path containment
+        quarantine_path = save_quarantined_file(original_filename, content)
 
-        # Log malware
+        # Log malware metadata
+        sanitized_display_name = sanitize_upload_filename(original_filename)
         new_malware = MalwareMetadata(
-            filename=filename,
+            filename=sanitized_display_name,
             file_hash=sha256,
             file_size=file_size,
             mime_type=mime_type,
             source_ip=ip_addr,
+            peer_ip=attr.peer_ip,
+            attribution_method=attr.attribution_method,
+            attribution_status=attr.attribution_status,
+            is_synthetic=attr.is_synthetic,
             quarantine_path=quarantine_path
         )
         db.add(new_malware)
@@ -370,9 +522,13 @@ async def decoy_upload_avatar(
             endpoint=f"/upload-avatar (File Upload)",
             method="POST",
             headers=dict(request.headers),
-            payload=f"filename={filename}, reasons={', '.join(reasons)}",
+            payload=f"filename={sanitized_display_name}, reasons={', '.join(reasons)}",
             attack_type="Web Shell Detection",
-            severity="High"
+            severity="High",
+            peer_ip=attr.peer_ip,
+            attribution_method=attr.attribution_method,
+            attribution_status=attr.attribution_status,
+            is_synthetic=attr.is_synthetic
         )
         db.commit()
 
@@ -382,31 +538,39 @@ async def decoy_upload_avatar(
     # Safe file path (mock upload success)
     return RedirectResponse(url="/?message=Profile picture updated successfully!", status_code=303)
 
-# LEGACY DEC_OY ROUTES (For backwards compatibility with simulate_attacks.py)
+# LEGACY DECOY ROUTES (For backwards compatibility with penetration testing & simulation)
 
 @app.post("/upload")
 async def legacy_upload(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
-    """Legacy Web Shell decoy endpoint targeted by the original simulation."""
-    filename = file.filename
-    content = await file.read()
+    """Legacy Web Shell decoy endpoint targeted by automated simulations."""
+    original_filename = file.filename or "upload.bin"
     
+    # Bounded read
+    content, is_exceeded = await read_bounded_upload(file)
+    if is_exceeded:
+        return JSONResponse(status_code=413, content={"error": "File exceeds maximum permitted size of 5MB."})
+
     sha256 = hashlib.sha256(content).hexdigest()
     file_size = len(content)
     mime_type = file.content_type or "application/octet-stream"
-    ip_addr = get_client_ip(request)
+    attr = extract_source_attribution(request)
+    ip_addr = attr.client_ip
     ua = request.headers.get("user-agent", "Unknown")
     
-    quarantine_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-    quarantine_path = os.path.join(QUARANTINE_DIR, quarantine_filename)
-    with open(quarantine_path, "wb") as f:
-        f.write(content)
+    # Safe quarantine save with containment check
+    quarantine_path = save_quarantined_file(original_filename, content)
+    sanitized_display_name = sanitize_upload_filename(original_filename)
 
     new_malware = MalwareMetadata(
-        filename=filename,
+        filename=sanitized_display_name,
         file_hash=sha256,
         file_size=file_size,
         mime_type=mime_type,
         source_ip=ip_addr,
+        peer_ip=attr.peer_ip,
+        attribution_method=attr.attribution_method,
+        attribution_status=attr.attribution_status,
+        is_synthetic=attr.is_synthetic,
         quarantine_path=quarantine_path
     )
     db.add(new_malware)
@@ -417,9 +581,13 @@ async def legacy_upload(request: Request, file: UploadFile = File(...), db: Sess
         endpoint="/upload (Legacy Decoy)",
         method="POST",
         headers=dict(request.headers),
-        payload=f"filename={filename}",
+        payload=f"filename={sanitized_display_name}",
         attack_type="Web Shell Detection",
-        severity="High"
+        severity="High",
+        peer_ip=attr.peer_ip,
+        attribution_method=attr.attribution_method,
+        attribution_status=attr.attribution_status,
+        is_synthetic=attr.is_synthetic
     )
     db.commit()
     
@@ -430,9 +598,14 @@ async def legacy_contact(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
-    message: str = Form(...)
+    message: str = Form(...),
+    db: Session = Depends(get_db)
 ):
     """Legacy XSS contact decoy endpoint targeted by the original simulation."""
+    rate_err = check_and_enforce_rate_limit(request, db, "contact", limit=30, window_sec=60)
+    if rate_err:
+        return rate_err
+
     check_and_log_attack(request, name, "Contact Name")
     check_and_log_attack(request, email, "Contact Email")
     check_and_log_attack(request, message, "Contact Message")
@@ -449,20 +622,28 @@ if __name__ == "__main__":
     import uvicorn
     import socket
 
+    if not os.path.exists("cert.pem") or not os.path.exists("key.pem"):
+        print("[!] SSL certificates missing. Generating self-signed TLS certificate and key...")
+        from generate_ssl import generate_self_signed_cert
+        generate_self_signed_cert()
+
     def is_port_in_use(port: int) -> bool:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex(('127.0.0.1', port)) == 0
 
-    port = 443
-    if is_port_in_use(443):
-        print("Port 443 is already in use. Falling back to port 8443...")
-        port = 8443
+    default_port = int(os.getenv("BAITSCOPE_DECOY_PORT") or os.getenv("SENTINEL_DECOY_PORT", "443"))
+    fallback_port = int(os.getenv("BAITSCOPE_DECOY_FALLBACK_PORT") or os.getenv("SENTINEL_DECOY_FALLBACK_PORT", "8443"))
+
+    port = default_port
+    if is_port_in_use(port):
+        print(f"Port {port} is already in use. Falling back to port {fallback_port}...")
+        port = fallback_port
 
     try:
         uvicorn.run("app_decoy:app", host="0.0.0.0", port=port, ssl_keyfile="key.pem", ssl_certfile="cert.pem", reload=False)
     except BaseException as e:
-        if port == 443:
-            print(f"Port 443 binding failed ({e}). Attempting fallback to port 8443...")
-            uvicorn.run("app_decoy:app", host="0.0.0.0", port=8443, ssl_keyfile="key.pem", ssl_certfile="cert.pem", reload=False)
+        if port == default_port:
+            print(f"Port {port} binding failed ({e}). Attempting fallback to port {fallback_port}...")
+            uvicorn.run("app_decoy:app", host="0.0.0.0", port=fallback_port, ssl_keyfile="key.pem", ssl_certfile="cert.pem", reload=False)
         else:
             raise

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinel.X | Administrator Login</title>
+    <title>BAITSCOPE | Administrator Login</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,7 +84,7 @@
     <div class="hidden lg:flex w-1/2 border-r-2 border-border bg-background p-12 flex-col justify-between relative overflow-hidden">
         <div class="flex items-center justify-between relative z-10">
             <a href="/" class="font-display font-bold text-3xl uppercase tracking-tighter text-accent flex items-center gap-2">
-                <span>⌬</span> Sentinel.X
+                <span>⌬</span> BAITSCOPE
             </a>
             <div class="font-mono text-xs uppercase px-3 py-1 border-2 border-border bg-muted/20 text-accent font-bold">
                 SECURITY GATEWAY // #0X-AUTH
@@ -93,16 +93,16 @@
         
         <div class="relative z-10">
             <h1 class="font-display font-bold uppercase text-[5.5rem] leading-[0.85] tracking-tighter mb-6 text-foreground">
-                Sentinel<br><span class="text-accent">Auth Gate</span>
+                BAITSCOPE<br><span class="text-accent">Auth Gate</span>
             </h1>
             <p class="text-lg text-muted-foreground font-display uppercase tracking-widest leading-relaxed max-w-md">
-                Role-Based Threat Intelligence Clearance. Root Administrators &amp; Guest Analysts.
+                Cyber Deception &amp; Threat Intelligence Clearance. Root Administrator Authentication.
             </p>
         </div>
         
         <div class="relative z-10 flex justify-between items-center font-mono text-xs text-muted-foreground border-t-2 border-border pt-6">
-            <span>CHALLENGE: SHA-256 HMAC</span>
-            <span>SENTINEL.X MATRIX</span>
+            <span>CHALLENGE: PBKDF2 / HMAC-SHA256</span>
+            <span>BAITSCOPE MATRIX</span>
         </div>
 
         <div class="absolute -right-20 -bottom-20 text-[32rem] font-display font-bold text-muted leading-none opacity-20 select-none pointer-events-none">
@@ -133,7 +133,7 @@
             
             <div class="mb-8">
                 <div class="lg:hidden font-display font-bold text-2xl uppercase tracking-tighter text-accent flex items-center gap-2 mb-3">
-                    <span>⌬</span> Sentinel.X
+                    <span>⌬</span> BAITSCOPE
                 </div>
                 <h2 class="font-display font-bold uppercase text-4xl sm:text-5xl leading-[0.88] tracking-tighter text-foreground mb-2">
                     Threat Center<br><span class="text-accent">Admin Login</span>
@@ -191,21 +191,40 @@
                         <label for="password" class="block font-display font-bold text-xs tracking-widest uppercase text-muted-foreground">
                             Password
                         </label>
+                        {% if is_dashboard %}
+                        <button type="button" onclick="toggleRecoveryNotice()" id="resetAuthBtn" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:underline cursor-pointer">
+                            Reset Auth
+                        </button>
+                        {% else %}
                         <a href="/forgot-password" class="font-display font-bold text-xs tracking-widest uppercase text-accent hover:underline">
                             Reset Auth
                         </a>
+                        {% endif %}
                     </div>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required 
-                           class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold uppercase tracking-tighter outline-none py-2 text-foreground transition-colors placeholder:text-muted-foreground/30 rounded-none">
+                    <div class="relative flex items-center">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"
+                               class="w-full bg-transparent border-b-2 border-border focus:border-accent text-2xl md:text-3xl font-display font-bold tracking-tighter outline-none py-2 pr-16 text-foreground transition-colors placeholder:text-muted-foreground/30 rounded-none">
+                        <button type="button" onclick="togglePasswordVisibility()" id="togglePwdBtn" aria-label="Show password"
+                                class="absolute right-0 px-2.5 py-1 border border-border text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:border-accent hover:text-accent transition-colors cursor-pointer">
+                            Show
+                        </button>
+                    </div>
                 </div>
-                
+
+                {% if is_dashboard %}
+                <div id="recoveryNotice" class="hidden border-2 border-warning bg-warning/10 p-3 text-[11px] font-mono text-warning uppercase tracking-wider leading-relaxed">
+                    ADMIN RECOVERY POLICY: Root operator credentials are enforced locally via environment configuration (BAITSCOPE_ADMIN_PASSWORD_HASH / .env). Rotate credentials on the host console and restart the dashboard process.
+                </div>
+                {% endif %}
+
                 <button type="submit" class="w-full py-5 bg-accent text-accent-foreground font-display font-bold uppercase tracking-tighter text-2xl hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-accent hover:bg-background hover:text-accent cursor-pointer">
                     Authenticate Administrator
                 </button>
             </form>
 
             <div class="mt-8 text-center font-display font-bold text-xs tracking-widest uppercase text-muted-foreground">
-                &copy; 2026 Global Systems Integrity Corp.<br>
+                &copy; 2026 BAITSCOPE Security Labs<br>
+                <span class="text-[10px] tracking-wider opacity-75">Deceive. Detect. Investigate.</span>
             </div>
         </div>
 
@@ -216,12 +235,19 @@
 
     <!-- Scripts -->
     <script>
-        function fillCredentials(user, pass) {
-            document.getElementById('username').value = user;
-            document.getElementById('password').value = pass;
-            // Highlight input fields
-            document.getElementById('username').classList.add('border-accent');
-            document.getElementById('password').classList.add('border-accent');
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('password');
+            const btn = document.getElementById('togglePwdBtn');
+            if (!pwdInput || !btn) return;
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            btn.textContent = show ? 'Hide' : 'Show';
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        }
+
+        function toggleRecoveryNotice() {
+            const box = document.getElementById('recoveryNotice');
+            if (box) box.classList.toggle('hidden');
         }
 
         function toggleTheme() {

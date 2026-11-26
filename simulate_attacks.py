@@ -3,9 +3,21 @@ import time
 import os
 import random
 import urllib3
+import hmac
+import hashlib
+from dotenv import load_dotenv
 
 # Suppress self-signed certificate warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+load_dotenv()
+
+DECOY_SECRET = os.getenv("BAITSCOPE_DECOY_SECRET_KEY") or os.getenv("SENTINEL_DECOY_SECRET_KEY", "baitscope-decoy-secret-key-phase1-production")
+DECOY_SALT = os.getenv("BAITSCOPE_DECOY_SALT") or os.getenv("SENTINEL_DECOY_SALT", "baitscope-decoy-salt-phase1")
+
+def get_decoy_auth_cookies(username="admin"):
+    """Generate a cryptographically valid decoy session cookie to test authenticated flows."""
+    sig = hmac.new(DECOY_SECRET.encode("utf-8"), username.encode("utf-8"), hashlib.sha256).hexdigest()
+    return {"decoy_session": f"{username}:{sig}"}
 
 # Auto-detect whether decoy runs on standard 443 or fallback 8443
 BASE_URL = "https://localhost:443"
@@ -26,22 +38,7 @@ USER_AGENTS = [
     "Wfuzz/3.1.0 - The Web Fuzzer"
 ]
 
-def generate_random_ip():
-    """Generates a random, realistic public IPv4 address."""
-    first_octet_choices = [
-        random.randint(11, 99),
-        random.randint(101, 126),
-        random.randint(130, 168),
-        random.randint(173, 191),
-        random.randint(193, 223)
-    ]
-    first_octet = random.choice(first_octet_choices)
-    second_octet = random.randint(1, 254)
-    third_octet = random.randint(1, 254)
-    fourth_octet = random.randint(1, 254)
-    return f"{first_octet}.{second_octet}.{third_octet}.{fourth_octet}"
-
-# Simplified attacks: SQL Injection, XSS, Path Traversal, Brute Force, Web Shell Detection
+# Supported attacks: SQL Injection, XSS, Path Traversal, Brute Force, Web Shell Detection
 attacks = [
     {
         "category": "SQL Injection",
@@ -87,28 +84,25 @@ attacks = [
 
 def run_simulations():
     print("==========================================================")
-    print("      SENTINEL.X HONEYPOT - ATTACK SIMULATOR (5 VECTORS)  ")
+    print("      BAITSCOPE HONEYPOT - ATTACK SIMULATOR (5 VECTORS)   ")
     print("==========================================================")
     
     # 1. Run Web Attacks (SQL Injection, XSS, Path Traversal, Brute Force)
     for attack in attacks:
-        random_ip = generate_random_ip()
         random_ua = random.choice(USER_AGENTS)
         headers = {
-            "X-Forwarded-For": random_ip,
-            "X-Real-IP": random_ip,
             "User-Agent": random_ua
         }
         
         print(f"\n[+] Simulating Vector: {attack['category']}")
         print(f"    Scenario:       {attack['name']}")
-        print(f"    Source Node IP: {random_ip}")
+        print(f"    Source:         Actual Connection Peer (No Spoof)")
         print(f"    User-Agent:     {random_ua}")
         
         try:
-            # Set cookie for playlist creation simulation to avoid login redirect issues
+            # Set signed cookie for playlist creation simulation to test authenticated endpoint
             if "create-playlist" in attack["url"]:
-                cookies = {"decoy_session": "admin:admin"}
+                cookies = get_decoy_auth_cookies("admin")
                 response = requests.post(attack["url"], data=attack.get("data"), headers=headers, cookies=cookies, verify=False, timeout=5, allow_redirects=False)
             elif attack["method"] == "POST":
                 response = requests.post(attack["url"], data=attack.get("data"), headers=headers, verify=False, timeout=5)
@@ -122,14 +116,11 @@ def run_simulations():
     # 2. Run Web Shell Detection Attack (Malicious Profile Avatar Upload)
     print("\n[+] Simulating Vector: Web Shell Detection")
     print("    Scenario:       Malicious PHP Web Shell Profile Pic Upload")
-    shell_ip = generate_random_ip()
     shell_ua = random.choice(USER_AGENTS)
     headers = {
-        "X-Forwarded-For": shell_ip,
-        "X-Real-IP": shell_ip,
         "User-Agent": shell_ua
     }
-    print(f"    Source Node IP: {shell_ip}")
+    print(f"    Source:         Actual Connection Peer (No Spoof)")
     print(f"    User-Agent:     {shell_ua}")
 
     file_content = b"<?php system($_GET['cmd']); ?>"
@@ -137,8 +128,8 @@ def run_simulations():
         f.write(file_content)
     
     try:
-        # Simulate authenticated user avatar upload
-        cookies = {"decoy_session": "admin:admin"}
+        # Simulate authenticated user avatar upload with cryptographically valid session cookie
+        cookies = get_decoy_auth_cookies("admin")
         with open('tmp_shell.php', 'rb') as f:
             files = {'file': ('shell.php', f, 'application/x-php')}
             response = requests.post(f"{BASE_URL}/upload-avatar", files=files, headers=headers, cookies=cookies, verify=False, timeout=5, allow_redirects=False)
@@ -152,13 +143,12 @@ def run_simulations():
     # 3. Run Web Shell Detection Attack (Legacy Decoy upload compat)
     print("\n[+] Simulating Vector: Web Shell Detection (Legacy)")
     print("    Scenario:       Legacy Upload Endpoint Attack")
-    legacy_ip = generate_random_ip()
     legacy_ua = random.choice(USER_AGENTS)
     headers = {
-        "X-Forwarded-For": legacy_ip,
-        "X-Real-IP": legacy_ip,
         "User-Agent": legacy_ua
     }
+    print(f"    Source:         Actual Connection Peer (No Spoof)")
+    print(f"    User-Agent:     {legacy_ua}")
     file_content = b"<?php @eval($_POST['cmd']); ?>"
     with open("tmp_legacy.php", "wb") as f:
         f.write(file_content)

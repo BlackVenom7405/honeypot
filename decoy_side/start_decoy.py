@@ -4,7 +4,7 @@ import os
 
 def start_decoy():
     print("==========================================================")
-    print("      SENTINEL.X STANDALONE DECOY HONEYPOT NODE          ")
+    print("      BAITSCOPE STANDALONE DECOY HONEYPOT NODE          ")
     print("==========================================================")
     
     # 1. Ensure required directories exist

@@ -7,7 +7,6 @@ from database import SessionLocal
 
 # Ensure log directories exist
 os.makedirs("logs", exist_ok=True)
-os.makedirs("ml_dataset", exist_ok=True)
 
 # Configure file logging
 logging.basicConfig(
@@ -24,16 +23,25 @@ def log_attack(
     headers: dict,
     payload: str,
     attack_type: str,
-    severity: str = "Low"
+    severity: str = "Low",
+    peer_ip: str = None,
+    attribution_method: str = "direct_peer",
+    attribution_status: str = "verified_peer",
+    is_synthetic: bool = False
 ):
     """
-    Logs an attack to SQLite, file logs, and optional remote admin webhook.
+    Logs an attack to SQLite, file logs, and optional remote admin webhook with provenance tracking.
     """
+    effective_peer = peer_ip or ip_address
     # 1. Log to SQLite
     try:
         db = SessionLocal()
         new_log = AttackLog(
             ip_address=ip_address,
+            peer_ip=effective_peer,
+            attribution_method=attribution_method,
+            attribution_status=attribution_status,
+            is_synthetic=is_synthetic,
             user_agent=user_agent,
             endpoint=endpoint,
             method=method,
@@ -45,6 +53,20 @@ def log_attack(
         db.add(new_log)
         db.commit()
         db.refresh(new_log)
+
+        # Update persistent IP Threat Registry
+        try:
+            from threat_intel import record_threat_event
+            record_threat_event(
+                db, ip_address, attack_type, headers,
+                peer_ip=effective_peer,
+                attribution_method=attribution_method,
+                attribution_status=attribution_status,
+                is_synthetic=is_synthetic
+            )
+        except Exception as te:
+            print(f"[-] Threat Registry Update Warning: {te}")
+
         db.close()
     except Exception as e:
         print(f"[-] SQLite Logging Error: {e}")
@@ -53,6 +75,10 @@ def log_attack(
     log_data = {
         "timestamp": datetime.now().isoformat(),
         "ip_address": ip_address,
+        "peer_ip": effective_peer,
+        "attribution_method": attribution_method,
+        "attribution_status": attribution_status,
+        "is_synthetic": is_synthetic,
         "user_agent": user_agent,
         "endpoint": endpoint,
         "method": method,
@@ -68,14 +94,7 @@ def log_attack(
     except Exception:
         pass
     
-    # 3. Log to standard logger for ML dataset preparation
-    try:
-        with open("ml_dataset/raw_logs.csv", "a") as f:
-            f.write(f"{datetime.now().isoformat()},{ip_address},{attack_type},{payload[:100].replace(',', ' ')}\n")
-    except Exception:
-        pass
-
-    # 4. Optional Remote Webhook Logging (Vercel -> Central Admin System)
+    # 3. Optional Remote Webhook Logging (Vercel -> Central Admin System)
     admin_url = os.getenv("ADMIN_SYSTEM_URL")
     if admin_url:
         try:

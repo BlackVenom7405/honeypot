@@ -1,5 +1,7 @@
 # ==============================================================================
-# Git Ignore - Sentinel.X Honeypot & Decoy Node
+# Git Ignore — BAITSCOPE Cyber Deception & Threat Intelligence Platform (v5.0.0)
+# Excludes non-runtime artifacts, research materials, tests, ML leftovers,
+# local databases, quarantine samples, logs, and environment secrets.
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -29,78 +31,131 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+decoy_side/venv/
+decoy_side/.venv/
+decoy_side/__pycache__/
 
 # ------------------------------------------------------------------------------
-# 2. SSL Certificates & Private Keys
+# 2. Testing, Verification & Audit Artifacts
 # ------------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+audit_output/
+tests/
+test_results/
+playwright-report/
+test-results/
+*_test_results.json
+phase*_results.json
+
+# ------------------------------------------------------------------------------
+# 3. Research Papers, Academic Reports & Generated Docs
+# ------------------------------------------------------------------------------
+research_paper/
+BAITSCOPE_REPORT/
+tectonic_bin/
+generate_figures.py
+BAITSCOPE_Project_Report.html
+FINAL-MJR-*
+*.pdf
+*.docx
+*.tex
+*.bib
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+
+# ------------------------------------------------------------------------------
+# 4. Removed ML Modules & Artifacts (Do Not Commit)
+# ------------------------------------------------------------------------------
+ml_analysis/
+ml_dataset/
+run_ml_tests.py
+*.pkl
+*.joblib
+*.h5
+*.onnx
+
+# ------------------------------------------------------------------------------
+# 5. Environment Variables, Secrets & Private TLS Material
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+decoy_side/.env
+decoy_side/.env.*
 *.pem
 *.key
 *.crt
+*.p12
+*.pfx
 cert.pem
 key.pem
 decoy_side/cert.pem
 decoy_side/key.pem
 
 # ------------------------------------------------------------------------------
-# 3. Databases & Persistent Data
+# 6. Local SQLite Databases & Backups
 # ------------------------------------------------------------------------------
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
-database/*.db
-decoy_side/database/*.db
-database/honeypot.db
-decoy_side/database/honeypot.db
+database/*
+!database/.gitkeep
+decoy_side/database/*
+!decoy_side/database/.gitkeep
 
 # ------------------------------------------------------------------------------
-# 4. Logs, Telemetry & ML Datasets
+# 7. Runtime Logs & Telemetry Captures
 # ------------------------------------------------------------------------------
-logs/
-decoy_side/logs/
+logs/*
+!logs/.gitkeep
+decoy_side/logs/*
+!decoy_side/logs/.gitkeep
 *.log
-ml_dataset/
-ml_analysis/report.csv
-ml_analysis/report.json
-ml_analysis/report.txt
 
 # ------------------------------------------------------------------------------
-# 5. Uploaded Files & Quarantined Web Shell Malware
+# 8. Uploaded Files & Quarantined Malware Samples
 # ------------------------------------------------------------------------------
-uploads/
-decoy_side/uploads/
-uploads/quarantine/
-decoy_side/uploads/quarantine/
+uploads/*
+!uploads/quarantine/
+uploads/quarantine/*
+!uploads/quarantine/.gitkeep
+decoy_side/uploads/*
+!decoy_side/uploads/quarantine/
+decoy_side/uploads/quarantine/*
+!decoy_side/uploads/quarantine/.gitkeep
 
 # ------------------------------------------------------------------------------
-# 6. Environment Variables & Secret Files
+# 9. Local Backups, Scratch & Agent Metadata
 # ------------------------------------------------------------------------------
-.env
-.env.*
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+backup_*/
+release_test_clone/
+/honeypot/
+scratch/
+.agents/
+skills-lock.json
+docker/Dockerfile
+requirements-frozen.txt
+requirements-lock.txt
 
 # ------------------------------------------------------------------------------
-# 7. Temporary Scripts & Simulator Files
+# 10. Temporary Files, Screenshots, IDE & OS System Files
 # ------------------------------------------------------------------------------
 tmp_*
 *.tmp
 *.temp
-scratch/
-
-# ------------------------------------------------------------------------------
-# 8. IDE & OS System Files
-# ------------------------------------------------------------------------------
+*.bak
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 .DS_Store
 Thumbs.db
-
-# ------------------------------------------------------------------------------
-# 9. Vercel & Deployment Build Artifacts
-# ------------------------------------------------------------------------------
 .vercel/
+decoy_side/.vercel/

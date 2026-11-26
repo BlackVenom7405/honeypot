@@ -1,5 +1,5 @@
 ================================================================================
-                    SENTINEL.X FIREWALL PORT CONFIGURATION
+                    BAITSCOPE FIREWALL PORT CONFIGURATION
 ================================================================================
 Run these commands in an Administrator PowerShell window to manage access
 to the public honeypot decoy website from other devices on your local network.

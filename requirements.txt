@@ -1,14 +1,16 @@
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-pydantic-settings
-jinja2
-python-multipart
-aiofiles
-pandas
-matplotlib
-requests
-joblib
-scikit-learn
-reportlab
+# BAITSCOPE Cyber Deception and Threat Intelligence Platform
+# Version 5.0 Production Dependency Specification
+
+fastapi>=0.135.0,<=0.136.0
+uvicorn>=0.30.0,<=0.42.0
+starlette>=0.52.0,<=1.0.0
+sqlalchemy>=2.0.0,<=2.0.49
+pydantic>=2.10.0,<=2.13.0
+pydantic-settings>=2.0.0,<=2.14.0
+jinja2>=3.1.0,<=3.1.6
+python-multipart>=0.0.20,<=0.0.25
+python-dotenv>=1.0.0,<=1.2.2
+aiofiles>=24.0.0,<=25.2.0
+requests>=2.31.0,<=2.35.0
+reportlab>=4.2.0,<=5.1.0
+cryptography>=46.0.0,<=50.1.0

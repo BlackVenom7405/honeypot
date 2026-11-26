@@ -1,5 +1,5 @@
 # ==============================================================================
-# Git Ignore - Standalone Decoy Node
+# Git Ignore — BAITSCOPE Standalone Decoy Node (v5.0.0)
 # ==============================================================================
 
 __pycache__/
@@ -7,7 +7,7 @@ __pycache__/
 venv/
 .venv/
 
-# SSL Keys & Certificates
+# TLS Keys & Certificates (generated locally on startup)
 *.pem
 *.key
 *.crt
@@ -18,17 +18,22 @@ key.pem
 *.db
 *.sqlite
 *.sqlite3
-database/*.db
+database/*
+!database/.gitkeep
 
-# Logs & Malware Uploads
-logs/
+# Runtime Logs & Quarantined Malware Samples
+logs/*
+!logs/.gitkeep
 *.log
-uploads/
-uploads/quarantine/
+uploads/*
+!uploads/quarantine/
+uploads/quarantine/*
+!uploads/quarantine/.gitkeep
 
-# Environment Variables & OS
+# Environment Variables & IDE / OS
 .env
 .env.*
+!.env.example
 .vscode/
 .DS_Store
 Thumbs.db

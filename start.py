@@ -2,6 +2,10 @@ import subprocess
 import sys
 import time
 import socket
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_local_ip():
     try:
@@ -15,25 +19,43 @@ def get_local_ip():
 
 def start_services():
     local_ip = get_local_ip()
-    print("==========================================================")
-    print("           SENTINEL.X HONEYPOT SERVICE MANAGER            ")
-    print("==========================================================")
+    dash_host = os.getenv("BAITSCOPE_DASHBOARD_HOST") or os.getenv("SENTINEL_DASHBOARD_HOST", "127.0.0.1")
+    dash_port = os.getenv("BAITSCOPE_DASHBOARD_PORT") or os.getenv("SENTINEL_DASHBOARD_PORT", "8080")
     
-    # 1. Start decoy website
+    print("================================================================================")
+    print("                                   BAITSCOPE                                    ")
+    print("                 Cyber Deception & Threat Intelligence Platform                 ")
+    print("                          Deceive. Detect. Investigate.                         ")
+    print("================================================================================")
+
+    # Ensure required runtime storage directories exist
+    os.makedirs("database", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+    os.makedirs(os.path.join("uploads", "quarantine"), exist_ok=True)
+
+    # Generate self-signed SSL certificates if absent on a fresh installation
+    if not os.path.exists("cert.pem") or not os.path.exists("key.pem"):
+        print("[!] SSL certificates missing. Generating self-signed TLS certs via generate_ssl.py...")
+        subprocess.run([sys.executable, "generate_ssl.py"], check=True)
+    
+    # 1. Start decoy website (binds 0.0.0.0 for public / LAN attraction)
     print("[+] Starting Public Decoy myTunes Website (HTTPS)...")
     decoy_proc = subprocess.Popen([sys.executable, "app_decoy.py"])
     
-    # 2. Start admin dashboard
-    print("[+] Starting Secure Sentinel.X Admin Dashboard...")
+    # 2. Start admin dashboard (binds 127.0.0.1 for localhost isolation)
+    print(f"[+] Starting Secure BAITSCOPE Admin Dashboard on {dash_host}:{dash_port}...")
     dashboard_proc = subprocess.Popen([sys.executable, "app_dashboard.py"])
     
     print("\n[+] Both applications started successfully!")
     print("    [Local Access - This Machine]")
     print("        - Decoy Site (HTTPS):   https://localhost")
-    print("        - Admin Dashboard:      http://127.0.0.1:8080/admin")
+    print(f"        - Admin Dashboard:      http://{dash_host}:{dash_port}/admin")
     print(f"\n    [Network Access - Other Devices on Same Wi-Fi/LAN]")
     print(f"        - Decoy Site (HTTPS):   https://{local_ip}")
-    print(f"        - Admin Dashboard:      http://{local_ip}:8080/admin")
+    if dash_host in ["127.0.0.1", "localhost"]:
+        print("        - Admin Dashboard:      [RESTRICTED TO LOCALHOST - ISOLATED FROM LAN]")
+    else:
+        print(f"        - Admin Dashboard:      http://{dash_host}:{dash_port}/admin")
     print("==========================================================")
     print("Press CTRL+C to stop both applications.")
     

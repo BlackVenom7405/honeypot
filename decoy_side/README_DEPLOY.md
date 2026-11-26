@@ -1,6 +1,6 @@
-# Sentinel.X - Standalone Decoy Node Deployment Guide
+# BAITSCOPE - Standalone Decoy Node Deployment Guide
 
-This directory (`decoy_side/`) contains the complete, self-contained **myTunes Decoy Honeypot Website**. You can copy this entire folder to any remote machine, VM, or container to capture attack vectors over network HTTPS and view the logged threats on your central Sentinel.X Admin System.
+This directory (`decoy_side/`) contains the complete, self-contained **myTunes Decoy Honeypot Website**. You can copy this entire folder to any remote machine, VM, or container to capture attack vectors over network HTTPS and view the logged threats on your central BAITSCOPE Admin System.
 
 ---
 

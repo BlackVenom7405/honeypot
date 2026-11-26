@@ -37,7 +37,7 @@ class NumberedCanvas(canvas.Canvas):
         if self._pageNumber > 1:
             self.setFont("Helvetica-Bold", 8)
             self.setFillColor(colors.HexColor("#475569"))
-            self.drawString(40, letter[1] - 30, "CYBERGUARD SENTINEL-X // INCIDENT AUDIT REPORT")
+            self.drawString(40, letter[1] - 30, "CYBERGUARD BAITSCOPE // INCIDENT AUDIT REPORT")
             self.setFont("Helvetica", 8)
             self.drawRightString(letter[0] - 40, letter[1] - 30, "TLP:AMBER | STRICTLY CONFIDENTIAL")
             
@@ -52,7 +52,7 @@ class NumberedCanvas(canvas.Canvas):
         
         self.setFont("Helvetica-Bold", 8)
         self.setFillColor(colors.HexColor("#0F172A"))
-        self.drawString(40, 30, "GSI CYBERGUARD SENTINEL")
+        self.drawString(40, 30, "GSI CYBERGUARD BAITSCOPE")
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#64748B"))
         self.drawString(185, 30, "• Automated Threat Intelligence & Forensic Honeynet")
@@ -179,7 +179,7 @@ def generate_pdf_report(attack_logs, malware_list, stats_summary=None) -> bytes:
     # 1. Header Banner & Classification
     header_data = [
         [
-            Paragraph("<b>CYBERGUARD // SENTINEL-X HONEYNET</b>", subtitle_style),
+            Paragraph("<b>CYBERGUARD // BAITSCOPE HONEYNET</b>", subtitle_style),
             Paragraph("<b>CLASSIFICATION: TLP:AMBER / RESTRICTED</b>", badge_banner_style)
         ]
     ]
@@ -219,7 +219,7 @@ def generate_pdf_report(attack_logs, malware_list, stats_summary=None) -> bytes:
     story.append(Paragraph("1. Executive Summary & Threat Posture", section_heading))
     story.append(Paragraph(
         "This security audit report provides real-time forensic analysis of malicious attempts, suspicious payloads, "
-        "and weaponized binary uploads trapped by the CyberGuard Sentinel honeynet architecture. "
+        "and weaponized binary uploads trapped by the CyberGuard BAITSCOPE honeynet architecture. "
         "All trapped adversary communications have been quarantined and parsed for indicators of compromise (IoCs).",
         body_text
     ))
@@ -259,20 +259,24 @@ def generate_pdf_report(attack_logs, malware_list, stats_summary=None) -> bytes:
     
     def normalize_attack_name(atype: str) -> str:
         tl = (atype or '').lower()
-        if "sql" in tl:
+        if "command" in tl:
+            return "Legacy (Retired Vector)"
+        elif "sql" in tl:
             return "SQL Injection"
         elif "shell" in tl or "upload" in tl:
             return "Web Shell Detection"
         elif "xss" in tl:
             return "XSS"
-        elif "traversal" in tl or "command" in tl or "api" in tl:
+        elif "traversal" in tl or "api" in tl:
             return "Path Traversal"
         return "Brute Force"
 
-    # Aggregate attacks by the 5 standardized vectors
+    # Aggregate attacks by the 5 standardized vectors (exclude retired legacy rows from active distribution)
     vector_counts = {}
     for log in attack_logs:
         norm_type = normalize_attack_name(log.attack_type)
+        if norm_type == "Legacy (Retired Vector)":
+            continue
         vector_counts[norm_type] = vector_counts.get(norm_type, 0) + 1
 
     vector_rows = [
