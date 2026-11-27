@@ -323,12 +323,13 @@
     </style>
 </head>
 
-<body class="bg-background text-foreground min-h-screen relative flex selection:bg-accent selection:text-accent-foreground">
+<body data-guest="{{ 'true' if user_role == 'guest' else 'false' }}"
+    class="bg-background text-foreground min-h-screen relative flex selection:bg-accent selection:text-accent-foreground">
     <!-- Subtle Noise Overlay -->
     <div class="fixed inset-0 noise z-50 pointer-events-none"></div>
 
     <!-- Mobile Backdrop -->
-    <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()"
+    <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()" aria-hidden="true"
         class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
 
     <!-- Navigation Sidebar -->
@@ -523,7 +524,7 @@
                     aria-label="Switch to Light Mode" title="Switch to Light Mode"
                     class="w-10 h-10 border-2 border-border text-foreground hover:border-accent hover:text-accent transition-all duration-300 inline-flex items-center justify-center cursor-pointer shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
                     <span id="sunIcon" class="hidden" aria-hidden="true">
-                        <svg class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                        <svg class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                             <circle cx="12" cy="12" r="4" />
                             <line x1="12" y1="2" x2="12" y2="5" />
                             <line x1="12" y1="19" x2="12" y2="22" />
@@ -536,7 +537,7 @@
                         </svg>
                     </span>
                     <span id="moonIcon" class="hidden" aria-hidden="true">
-                        <svg class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                        <svg class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                         </svg>
                     </span>
@@ -588,7 +589,7 @@
 
         <!-- Global Error / Connectivity / Auth Alert Banner -->
         <div id="global-alert-banner" role="alert"
-            class="hidden mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-danger bg-danger/10 text-danger font-mono text-xs flex items-center justify-between gap-4">
+            class="hidden mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-danger bg-danger/10 text-danger font-mono text-xs items-center justify-between gap-4">
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 min-w-0">
                 <span id="global-alert-prefix" class="font-bold shrink-0">⚠ SYSTEM ALERT:</span>
                 <span id="global-alert-message" class="break-words"></span>
@@ -603,6 +604,19 @@
                     Dismiss
                 </button>
             </div>
+        </div>
+
+        <!-- Genuine Attack Audio Alarm Notification Banner -->
+        <div id="attack-alarm-banner" role="alert" aria-live="assertive"
+            class="hidden mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-danger bg-danger/10 text-danger font-mono text-xs items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 min-w-0">
+                <span id="attack-alarm-prefix" class="font-bold shrink-0">⚠ ATTACK ALARM:</span>
+                <span id="attack-alarm-message" class="break-words"></span>
+            </div>
+            <button type="button" id="stop-alarm-btn" onclick="stopAttackAlarm(true)"
+                class="hidden px-3.5 py-1.5 bg-danger text-white font-display font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity cursor-pointer shrink-0 whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+                STOP ALERT
+            </button>
         </div>
 
         <!-- Guest Analyst Redaction Warning Banner -->
@@ -816,6 +830,7 @@
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
                     <div class="relative flex-1 w-full">
                         <input type="text" id="log-search" oninput="filterLogs()"
+                            aria-label="Search attack logs"
                             placeholder="Search by IP address, target page, input, or browser..."
                             class="w-full bg-background border-2 border-border focus:border-accent px-4 py-3 text-sm font-mono outline-none text-foreground placeholder:text-muted-foreground/60">
                     </div>
@@ -1032,7 +1047,7 @@
                             Creates a PDF report with attack counts, isolated file SHA-256 hashes, event logs, and security tips.
                         </p>
                     </div>
-                    <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
+                    <button type="button" data-guest-disabled="true"
                         onclick="handleDownload('/admin/api/logs/download/pdf', 'baitscope_forensic_report.pdf')"
                         class="w-full py-3 bg-accent text-accent-foreground border-2 border-accent hover:bg-background hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
                         Download PDF Report
@@ -1052,7 +1067,7 @@
                             Downloads all recorded attack logs as plain text, including times, IP addresses, target pages, inputs, browsers, and file paths.
                         </p>
                     </div>
-                    <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
+                    <button type="button" data-guest-disabled="true"
                         onclick="handleDownload('/admin/api/logs/download/txt', 'baitscope_attack_logs.txt')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
                         Download Text Logs
@@ -1072,7 +1087,7 @@
                             Exports tracked attacker IPs, risk scores, attack counts, source details, and notes in JSON format.
                         </p>
                     </div>
-                    <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
+                    <button type="button" data-guest-disabled="true"
                         onclick="handleDownload('/admin/api/threats/export?format=json', 'baitscope_threats.json')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
                         Download JSON
@@ -1092,7 +1107,7 @@
                             Exports all tracked attacker IPs and risk scores as a CSV spreadsheet sorted from highest risk to lowest.
                         </p>
                     </div>
-                    <button type="button" {% if user_role == 'guest' %}disabled{% endif %}
+                    <button type="button" data-guest-disabled="true"
                         onclick="handleDownload('/admin/api/threats/export?format=csv', 'baitscope_threats.csv')"
                         class="w-full py-3 border-2 border-border hover:border-accent text-foreground hover:text-accent disabled:opacity-40 disabled:cursor-not-allowed font-display font-bold uppercase text-xs tracking-widest cursor-pointer transition-colors">
                         Download CSV
@@ -1212,6 +1227,7 @@
                         </div>
                         <div class="flex flex-col sm:items-end gap-1.5 shrink-0">
                             <select id="polling-interval-select" onchange="updatePollingInterval(this.value)"
+                                aria-label="Dashboard refresh mode"
                                 class="bg-background border-2 border-border focus:border-accent px-3 py-2 font-mono text-xs uppercase text-foreground outline-none cursor-pointer">
                                 <option value="realtime">Real-Time (Live SSE Updates)</option>
                                 <option value="5000">Every 5 Seconds (Default)</option>
@@ -1418,7 +1434,12 @@
 
     <!-- Scripts -->
     <script>
-        const IS_GUEST = {{ 'true' if user_role == 'guest' else 'false' }};
+        const IS_GUEST = document.body.dataset.guest === 'true';
+        if (IS_GUEST) {
+            document.querySelectorAll('[data-guest-disabled="true"]').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
         const api = window.BaitscopeApi;
         const { escapeHtml, formatUtcToIst, formatUtcTimeOnly, formatBytes } = api;
 
@@ -1475,6 +1496,35 @@
         let watchlistBlinkTimer = null;
         const WATCHLIST_BLINK_DURATION_MS = 6000;
 
+        // Genuine Attack Audio Alarm state (Admin Dashboard only)
+        const ALARM_AUDIO_SRC = '/static/sample.mp3';
+        const ALARM_ACTIVE_CATEGORIES = new Set([
+            'SQL Injection',
+            'XSS',
+            'Path Traversal',
+            'Brute Force',
+            'Web Shell Detection'
+        ]);
+        const ALARM_ONGOING_WINDOW_MS = 45000;
+        const ALARM_LIVE_MAX_AGE_MS = 180000;
+        const seenAlarmEventKeys = new Set();
+        let alarmBaselineInitialized = false;
+        let alarmActive = false;
+        let alarmIsPlaying = false;
+        let alarmBlockedByBrowser = false;
+        let alarmSilencedWave = false;
+        let alarmPendingAttack = null;
+        let alarmIdleWatchdogTimer = null;
+        let alarmSilenceWatchdogTimer = null;
+        let alarmAudioEl = null;
+        let alarmPrevAudioTime = 0;
+        let alarmBurstCount = 0;
+        let alarmPlayToken = 0;
+        let alarmLastTriggerWallMs = 0;
+        let alarmTriggeredAtTotal = 0;
+        let alarmLatestKnownTotal = 0;
+        let alarmAudioListenersAttached = false;
+
         api.setAuthExpiredHandler(() => {
             authExpiredState = true;
             stopHealthWatchdog();
@@ -1484,7 +1534,10 @@
 
         function hideAlertBannerElement() {
             const banner = document.getElementById('global-alert-banner');
-            if (banner) banner.classList.add('hidden');
+            if (banner) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
         }
 
         function showConnectionLostAlert() {
@@ -1807,6 +1860,13 @@
             if (metrics.distribution) {
                 latestDistribution = metrics.distribution;
             }
+
+            if (metrics.total_attacks !== undefined && Number.isFinite(Number(metrics.total_attacks))) {
+                alarmLatestKnownTotal = Math.max(0, Number(metrics.total_attacks));
+            }
+            if (typeof syncAlarmWithSystemStatus === 'function') {
+                syncAlarmWithSystemStatus(metrics);
+            }
         }
 
         function renderRecentAttacksTable() {
@@ -1945,6 +2005,7 @@
                     : allAttacks.length;
                 processRadarEvents(totalCnt, newlyAccepted);
                 processWatchlistActivity(totalCnt, newlyAccepted);
+                processAttackAlarmEvents(totalCnt, newlyAccepted);
                 scheduleChartAndTrafficRefresh(data.metrics ? data.metrics.distribution : latestDistribution);
             } else if (data.metrics && data.metrics.distribution) {
                 scheduleChartAndTrafficRefresh(data.metrics.distribution);
@@ -1956,12 +2017,15 @@
             seenRadarEventKeys.clear();
             activeRadarBlips.clear();
             seenWatchlistEventKeys.clear();
+            seenAlarmEventKeys.clear();
             stopWatchlistAlertBlink();
+            stopAttackAlarm(false);
             allAttacks = [];
             allMalware = [];
             lastAttackId = (data && Number(data.last_id)) || 0;
             radarBaselineInitialized = true;
             watchlistBaselineInitialized = true;
+            alarmBaselineInitialized = true;
             if (data && data.metrics) {
                 applyDashboardMetrics(data.metrics);
             }
@@ -1990,6 +2054,7 @@
                 applyDashboardMetrics(data);
                 processRadarEvents(data.total_attacks ?? 0, allAttacks);
                 processWatchlistActivity(data.total_attacks ?? 0, allAttacks);
+                processAttackAlarmEvents(data.total_attacks ?? 0, allAttacks);
                 renderRecentAttacksTable();
                 renderMalwareTables();
                 filterLogs();
@@ -2335,7 +2400,7 @@
                     <div class="border border-border p-4 bg-background space-y-3">
                         <div class="text-[10px] uppercase text-muted-foreground font-bold">Watchlist &amp; Notes</div>
                         <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="text" id="dossier-notes-input" value="${escapeHtml(t.notes || '')}" placeholder="Write notes about this IP..."
+                            <input type="text" id="dossier-notes-input" aria-label="Watchlist notes" value="${escapeHtml(t.notes || '')}" placeholder="Write notes about this IP..."
                                 class="flex-1 bg-card border-2 border-border focus:border-accent px-3 py-2 text-xs font-mono text-foreground outline-none">
                             <button type="button" onclick="saveDossierWatchlist('${safeIp}', '${t.is_watchlisted ? 'remove' : 'add'}')"
                                 class="px-4 py-2 ${t.is_watchlisted ? 'border-2 border-danger text-danger hover:bg-danger hover:text-white' : 'bg-accent text-black border-2 border-accent'} font-display font-bold uppercase text-xs cursor-pointer">
@@ -2722,6 +2787,339 @@
             }
         }
 
+        // Genuine Attack Audio Alarm Controls (Admin Dashboard Only)
+        let alarmPlayPromiseInFlight = null;
+
+        function ensureAlarmAudioElement() {
+            if (!alarmAudioEl) {
+                alarmAudioEl = new Audio(ALARM_AUDIO_SRC);
+                alarmAudioEl.loop = true;
+                alarmAudioEl.preload = 'auto';
+            }
+            if (!alarmAudioListenersAttached && alarmAudioEl) {
+                alarmAudioListenersAttached = true;
+                alarmAudioEl.addEventListener('timeupdate', () => {
+                    if (!alarmAudioEl || !alarmActive || !alarmIsPlaying) return;
+                    const cur = Number(alarmAudioEl.currentTime || 0);
+                    if (cur + 0.08 < alarmPrevAudioTime) {
+                        alarmBurstCount += 1;
+                    }
+                    alarmPrevAudioTime = cur;
+                });
+                alarmAudioEl.addEventListener('ended', () => {
+                    if (!alarmActive || !alarmAudioEl) return;
+                    alarmPrevAudioTime = 0;
+                    try {
+                        alarmAudioEl.currentTime = 0;
+                        const p = alarmAudioEl.play();
+                        if (p && typeof p.then === 'function') {
+                            p.then(() => {
+                                if (alarmActive && alarmIsPlaying) alarmBurstCount += 1;
+                            }).catch(() => {});
+                        } else if (alarmIsPlaying) {
+                            alarmBurstCount += 1;
+                        }
+                    } catch (_) {}
+                });
+                alarmAudioEl.addEventListener('error', () => {
+                    if (alarmActive) {
+                        alarmIsPlaying = false;
+                        alarmBlockedByBrowser = true;
+                        renderAttackAlarmBanner();
+                    }
+                });
+            }
+            return alarmAudioEl;
+        }
+
+        function clearAlarmIdleWatchdog() {
+            if (alarmIdleWatchdogTimer) {
+                clearTimeout(alarmIdleWatchdogTimer);
+                alarmIdleWatchdogTimer = null;
+            }
+        }
+
+        function clearAlarmSilenceWatchdog() {
+            if (alarmSilenceWatchdogTimer) {
+                clearTimeout(alarmSilenceWatchdogTimer);
+                alarmSilenceWatchdogTimer = null;
+            }
+        }
+
+        function clearAlarmSilenceWave() {
+            alarmSilencedWave = false;
+            clearAlarmSilenceWatchdog();
+        }
+
+        function scheduleAlarmIdleWatchdog(delayMs = ALARM_ONGOING_WINDOW_MS) {
+            clearAlarmIdleWatchdog();
+            if (!alarmActive) return;
+            const waitMs = Math.max(1500, Math.min(ALARM_ONGOING_WINDOW_MS + 2000, Number(delayMs) || ALARM_ONGOING_WINDOW_MS));
+            alarmIdleWatchdogTimer = setTimeout(() => {
+                alarmIdleWatchdogTimer = null;
+                if (alarmActive) {
+                    stopAttackAlarm(false);
+                }
+            }, waitMs);
+        }
+
+        function scheduleAlarmSilenceReset(delayMs = ALARM_ONGOING_WINDOW_MS) {
+            clearAlarmSilenceWatchdog();
+            if (!alarmSilencedWave) return;
+            const waitMs = Math.max(1500, Math.min(ALARM_ONGOING_WINDOW_MS + 2000, Number(delayMs) || ALARM_ONGOING_WINDOW_MS));
+            alarmSilenceWatchdogTimer = setTimeout(() => {
+                alarmSilenceWatchdogTimer = null;
+                alarmSilencedWave = false;
+            }, waitMs);
+        }
+
+        function clearAlarmPlaybackLoop() {
+            clearAlarmIdleWatchdog();
+            alarmPlayToken += 1;
+            alarmPlayPromiseInFlight = null;
+            alarmPrevAudioTime = 0;
+            if (alarmAudioEl) {
+                try {
+                    alarmAudioEl.pause();
+                } catch (_) {}
+                try {
+                    alarmAudioEl.currentTime = 0;
+                } catch (_) {}
+            }
+        }
+
+        function syncAlarmWithSystemStatus(metrics) {
+            if ((!alarmActive && !alarmSilencedWave) || !metrics || typeof metrics !== 'object') return;
+
+            const total = metrics.total_attacks !== undefined ? Number(metrics.total_attacks) : null;
+            if (total === 0) {
+                stopAttackAlarm(false);
+                return;
+            }
+
+            const status = typeof metrics.system_status === 'string' ? metrics.system_status.trim().toUpperCase() : '';
+            if (!status) return;
+
+            if (status === 'NOMINAL') {
+                // Guard against an older in-flight poll that started before the newest triggering attack
+                const isStalePoll = total !== null && Number.isFinite(total) && total < alarmTriggeredAtTotal;
+                const secSince = metrics.sec_since_attack !== undefined ? Number(metrics.sec_since_attack) : null;
+                const justTriggeredHere = (Date.now() - alarmLastTriggerWallMs) < 1200 && (secSince === null || secSince <= 45);
+                if (!isStalePoll && !justTriggeredHere) {
+                    if (alarmActive) {
+                        stopAttackAlarm(false);
+                    } else {
+                        clearAlarmSilenceWave();
+                    }
+                }
+                return;
+            }
+
+            if (status === 'UNDER ATTACK' || status === 'INTERCEPTING' || status === 'MITIGATING') {
+                const secSince = metrics.sec_since_attack !== undefined ? Number(metrics.sec_since_attack) : 0;
+                const remainingMs = Number.isFinite(secSince)
+                    ? Math.max(2000, (ALARM_ONGOING_WINDOW_MS + 1500) - (Math.max(0, secSince) * 1000))
+                    : ALARM_ONGOING_WINDOW_MS;
+                if (alarmActive) {
+                    scheduleAlarmIdleWatchdog(remainingMs);
+                } else if (alarmSilencedWave) {
+                    scheduleAlarmSilenceReset(remainingMs);
+                }
+            }
+        }
+
+        function renderAttackAlarmBanner() {
+            const banner = document.getElementById('attack-alarm-banner');
+            const prefixEl = document.getElementById('attack-alarm-prefix');
+            const msgEl = document.getElementById('attack-alarm-message');
+            const stopBtn = document.getElementById('stop-alarm-btn');
+            if (!banner || !msgEl) return;
+
+            if (!alarmActive || !alarmPendingAttack) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+                if (stopBtn) stopBtn.classList.add('hidden');
+                return;
+            }
+
+            const vec = alarmPendingAttack.attack_type || 'Attack';
+            const ip = alarmPendingAttack.ip_address || 'Unknown IP';
+
+            if (alarmIsPlaying) {
+                banner.className = 'mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-danger bg-danger/10 text-danger font-mono text-xs flex items-center justify-between gap-4';
+                if (prefixEl) prefixEl.textContent = '⚠ ATTACK ALARM ACTIVE —';
+                msgEl.textContent = `${vec} detected from ${ip}. Repeating alert until attack ends or stopped.`;
+                if (stopBtn) stopBtn.classList.remove('hidden');
+            } else {
+                banner.className = 'mx-4 sm:mx-8 mt-4 p-3.5 border-2 border-warning bg-warning/10 text-warning font-mono text-xs flex items-center justify-between gap-4';
+                if (prefixEl) prefixEl.textContent = '⚠ ATTACK DETECTED —';
+                msgEl.textContent = `${vec} from ${ip}. Click anywhere on the dashboard to allow browser alarm audio.`;
+                if (stopBtn) stopBtn.classList.add('hidden');
+            }
+        }
+
+        async function startAlarmPlayback() {
+            if (!alarmActive) return false;
+            const audio = ensureAlarmAudioElement();
+            if (!audio) {
+                alarmIsPlaying = false;
+                alarmBlockedByBrowser = true;
+                renderAttackAlarmBanner();
+                return false;
+            }
+
+            if (alarmIsPlaying && !audio.paused) {
+                renderAttackAlarmBanner();
+                return true;
+            }
+
+            if (alarmPlayPromiseInFlight) {
+                return alarmPlayPromiseInFlight;
+            }
+
+            const token = ++alarmPlayToken;
+            audio.loop = true;
+            alarmPrevAudioTime = 0;
+            try {
+                audio.currentTime = 0;
+            } catch (_) {}
+
+            alarmPlayPromiseInFlight = (async () => {
+                try {
+                    const playPromise = audio.play();
+                    if (playPromise && typeof playPromise.then === 'function') {
+                        await playPromise;
+                    }
+                    if (!alarmActive || token !== alarmPlayToken) {
+                        try { audio.pause(); } catch (_) {}
+                        try { audio.currentTime = 0; } catch (_) {}
+                        return false;
+                    }
+                    alarmIsPlaying = true;
+                    alarmBlockedByBrowser = false;
+                    alarmBurstCount += 1;
+                    renderAttackAlarmBanner();
+                    return true;
+                } catch (_) {
+                    if (!alarmActive || token !== alarmPlayToken) {
+                        return false;
+                    }
+                    alarmIsPlaying = false;
+                    alarmBlockedByBrowser = true;
+                    renderAttackAlarmBanner();
+                    return false;
+                } finally {
+                    if (token === alarmPlayToken) {
+                        alarmPlayPromiseInFlight = null;
+                    }
+                }
+            })();
+
+            return alarmPlayPromiseInFlight;
+        }
+
+        async function triggerAttackAlarm(attack, totalCount = null) {
+            if (alarmSilencedWave) {
+                const eventMs = parseUtcEpochMs(attack && attack.timestamp);
+                const ageMs = Number.isFinite(eventMs) ? Math.max(0, Date.now() - eventMs) : 0;
+                if (totalCount !== null && Number.isFinite(Number(totalCount))) {
+                    alarmTriggeredAtTotal = Math.max(alarmTriggeredAtTotal, Number(totalCount));
+                }
+                scheduleAlarmSilenceReset(Math.max(5000, ALARM_ONGOING_WINDOW_MS + 1500 - ageMs));
+                return;
+            }
+            alarmPendingAttack = attack;
+            alarmActive = true;
+            alarmLastTriggerWallMs = Date.now();
+            if (totalCount !== null && Number.isFinite(Number(totalCount))) {
+                alarmTriggeredAtTotal = Math.max(alarmLatestKnownTotal, Number(totalCount));
+            } else {
+                alarmTriggeredAtTotal = alarmLatestKnownTotal;
+            }
+            const eventMs = parseUtcEpochMs(attack && attack.timestamp);
+            const ageMs = Number.isFinite(eventMs) ? Math.max(0, Date.now() - eventMs) : 0;
+            scheduleAlarmIdleWatchdog(Math.max(5000, ALARM_ONGOING_WINDOW_MS + 1500 - ageMs));
+            await startAlarmPlayback();
+        }
+
+        function stopAttackAlarm(manual = true) {
+            alarmActive = false;
+            alarmIsPlaying = false;
+            alarmBlockedByBrowser = false;
+            alarmPendingAttack = null;
+            clearAlarmPlaybackLoop();
+            if (manual) {
+                alarmSilencedWave = true;
+                alarmLastTriggerWallMs = Date.now();
+                alarmTriggeredAtTotal = Math.max(alarmTriggeredAtTotal, alarmLatestKnownTotal);
+                scheduleAlarmSilenceReset(ALARM_ONGOING_WINDOW_MS + 1500);
+            } else {
+                clearAlarmSilenceWave();
+            }
+            renderAttackAlarmBanner();
+        }
+
+        async function handleDashboardAudioUnlock(event) {
+            if (event && event.target && event.target.closest && event.target.closest('#stop-alarm-btn')) {
+                return;
+            }
+            ensureAlarmAudioElement();
+            if (alarmActive && !alarmIsPlaying && !alarmSilencedWave) {
+                await startAlarmPlayback();
+            }
+        }
+
+        function isQualifyingAlarmEvent(a, nowMs) {
+            if (!a || typeof a !== 'object') return false;
+            if (a.is_synthetic) return false;
+            if (a.attribution_status === 'unverified_historical') return false;
+            const rawType = String(a.attack_type || '').trim();
+            if (!ALARM_ACTIVE_CATEGORIES.has(rawType)) return false;
+            const eventMs = parseUtcEpochMs(a.timestamp);
+            if (Number.isFinite(eventMs) && (nowMs - eventMs) > ALARM_LIVE_MAX_AGE_MS) {
+                return false;
+            }
+            return true;
+        }
+
+        function processAttackAlarmEvents(totalAttacks, attacks) {
+            if (Number(totalAttacks) === 0 || !attacks || attacks.length === 0) {
+                seenAlarmEventKeys.clear();
+                alarmBaselineInitialized = true;
+                if (Number(totalAttacks) === 0 && (alarmActive || alarmSilencedWave)) {
+                    stopAttackAlarm(false);
+                }
+                return;
+            }
+
+            if (!alarmBaselineInitialized) {
+                attacks.forEach(a => seenAlarmEventKeys.add(getAttackEventKey(a)));
+                alarmBaselineInitialized = true;
+                return;
+            }
+
+            const nowMs = Date.now();
+            let newestQualifying = null;
+            attacks.forEach(a => {
+                const key = getAttackEventKey(a);
+                if (seenAlarmEventKeys.has(key)) return;
+                seenAlarmEventKeys.add(key);
+
+                if (seenAlarmEventKeys.size > 1000) {
+                    const first = seenAlarmEventKeys.values().next().value;
+                    if (first) seenAlarmEventKeys.delete(first);
+                }
+
+                if (isQualifyingAlarmEvent(a, nowMs)) {
+                    newestQualifying = a;
+                }
+            });
+
+            if (newestQualifying) {
+                triggerAttackAlarm(newestQualifying, totalAttacks);
+            }
+        }
+
         // Typed CONFIRM Log Purge Workflow
         function confirmClearHistory() {
             const modal = document.getElementById('clear-logs-modal');
@@ -2764,7 +3162,9 @@
                 seenRadarEventKeys.clear();
                 activeRadarBlips.clear();
                 seenWatchlistEventKeys.clear();
+                seenAlarmEventKeys.clear();
                 stopWatchlistAlertBlink();
+                stopAttackAlarm(false);
                 seenAttackIds.clear();
                 lastAttackId = 0;
                 closeClearLogsModal();
@@ -3263,6 +3663,12 @@
         window.addEventListener('beforeunload', () => {
             stopHealthWatchdog();
             clearUpdateTransports();
+            clearAlarmPlaybackLoop();
+        });
+
+        // Unlock browser Web Audio via existing user interactions (without extra UI buttons)
+        ['pointerdown', 'keydown', 'click'].forEach(evtName => {
+            document.addEventListener(evtName, handleDashboardAudioUnlock, { passive: true });
         });
 
         // Escape & Backdrop Listeners
